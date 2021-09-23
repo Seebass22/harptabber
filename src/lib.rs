@@ -65,6 +65,9 @@ pub fn run(
                     to_position,
                     octave_shift,
                 );
+            } else if octave_shift != 0 {
+                new_note =
+                    transpose_position(&notes, note.as_str(), from_position, 1, octave_shift);
             } else {
                 new_note = transpose(&notes, note.as_str(), semitones);
             }
