@@ -1,7 +1,14 @@
 use std::fs;
 
 fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> &'a str {
-    let mut pos = notes.iter().position(|&x| x == note).unwrap() as i32;
+    let mut pos;
+    match notes.iter().position(|&x| x == note) {
+        Some(p) => pos = p as i32,
+        None => {
+            eprintln!("\"{}\" is not a valid note", note);
+            std::process::exit(-2);
+        }
+    }
     pos += semitones;
     if let Some(new_note) = notes.get(pos as usize) {
         new_note
