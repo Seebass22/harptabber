@@ -51,11 +51,12 @@ fn main() {
         .arg(
             Arg::with_name("file")
                 .value_name("FILE")
-                .help("file containing tabs"),
+                .help("file containing tabs")
+                .required(true),
         )
         .get_matches();
 
-    let filename = matches.value_of("file").unwrap_or("tabs.txt");
+    let filename = matches.value_of("file").unwrap();
     let semitones = matches.value_of("semitones").unwrap_or("0");
     let semitones = semitones.parse::<i32>().unwrap();
     let from_position = matches
