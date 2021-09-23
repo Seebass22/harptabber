@@ -10,8 +10,8 @@ fn is_int(val: String) -> Result<(), String> {
 }
 
 fn main() {
-    let matches = App::new("harptool")
-        .about("print harmonica note layouts")
+    let matches = App::new("harptabs")
+        .about("transpose harmonica tabs")
         .arg(
             Arg::with_name("semitones")
                 .short("s")
