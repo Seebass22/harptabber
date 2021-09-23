@@ -49,6 +49,12 @@ fn main() {
                 .validator(is_int),
         )
         .arg(
+            Arg::with_name("no-error")
+                .short("e")
+                .long("no-error")
+                .help("ignore invalid notes"),
+        )
+        .arg(
             Arg::with_name("file")
                 .value_name("FILE")
                 .help("file containing tabs")
@@ -59,6 +65,7 @@ fn main() {
     let filename = matches.value_of("file").unwrap();
     let semitones = matches.value_of("semitones").unwrap_or("0");
     let semitones = semitones.parse::<i32>().unwrap();
+    let no_error = matches.is_present("no-error");
     let from_position = matches
         .value_of("from-position")
         .unwrap()
@@ -81,5 +88,6 @@ fn main() {
         from_position,
         to_position,
         octave_shift,
+        no_error,
     );
 }

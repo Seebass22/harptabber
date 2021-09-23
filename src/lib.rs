@@ -53,6 +53,7 @@ pub fn run(
     from_position: i32,
     to_position: Option<i32>,
     octave_shift: i32,
+    no_error: bool,
 ) {
     let notes = [
         "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4", "-4'",
@@ -83,8 +84,10 @@ pub fn run(
             match new_note {
                 Ok(new_note) => print!("{} ", new_note),
                 Err(s) => {
-                    eprintln!("{}", s);
-                    std::process::exit(-1);
+                    if !no_error {
+                        eprintln!("{}", s);
+                        std::process::exit(-1);
+                    }
                 }
             }
         }
