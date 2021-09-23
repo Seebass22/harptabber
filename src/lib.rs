@@ -1,19 +1,20 @@
 use std::fs;
 
-fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> &'a str {
+fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> Result<&'a str, String> {
     let mut pos;
     match notes.iter().position(|&x| x == note) {
         Some(p) => pos = p as i32,
         None => {
-            eprintln!("\"{}\" is not a valid note", note);
-            std::process::exit(-2);
+            let error = format!("\"{}\" is not a valid note", note);
+            return Err(String::from(error));
         }
     }
+
     pos += semitones;
     if let Some(new_note) = notes.get(pos as usize) {
-        new_note
+        Ok(new_note)
     } else {
-        "X"
+        Ok("X")
     }
 }
 
@@ -23,7 +24,7 @@ fn transpose_position<'a>(
     from_position: i32,
     to_position: i32,
     octave_shift: i32,
-) -> &'a str {
+) -> Result<&'a str, String> {
     let diff = to_position - from_position;
     let semitones = ((diff * 7) % 12) + 12 * octave_shift;
     transpose(notes, note, semitones)
@@ -56,7 +57,7 @@ pub fn run(
     let notes = [
         "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4", "-4'",
         "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8", "8'", "8",
-        "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10",
+        "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10", "-10o",
     ];
 
     let contents = readfile(filename);
@@ -78,7 +79,14 @@ pub fn run(
             } else {
                 new_note = transpose(&notes, note.as_str(), semitones);
             }
-            print!("{} ", new_note);
+
+            match new_note {
+                Ok(new_note) => print!("{} ", new_note),
+                Err(s) => {
+                    eprintln!("{}", s);
+                    std::process::exit(-1);
+                }
+            }
         }
         println!();
     }
