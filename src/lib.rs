@@ -9,7 +9,7 @@ fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> &'a str {
     new_note
 }
 
-fn readfile(filename: &str) -> Vec<String> {
+fn readfile(filename: &str) -> Vec<Vec<String>> {
     let contents;
     match fs::read_to_string(filename) {
         Ok(s) => contents = s,
@@ -18,8 +18,12 @@ fn readfile(filename: &str) -> Vec<String> {
             panic!();
         }
     }
-    let contents: Vec<String> = contents.split_whitespace().map(|s| s.to_string()).collect();
-    contents
+    let mut lines: Vec<Vec<String>> = Vec::new();
+    for line in contents.lines() {
+        let line: Vec<String> = line.split_whitespace().map(|s| s.to_string()).collect();
+        lines.push(line);
+    }
+    lines
 }
 
 pub fn run(filename: &str, semitones: i32) {
@@ -31,9 +35,11 @@ pub fn run(filename: &str, semitones: i32) {
 
     let contents = readfile(filename);
 
-    for note in contents {
-        let new_note = transpose(&notes, note.as_str(), semitones);
-        print!("{} ", new_note);
+    for line in contents {
+        for note in line {
+            let new_note = transpose(&notes, note.as_str(), semitones);
+            print!("{} ", new_note);
+        }
+        println!();
     }
-    println!();
 }

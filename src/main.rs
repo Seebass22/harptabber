@@ -9,6 +9,7 @@ fn main() {
                 .short("s")
                 .long("semitones")
                 .value_name("SEMITONES")
+                .allow_hyphen_values(true)
                 .help("number of semitones to transpose"),
         )
         .arg(
