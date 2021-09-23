@@ -1,6 +1,6 @@
 harptabber
 --------
-CLI tool for transposing harmonica tabs into into different positions
+CLI tool for transposing harmonica tabs into different positions
 ```
 $ cat tabs.txt 
 -2 -3 4 -4' -4 -4
