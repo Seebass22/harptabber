@@ -1,6 +1,14 @@
 use clap::{App, Arg};
 use harptabs::run;
 
+fn is_int(val: String) -> Result<(), String> {
+    if val.parse::<i32>().is_ok() {
+        Ok(())
+    } else {
+        Err(String::from("arg must be integer"))
+    }
+}
+
 fn main() {
     let matches = App::new("harptool")
         .about("print harmonica note layouts")
@@ -10,7 +18,35 @@ fn main() {
                 .long("semitones")
                 .value_name("SEMITONES")
                 .allow_hyphen_values(true)
-                .help("number of semitones to transpose"),
+                .help("number of semitones to transpose")
+                .validator(is_int),
+        )
+        .arg(
+            Arg::with_name("to-position")
+                .short("t")
+                .long("to")
+                .value_name("POSITION")
+                .help("position to transpose to")
+                .validator(is_int),
+        )
+        .arg(
+            Arg::with_name("from-position")
+                .short("f")
+                .long("from")
+                .value_name("POSITION")
+                .default_value("1")
+                .help("position to transpose from")
+                .validator(is_int),
+        )
+        .arg(
+            Arg::with_name("octave-shift")
+                .short("o")
+                .long("octave")
+                .value_name("OCTAVES")
+                .allow_hyphen_values(true)
+                .default_value("0")
+                .help("octaves to shift resulting tab")
+                .validator(is_int),
         )
         .arg(
             Arg::with_name("file")
@@ -22,6 +58,27 @@ fn main() {
     let filename = matches.value_of("file").unwrap_or("tabs.txt");
     let semitones = matches.value_of("semitones").unwrap_or("0");
     let semitones = semitones.parse::<i32>().unwrap();
+    let from_position = matches
+        .value_of("from-position")
+        .unwrap()
+        .parse::<i32>()
+        .unwrap();
+    let octave_shift = matches
+        .value_of("octave-shift")
+        .unwrap()
+        .parse::<i32>()
+        .unwrap();
 
-    run(filename, semitones);
+    let mut to_position = None;
+    if matches.is_present("to-position") {
+        to_position = matches.value_of("to-position").unwrap().parse::<i32>().ok();
+    }
+
+    run(
+        filename,
+        semitones,
+        from_position,
+        to_position,
+        octave_shift,
+    );
 }
