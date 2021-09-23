@@ -6,8 +6,7 @@ fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> &'a str {
     if let Some(new_note) = notes.get(pos as usize) {
         new_note
     } else {
-        eprintln!("could not transpose: exceeded harmonica bounds");
-        std::process::exit(-2);
+        "X"
     }
 }
 
