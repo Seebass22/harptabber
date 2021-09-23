@@ -44,7 +44,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "harptabs"
+name = "harptabber"
 version = "0.1.0"
 dependencies = [
  "clap",

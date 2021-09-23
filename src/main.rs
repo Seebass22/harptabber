@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use harptabs::run;
+use harptabber::run;
 
 fn is_int(val: String) -> Result<(), String> {
     if val.parse::<i32>().is_ok() {
@@ -10,7 +10,7 @@ fn is_int(val: String) -> Result<(), String> {
 }
 
 fn main() {
-    let matches = App::new("harptabs")
+    let matches = App::new("harptabber")
         .about("transpose harmonica tabs")
         .arg(
             Arg::with_name("semitones")
