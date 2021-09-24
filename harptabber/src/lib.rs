@@ -82,3 +82,50 @@ fn transpose_tabs(tab: String, semitones: i32, no_error: bool) -> String {
     }
     result
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_transpose_tabs() {
+        let tab = String::from("-2 -3'' -3 4 -4 5 5o 6");
+
+        // down 5th (G -> C)
+        let res = transpose_tabs(tab.clone(), -7, true);
+        assert_eq!(res.as_str(), "1 -1 2 -2'' -2 -3'' -3 4 \n");
+
+        // down 5th, up octave (G -> C)
+        let res = transpose_tabs(tab.clone(), -7 + 12, true);
+        assert_eq!(res.as_str(), "4 -4 5 -5 6 -6 -7 7 \n");
+
+        // up 5th, down octave (G -> D)
+        let res = transpose_tabs(tab, 7 - 12, true);
+        assert_eq!(res.as_str(), "-1 2 -2' -2 -3'' -3 -4' -4 \n");
+    }
+
+    #[test]
+    fn test_transpose() {
+        let notes = [
+            "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4",
+            "-4'", "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8",
+            "8'", "8", "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10", "-10o",
+        ];
+
+        let note = "1";
+        let res = transpose(&notes, note, 1);
+        assert_eq!(res, Ok("-1'"));
+
+        let note = "1";
+        let res = transpose(&notes, note, -1);
+        assert_eq!(res, Ok("X"));
+
+        let note = "10";
+        let res = transpose(&notes, note, 2);
+        assert_eq!(res, Ok("X"));
+
+        let note = "asdf";
+        let res = transpose(&notes, note, -1);
+        assert!(res.is_err());
+    }
+}
