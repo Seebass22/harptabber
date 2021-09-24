@@ -18,9 +18,16 @@ fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> Result<&'a st
     }
 }
 
+pub fn semitones_to_position(starting_pos: u32, semitones: i32) -> u32 {
+    let position_diffs = [0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5];
+    let index = semitones.rem_euclid(12);
+    let res = position_diffs[index as usize];
+    (res + starting_pos - 1).rem_euclid(12) + 1
+}
+
 pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift: i32) -> i32 {
     let diff = to_position - from_position;
-    ((diff * 7) % 12) + 12 * octave_shift
+    (diff * 7).rem_euclid(12) + 12 * octave_shift
 }
 
 pub fn run(
@@ -126,5 +133,35 @@ mod tests {
         let note = "asdf";
         let res = transpose(&notes, note, -1);
         assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_semitones_to_position() {
+        let res = semitones_to_position(1, 7);
+        assert_eq!(res, 2);
+
+        let res = semitones_to_position(1, -7);
+        assert_eq!(res, 12);
+
+        let res = semitones_to_position(1, 2);
+        assert_eq!(res, 3);
+
+        let res = semitones_to_position(2, 7);
+        assert_eq!(res, 3);
+
+        let res = semitones_to_position(3, -3);
+        assert_eq!(res, 6);
+
+        let res = semitones_to_position(3, 9);
+        assert_eq!(res, 6);
+
+        let res = semitones_to_position(1, 12);
+        assert_eq!(res, 1);
+
+        let res = semitones_to_position(1, 0);
+        assert_eq!(res, 1);
+
+        let res = semitones_to_position(2, -7);
+        assert_eq!(res, 1);
     }
 }
