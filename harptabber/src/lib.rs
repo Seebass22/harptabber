@@ -6,7 +6,7 @@ fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> Result<&'a st
         Some(p) => pos = p as i32,
         None => {
             let error = format!("\"{}\" is not a valid note", note);
-            return Err(String::from(error));
+            return Err(error);
         }
     }
 
@@ -20,8 +20,7 @@ fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> Result<&'a st
 
 pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift: i32) -> i32 {
     let diff = to_position - from_position;
-    let semitones = ((diff * 7) % 12) + 12 * octave_shift;
-    semitones
+    ((diff * 7) % 12) + 12 * octave_shift
 }
 
 pub fn run(
@@ -68,7 +67,7 @@ pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool) -> String {
             match new_note {
                 Ok(new_note) => {
                     result.push_str(new_note);
-                    result.push_str(" ");
+                    result.push(' ');
                 }
                 Err(s) => {
                     if !no_error {
@@ -78,7 +77,7 @@ pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool) -> String {
                 }
             }
         }
-        result.push_str("\n");
+        result.push('\n');
     }
     result
 }

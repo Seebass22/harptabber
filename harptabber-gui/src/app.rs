@@ -1,5 +1,4 @@
 use eframe::{egui, epi};
-use harptabber;
 
 pub struct TemplateApp {
     input_text: String,
