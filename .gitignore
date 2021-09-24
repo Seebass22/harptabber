@@ -1,2 +1,4 @@
 /target
 *.txt
+*.wasm
+harptabber_gui.js

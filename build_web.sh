@@ -3,8 +3,7 @@ set -eu
 
 # ./setup_web.sh # <- call this first!
 
-FOLDER_NAME=${PWD##*/}
-CRATE_NAME=$FOLDER_NAME # assume crate name is the same as the folder name
+CRATE_NAME=harptabber-gui # assume crate name is the same as the folder name
 CRATE_NAME_SNAKE_CASE="${CRATE_NAME//-/_}" # for those who name crates with-kebab-case
 
 # This is required to enable the web_sys clipboard API which egui_web uses

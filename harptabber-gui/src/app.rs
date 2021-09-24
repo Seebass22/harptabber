@@ -1,12 +1,12 @@
 use eframe::{egui, epi};
 
-pub struct TemplateApp {
+pub struct GUIApp {
     input_text: String,
     output_text: String,
     semitone_shift: i32,
 }
 
-impl Default for TemplateApp {
+impl Default for GUIApp {
     fn default() -> Self {
         Self {
             // Example stuff:
@@ -17,9 +17,9 @@ impl Default for TemplateApp {
     }
 }
 
-impl epi::App for TemplateApp {
+impl epi::App for GUIApp {
     fn name(&self) -> &str {
-        "egui template"
+        "harmonica tab transposer"
     }
 
     fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
