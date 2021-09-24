@@ -18,7 +18,7 @@ fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> Result<&'a st
     }
 }
 
-fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift: i32) -> i32 {
+pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift: i32) -> i32 {
     let diff = to_position - from_position;
     let semitones = ((diff * 7) % 12) + 12 * octave_shift;
     semitones
@@ -50,7 +50,7 @@ pub fn run(
     print!("{}", tabs);
 }
 
-fn transpose_tabs(tab: String, semitones: i32, no_error: bool) -> String {
+pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool) -> String {
     let notes = [
         "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4", "-4'",
         "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8", "8'", "8",
