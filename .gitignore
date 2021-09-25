@@ -2,3 +2,4 @@
 *.txt
 *.wasm
 harptabber_gui.js
+/builds
