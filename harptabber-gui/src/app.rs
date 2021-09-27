@@ -1,4 +1,5 @@
 use eframe::{egui, epi};
+use harptabber::Style;
 
 pub struct GUIApp {
     input_text: String,
@@ -26,6 +27,7 @@ impl epi::App for GUIApp {
     }
 
     fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
+        let style = harptabber::Style::Default;
         let Self {
             input_text,
             output_text,
@@ -93,10 +95,12 @@ impl epi::App for GUIApp {
                         0,
                     );
                 }
+                let mut my_enum = Style::Default;
+                ui.selectable_value(&mut my_enum, Style::Default, "default");
 
                 if ui.button("go").clicked() {
                     *output_text =
-                        harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true);
+                        harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true, style);
                 }
 
                 ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {

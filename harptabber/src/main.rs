@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use harptabber::run;
+use harptabber::{run, Style};
 
 fn is_int(val: String) -> Result<(), String> {
     if val.parse::<i32>().is_ok() {
@@ -55,6 +55,13 @@ fn main() {
                 .help("ignore invalid notes"),
         )
         .arg(
+            Arg::with_name("style")
+                // .short("s")
+                .long("style")
+                .value_name("STYLE")
+                .help("set tab style (harpsurgery, b, default)"),
+        )
+        .arg(
             Arg::with_name("file")
                 .value_name("FILE")
                 .help("file containing tabs")
@@ -82,6 +89,15 @@ fn main() {
         to_position = matches.value_of("to-position").unwrap().parse::<i32>().ok();
     }
 
+    let mut style = Style::Default;
+    if matches.is_present("style") {
+        style = match matches.value_of("style").unwrap() {
+            "b" => Style::B,
+            "harpsurgery" => Style::Harpsurgery,
+            _ => Style::Default,
+        }
+    }
+
     run(
         filename,
         semitones,
@@ -89,5 +105,6 @@ fn main() {
         to_position,
         octave_shift,
         no_error,
+        style,
     );
 }

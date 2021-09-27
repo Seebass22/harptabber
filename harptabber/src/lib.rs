@@ -1,8 +1,18 @@
+use regex::Regex;
 use std::fs;
+#[macro_use]
+extern crate lazy_static;
 
-fn transpose<'a>(notes: &'a [&str], note: &str, semitones: i32) -> Result<&'a str, String> {
+#[derive(PartialEq)]
+pub enum Style {
+    Default,
+    Harpsurgery,
+    B,
+}
+
+fn transpose<'a>(notes: &'a [String], note: &str, semitones: i32) -> Result<&'a str, String> {
     let mut pos;
-    match notes.iter().position(|&x| x == note) {
+    match notes.iter().position(|x| x == note) {
         Some(p) => pos = p as i32,
         None => {
             let error = format!("\"{}\" is not a valid note", note);
@@ -37,6 +47,7 @@ pub fn run(
     to_position: Option<i32>,
     octave_shift: i32,
     no_error: bool,
+    style: Style,
 ) {
     let tab = match fs::read_to_string(filename) {
         Ok(s) => s,
@@ -52,16 +63,47 @@ pub fn run(
         semitones = positions_to_semitones(from_position, 1, octave_shift);
     }
 
-    let tabs = transpose_tabs(tab, semitones, no_error);
+    let tabs = transpose_tabs(tab, semitones, no_error, style);
     print!("{}", tabs);
 }
 
-pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool) -> String {
+fn convert_to_harpsurgery_style(note: &str) -> String {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"(?P<dir>-?)(?P<note>\d{1,2})(?P<rest>.*)").unwrap();
+    }
+
+    let caps = RE.captures(note).unwrap();
+
+    let dir = if &caps["dir"] == "-" { "D" } else { "B" };
+    let rest = if &caps["rest"] == "o" {
+        "#"
+    } else {
+        &caps["rest"]
+    };
+
+    format!("{}{}{}", &caps["note"], dir, rest)
+}
+
+fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
+    let notes: Vec<String> = match style {
+        Style::B => notes.iter().map(|s| s.replace("'", "b")).collect(),
+        Style::Harpsurgery => notes
+            .iter()
+            .map(|s| convert_to_harpsurgery_style(s))
+            .collect(),
+        _ => notes.iter().map(|s| s.to_string()).collect(),
+    };
+
+    notes
+}
+
+pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool, style: Style) -> String {
     let notes = [
         "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4", "-4'",
         "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8", "8'", "8",
         "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10", "-10o",
     ];
+    let notes = change_tab_style(&notes, style);
 
     let mut result = String::from("");
 
@@ -98,15 +140,15 @@ mod tests {
         let tab = String::from("-2 -3'' -3 4 -4 5 5o 6");
 
         // down 5th (G -> C)
-        let res = transpose_tabs(tab.clone(), -7, true);
+        let res = transpose_tabs(tab.clone(), -7, true, Style::Default);
         assert_eq!(res.as_str(), "1 -1 2 -2'' -2 -3'' -3 4 \n");
 
         // down 5th, up octave (G -> C)
-        let res = transpose_tabs(tab.clone(), -7 + 12, true);
+        let res = transpose_tabs(tab.clone(), -7 + 12, true, Style::Default);
         assert_eq!(res.as_str(), "4 -4 5 -5 6 -6 -7 7 \n");
 
         // up 5th, down octave (G -> D)
-        let res = transpose_tabs(tab, 7 - 12, true);
+        let res = transpose_tabs(tab, 7 - 12, true, Style::Default);
         assert_eq!(res.as_str(), "-1 2 -2' -2 -3'' -3 -4' -4 \n");
     }
 
@@ -117,6 +159,7 @@ mod tests {
             "-4'", "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8",
             "8'", "8", "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10", "-10o",
         ];
+        let notes: Vec<String> = notes.iter().map(|s| s.to_string()).collect();
 
         let note = "1";
         let res = transpose(&notes, note, 1);
@@ -163,5 +206,23 @@ mod tests {
 
         let res = semitones_to_position(2, -7);
         assert_eq!(res, 1);
+    }
+
+    #[test]
+    fn test_convert_to_harpsurgery_style() {
+        let res = convert_to_harpsurgery_style("8'");
+        assert_eq!(res.as_str(), "8B'");
+
+        let res = convert_to_harpsurgery_style("-2''");
+        assert_eq!(res.as_str(), "2D''");
+
+        let res = convert_to_harpsurgery_style("4o");
+        assert_eq!(res.as_str(), "4B#");
+
+        let res = convert_to_harpsurgery_style("-7o");
+        assert_eq!(res.as_str(), "7D#");
+
+        let res = convert_to_harpsurgery_style("10''");
+        assert_eq!(res.as_str(), "10B''");
     }
 }
