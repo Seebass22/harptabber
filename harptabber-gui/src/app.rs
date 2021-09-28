@@ -7,6 +7,7 @@ pub struct GUIApp {
     semitone_shift: i32,
     from_position: u32,
     to_position: u32,
+    style: Style,
 }
 
 impl Default for GUIApp {
@@ -17,6 +18,7 @@ impl Default for GUIApp {
             semitone_shift: 0,
             from_position: 1,
             to_position: 1,
+            style: Style::Default,
         }
     }
 }
@@ -27,13 +29,13 @@ impl epi::App for GUIApp {
     }
 
     fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
-        let style = harptabber::Style::Default;
         let Self {
             input_text,
             output_text,
             semitone_shift,
             from_position,
             to_position,
+            style,
         } = self;
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
@@ -95,12 +97,23 @@ impl epi::App for GUIApp {
                         0,
                     );
                 }
-                let mut my_enum = Style::Default;
-                ui.selectable_value(&mut my_enum, Style::Default, "default");
+                ui.vertical(|ui| {
+                    ui.label("tab style");
+                    ui.horizontal(|ui| {
+                        ui.selectable_value(style, Style::Default, "default");
+                        ui.selectable_value(style, Style::B, "alternative");
+                        ui.selectable_value(style, Style::Harpsurgery, "Harpsurgery");
+                    });
+                });
 
                 if ui.button("go").clicked() {
-                    *output_text =
-                        harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true, style);
+                    let style = *style;
+                    *output_text = harptabber::transpose_tabs(
+                        input_text.clone(),
+                        *semitone_shift,
+                        true,
+                        style,
+                    );
                 }
 
                 ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {

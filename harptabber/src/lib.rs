@@ -3,7 +3,7 @@ use std::fs;
 #[macro_use]
 extern crate lazy_static;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum Style {
     Default,
     Harpsurgery,
@@ -85,16 +85,14 @@ fn convert_to_harpsurgery_style(note: &str) -> String {
 }
 
 fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
-    let notes: Vec<String> = match style {
+    match style {
         Style::B => notes.iter().map(|s| s.replace("'", "b")).collect(),
         Style::Harpsurgery => notes
             .iter()
             .map(|s| convert_to_harpsurgery_style(s))
             .collect(),
         _ => notes.iter().map(|s| s.to_string()).collect(),
-    };
-
-    notes
+    }
 }
 
 pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool, style: Style) -> String {
