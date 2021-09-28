@@ -8,6 +8,7 @@ pub struct GUIApp {
     from_position: u32,
     to_position: u32,
     style: Style,
+    style_example: String,
 }
 
 impl Default for GUIApp {
@@ -19,6 +20,7 @@ impl Default for GUIApp {
             from_position: 1,
             to_position: 1,
             style: Style::Default,
+            style_example: "-2 -2'' -3 4 -4 5 5o 6".to_owned(),
         }
     }
 }
@@ -36,6 +38,7 @@ impl epi::App for GUIApp {
             from_position,
             to_position,
             style,
+            style_example,
         } = self;
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
@@ -97,14 +100,8 @@ impl epi::App for GUIApp {
                         0,
                     );
                 }
-                ui.vertical(|ui| {
-                    ui.label("tab style");
-                    ui.horizontal(|ui| {
-                        ui.selectable_value(style, Style::Default, "default");
-                        ui.selectable_value(style, Style::B, "alternative");
-                        ui.selectable_value(style, Style::Harpsurgery, "Harpsurgery");
-                    });
-                });
+
+                ui.add_space(20.0);
 
                 if ui.button("go").clicked() {
                     let style = *style;
@@ -115,6 +112,33 @@ impl epi::App for GUIApp {
                         style,
                     );
                 }
+
+                ui.add_space(20.0);
+
+                ui.vertical(|ui| {
+                    ui.label("tab style");
+                    ui.horizontal(|ui| {
+                        if ui
+                            .selectable_value(style, Style::Default, "default")
+                            .clicked()
+                        {
+                            *style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
+                        }
+                        if ui
+                            .selectable_value(style, Style::B, "alternative")
+                            .clicked()
+                        {
+                            *style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
+                        }
+                        if ui
+                            .selectable_value(style, Style::Harpsurgery, "harpsurgery")
+                            .clicked()
+                        {
+                            *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+                        }
+                    });
+                    ui.add(egui::TextEdit::singleline(style_example).enabled(false));
+                });
 
                 ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
                     ui.add(
