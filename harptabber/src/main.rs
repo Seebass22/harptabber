@@ -56,10 +56,9 @@ fn main() {
         )
         .arg(
             Arg::with_name("style")
-                // .short("s")
                 .long("style")
                 .value_name("STYLE")
-                .help("set tab style (harpsurgery, b, default)"),
+                .help("set tab style (harpsurgery, b, plus, default)"),
         )
         .arg(
             Arg::with_name("file")
@@ -94,6 +93,7 @@ fn main() {
         style = match matches.value_of("style").unwrap() {
             "b" => Style::B,
             "harpsurgery" => Style::Harpsurgery,
+            "plus" => Style::Plus,
             _ => Style::Default,
         }
     }

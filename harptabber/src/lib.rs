@@ -8,6 +8,7 @@ pub enum Style {
     Default,
     Harpsurgery,
     B,
+    Plus,
 }
 
 fn transpose<'a>(notes: &'a [String], note: &str, semitones: i32) -> Result<&'a str, String> {
@@ -67,6 +68,17 @@ pub fn run(
     print!("{}", tabs);
 }
 
+fn convert_to_plus_style(note: &str) -> String {
+    match note.chars().next().unwrap() {
+        '-' => note.to_string(),
+        _ => {
+            let mut res = String::from("+");
+            res.push_str(note);
+            res
+        }
+    }
+}
+
 fn convert_to_harpsurgery_style(note: &str) -> String {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"(?P<dir>-?)(?P<note>\d{1,2})(?P<rest>.*)").unwrap();
@@ -91,6 +103,7 @@ fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
             .iter()
             .map(|s| convert_to_harpsurgery_style(s))
             .collect(),
+        Style::Plus => notes.iter().map(|s| convert_to_plus_style(s)).collect(),
         _ => notes.iter().map(|s| s.to_string()).collect(),
     }
 }
