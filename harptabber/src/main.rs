@@ -58,7 +58,7 @@ fn main() {
             Arg::with_name("style")
                 .long("style")
                 .value_name("STYLE")
-                .help("set tab style (harpsurgery, b, plus, default)"),
+                .help("set tab style (harpsurgery, b-bends, plus, default)"),
         )
         .arg(
             Arg::with_name("file")
@@ -91,7 +91,7 @@ fn main() {
     let mut style = Style::Default;
     if matches.is_present("style") {
         style = match matches.value_of("style").unwrap() {
-            "b" => Style::B,
+            "b-bends" => Style::BBends,
             "harpsurgery" => Style::Harpsurgery,
             "plus" => Style::Plus,
             _ => Style::Default,

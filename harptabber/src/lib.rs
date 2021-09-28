@@ -7,7 +7,7 @@ extern crate lazy_static;
 pub enum Style {
     Default,
     Harpsurgery,
-    B,
+    BBends,
     Plus,
 }
 
@@ -98,7 +98,7 @@ fn convert_to_harpsurgery_style(note: &str) -> String {
 
 fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
     match style {
-        Style::B => notes.iter().map(|s| s.replace("'", "b")).collect(),
+        Style::BBends => notes.iter().map(|s| s.replace("'", "b")).collect(),
         Style::Harpsurgery => notes
             .iter()
             .map(|s| convert_to_harpsurgery_style(s))

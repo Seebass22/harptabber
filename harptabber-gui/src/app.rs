@@ -125,7 +125,7 @@ impl epi::App for GUIApp {
                             *style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
                         }
                         if ui
-                            .selectable_value(style, Style::B, "b-bends")
+                            .selectable_value(style, Style::BBends, "b-bends")
                             .clicked()
                         {
                             *style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
