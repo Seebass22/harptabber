@@ -120,7 +120,12 @@ impl epi::App for GUIApp {
                     );
                 }
 
-                tabkeyboard::tabkeyboard(ui, input_text);
+                ui.add_space(20.0);
+
+                ui.collapsing("tab keyboard", |ui| {
+                    tabkeyboard::tabkeyboard(ui, input_text);
+                });
+
                 ui.add_space(20.0);
 
                 ui.vertical(|ui| {
