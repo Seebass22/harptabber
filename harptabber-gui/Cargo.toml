@@ -12,9 +12,5 @@ crate-type = ["cdylib", "rlib"]
 eframe = "0.14.0" # Gives us egui, epi and web+native backends
 harptabber = { path = "../harptabber" }
 
-# serde = { version = "1", features = ["derive"], optional = true }
-
 [features]
 default = []
-# http = ["eframe/http"] # Enable if you want to do http requests
-# persistence = ["eframe/persistence", "serde"] # Enable if you want to persist app state on shutdown
