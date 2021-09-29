@@ -9,7 +9,7 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-eframe = "0.14.0" # Gives us egui, epi and web+native backends
+eframe = { git = "https://github.com/emilk/egui", rev = "5539dbe" } # Gives us egui, epi and web+native backends
 harptabber = { path = "../harptabber" }
 
 [features]
