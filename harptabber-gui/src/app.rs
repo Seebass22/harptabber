@@ -131,18 +131,24 @@ impl epi::App for GUIApp {
                             *style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
                         }
                         if ui
+                            .selectable_value(style, Style::DrawDefault, "draw-default")
+                            .clicked()
+                        {
+                            *style_example = String::from("2 2'' 3 +4 4 +5 +5o +6");
+                        }
+                        if ui
                             .selectable_value(style, Style::Plus, "plus/minus")
                             .clicked()
                         {
                             *style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
                         }
-                        if ui
-                            .selectable_value(style, Style::Harpsurgery, "harpsurgery")
-                            .clicked()
-                        {
-                            *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
-                        }
                     });
+                    if ui
+                        .selectable_value(style, Style::Harpsurgery, "harpsurgery")
+                        .clicked()
+                    {
+                        *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+                    }
                     ui.add(egui::TextEdit::singleline(style_example).enabled(false));
                 });
 

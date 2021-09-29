@@ -9,6 +9,7 @@ pub enum Style {
     Harpsurgery,
     BBends,
     Plus,
+    DrawDefault,
 }
 
 fn transpose<'a>(notes: &'a [String], note: &str, semitones: i32) -> Result<&'a str, String> {
@@ -79,6 +80,17 @@ fn convert_to_plus_style(note: &str) -> String {
     }
 }
 
+fn convert_to_draw_style(note: &str) -> String {
+    match note.chars().next().unwrap() {
+        '-' => note[1..].to_string(),
+        _ => {
+            let mut res = String::from("+");
+            res.push_str(note);
+            res
+        }
+    }
+}
+
 fn convert_to_harpsurgery_style(note: &str) -> String {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"(?P<dir>-?)(?P<note>\d{1,2})(?P<rest>.*)").unwrap();
@@ -104,6 +116,7 @@ fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
             .map(|s| convert_to_harpsurgery_style(s))
             .collect(),
         Style::Plus => notes.iter().map(|s| convert_to_plus_style(s)).collect(),
+        Style::DrawDefault => notes.iter().map(|s| convert_to_draw_style(s)).collect(),
         _ => notes.iter().map(|s| s.to_string()).collect(),
     }
 }
@@ -235,5 +248,17 @@ mod tests {
 
         let res = convert_to_harpsurgery_style("10''");
         assert_eq!(res.as_str(), "10B''");
+    }
+
+    #[test]
+    fn test_convert_to_draw_style() {
+        let res = convert_to_draw_style("4");
+        assert_eq!(res.as_str(), "+4");
+
+        let res = convert_to_draw_style("-4'");
+        assert_eq!(res.as_str(), "4'");
+
+        let res = convert_to_draw_style("5o");
+        assert_eq!(res.as_str(), "+5o");
     }
 }

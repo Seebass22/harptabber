@@ -58,7 +58,7 @@ fn main() {
             Arg::with_name("style")
                 .long("style")
                 .value_name("STYLE")
-                .help("set tab style (harpsurgery, b-bends, plus, default)"),
+                .help("set tab style (harpsurgery, b-bends, plus, draw, default)"),
         )
         .arg(
             Arg::with_name("file")
@@ -94,6 +94,7 @@ fn main() {
             "b-bends" => Style::BBends,
             "harpsurgery" => Style::Harpsurgery,
             "plus" => Style::Plus,
+            "draw" => Style::DrawDefault,
             _ => Style::Default,
         }
     }
