@@ -43,6 +43,11 @@ impl epi::App for GUIApp {
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
+                let style: egui::Style = (*ui.ctx().style()).clone();
+                let new_visuals = style.visuals.light_dark_small_toggle_button(ui);
+                if let Some(visuals) = new_visuals {
+                    ui.ctx().set_visuals(visuals);
+                }
                 egui::menu::menu(ui, "File", |ui| {
                     if ui.button("Quit").clicked() {
                         frame.quit();
