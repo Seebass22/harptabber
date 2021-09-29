@@ -1,6 +1,8 @@
 use eframe::{egui, epi};
 use harptabber::Style;
 
+mod tabkeyboard;
+
 pub struct GUIApp {
     input_text: String,
     output_text: String,
@@ -118,6 +120,7 @@ impl epi::App for GUIApp {
                     );
                 }
 
+                tabkeyboard::tabkeyboard(ui, input_text);
                 ui.add_space(20.0);
 
                 ui.vertical(|ui| {
