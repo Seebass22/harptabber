@@ -108,17 +108,18 @@ fn convert_to_harpsurgery_style(note: &str) -> String {
     format!("{}{}{}", &caps["note"], dir, rest)
 }
 
-fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
+pub fn change_tab_style_single(note: &str, style: Style) -> String {
     match style {
-        Style::BBends => notes.iter().map(|s| s.replace("'", "b")).collect(),
-        Style::Harpsurgery => notes
-            .iter()
-            .map(|s| convert_to_harpsurgery_style(s))
-            .collect(),
-        Style::Plus => notes.iter().map(|s| convert_to_plus_style(s)).collect(),
-        Style::DrawDefault => notes.iter().map(|s| convert_to_draw_style(s)).collect(),
-        _ => notes.iter().map(|s| s.to_string()).collect(),
+        Style::BBends => note.replace("'", "b"),
+        Style::Harpsurgery => convert_to_harpsurgery_style(note),
+        Style::Plus => convert_to_plus_style(note),
+        Style::DrawDefault => convert_to_draw_style(note),
+        _ => note.to_string()
     }
+}
+
+fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
+    notes.iter().map(|s| change_tab_style_single(s, style)).collect()
 }
 
 fn fix_enharmonics(note: &str, style: Style) -> &str {
@@ -286,5 +287,22 @@ mod tests {
 
         let res = convert_to_draw_style("5o");
         assert_eq!(res.as_str(), "+5o");
+    }
+
+    #[test]
+    fn test_change_tab_style() {
+        let input = ["-2", "-3'", "4", "-4'", "-4", "-5", "6"];
+
+        let res = change_tab_style(&input, Style::BBends);
+        let expected = ["-2", "-3b", "4", "-4b", "-4", "-5", "6"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        assert_eq!(res, expected);
+
+        let res = change_tab_style(&input, Style::Harpsurgery);
+        let expected = ["2D", "3D'", "4B", "4D'", "4D", "5D", "6B"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        assert_eq!(res, expected);
+        
+        let res = change_tab_style(&input, Style::DrawDefault);
+        let expected = ["2", "3'", "+4", "4'", "4", "5", "+6"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        assert_eq!(res, expected);
     }
 }

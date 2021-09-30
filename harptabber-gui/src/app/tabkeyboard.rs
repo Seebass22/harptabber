@@ -1,6 +1,7 @@
 use eframe::egui;
+use harptabber::Style;
 
-pub fn tabkeyboard(ui: &mut egui::Ui, tabtext: &mut String) {
+pub fn tabkeyboard(ui: &mut egui::Ui, tabtext: &mut String, style: Style) {
     ui.vertical(|ui| {
         let rows = vec![
             ["", "", "", "", "", "", "", "", "", "10''"],
@@ -23,6 +24,8 @@ pub fn tabkeyboard(ui: &mut egui::Ui, tabtext: &mut String) {
                                 .enabled(false),
                         );
                     } else {
+                        let hole = harptabber::change_tab_style_single(hole, style);
+
                         let text = format!("{:width$}", hole, width = 5);
                         if ui
                             .add(
@@ -31,7 +34,7 @@ pub fn tabkeyboard(ui: &mut egui::Ui, tabtext: &mut String) {
                             )
                             .clicked()
                         {
-                            tabtext.push_str(hole);
+                            tabtext.push_str(hole.as_str());
                             tabtext.push_str(" ");
                         }
                     }

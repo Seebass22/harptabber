@@ -150,7 +150,7 @@ fn leftpanel(
     ui.add_space(20.0);
 
     ui.collapsing("tab keyboard", |ui| {
-        tabkeyboard::tabkeyboard(ui, input_text);
+        tabkeyboard::tabkeyboard(ui, input_text, *style);
     });
 
     ui.add_space(20.0);
