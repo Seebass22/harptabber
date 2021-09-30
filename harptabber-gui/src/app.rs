@@ -91,6 +91,10 @@ impl epi::App for GUIApp {
     }
 }
 
+fn transpose(input_text: &String, output_text: &mut String, semitone_shift: &i32, style: &Style) {
+    *output_text = harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true, *style);
+}
+
 fn leftpanel(
     ui: &mut egui::Ui,
     input_text: &mut String,
@@ -103,25 +107,34 @@ fn leftpanel(
 ) {
     ui.heading("input");
 
-    ui.add(egui::TextEdit::multiline(input_text).desired_width(300.0));
+    if ui
+        .add(egui::TextEdit::multiline(input_text).desired_width(600.0))
+        .changed()
+    {
+        transpose(input_text, output_text, semitone_shift, style);
+    };
 
     if ui
         .add(egui::Slider::new(semitone_shift, -24..=24).text("semitone shift"))
         .changed()
     {
         *to_position = harptabber::semitones_to_position(*from_position, *semitone_shift);
+        transpose(input_text, output_text, semitone_shift, style);
     }
 
     ui.horizontal(|ui| {
         if ui.button("octave down").clicked() {
             *semitone_shift -= 12;
+            transpose(input_text, output_text, semitone_shift, style);
         }
         if ui.button("octave up").clicked() {
             *semitone_shift += 12;
+            transpose(input_text, output_text, semitone_shift, style);
         }
         if ui.button("reset").clicked() {
             *semitone_shift = 0;
             *to_position = harptabber::semitones_to_position(*from_position, *semitone_shift);
+            transpose(input_text, output_text, semitone_shift, style);
         }
     });
 
@@ -131,6 +144,7 @@ fn leftpanel(
     {
         *semitone_shift =
             harptabber::positions_to_semitones(*from_position as i32, *to_position as i32, 0);
+        transpose(input_text, output_text, semitone_shift, style);
     }
     if ui
         .add(egui::Slider::new(to_position, 1..=12).text("target position"))
@@ -138,19 +152,13 @@ fn leftpanel(
     {
         *semitone_shift =
             harptabber::positions_to_semitones(*from_position as i32, *to_position as i32, 0);
-    }
-
-    ui.add_space(20.0);
-
-    if ui.button("go").clicked() {
-        let style = *style;
-        *output_text = harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true, style);
+        transpose(input_text, output_text, semitone_shift, style);
     }
 
     ui.add_space(20.0);
 
     ui.collapsing("tab keyboard", |ui| {
-        tabkeyboard::tabkeyboard(ui, input_text, *style);
+        tabkeyboard::tabkeyboard(ui, input_text, output_text, semitone_shift, style);
     });
 
     ui.add_space(20.0);
@@ -182,13 +190,17 @@ fn leftpanel(
             {
                 *style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
             }
+            if ui
+                .selectable_value(style, Style::Harpsurgery, "harpsurgery")
+                .clicked()
+            {
+                *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+            }
         });
-        if ui
-            .selectable_value(style, Style::Harpsurgery, "harpsurgery")
-            .clicked()
-        {
-            *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
-        }
-        ui.add(egui::TextEdit::singleline(style_example).enabled(false));
+        ui.add(
+            egui::TextEdit::singleline(style_example)
+                .desired_width(350.0)
+                .enabled(false),
+        );
     });
 }

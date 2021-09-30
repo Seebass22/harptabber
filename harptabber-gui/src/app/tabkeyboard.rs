@@ -1,7 +1,13 @@
 use eframe::egui;
 use harptabber::Style;
 
-pub fn tabkeyboard(ui: &mut egui::Ui, tabtext: &mut String, style: Style) {
+pub fn tabkeyboard(
+    ui: &mut egui::Ui,
+    tabtext: &mut String,
+    output_text: &mut String,
+    semitone_shift: &i32,
+    style: &Style,
+) {
     ui.vertical(|ui| {
         let rows = vec![
             ["", "", "", "", "", "", "", "", "", "10''"],
@@ -24,7 +30,7 @@ pub fn tabkeyboard(ui: &mut egui::Ui, tabtext: &mut String, style: Style) {
                                 .enabled(false),
                         );
                     } else {
-                        let hole = harptabber::change_tab_style_single(hole, style);
+                        let hole = harptabber::change_tab_style_single(hole, *style);
 
                         let text = format!("{:width$}", hole, width = 5);
                         if ui
@@ -36,6 +42,12 @@ pub fn tabkeyboard(ui: &mut egui::Ui, tabtext: &mut String, style: Style) {
                         {
                             tabtext.push_str(hole.as_str());
                             tabtext.push_str(" ");
+                            *output_text = harptabber::transpose_tabs(
+                                tabtext.clone(),
+                                *semitone_shift,
+                                true,
+                                *style,
+                            );
                         }
                     }
                 }
