@@ -55,6 +55,12 @@ impl epi::App for GUIApp {
                         frame.quit();
                     }
                 });
+                egui::menu::menu(ui, "About", |ui| {
+                    ui.add(
+                        egui::Hyperlink::new("https://github.com/Seebass22/harptabber")
+                            .text("Source code"),
+                    );
+                });
             });
         });
 
@@ -71,12 +77,6 @@ impl epi::App for GUIApp {
                         from_position,
                         to_position,
                         semitone_shift,
-                    );
-                });
-                ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
-                    ui.add(
-                        egui::Hyperlink::new("https://github.com/Seebass22/harptabber")
-                            .text("Source code"),
                     );
                 });
             });
