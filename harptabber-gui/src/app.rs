@@ -62,109 +62,16 @@ impl epi::App for GUIApp {
             .default_width(330.0)
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    ui.heading("input");
-
-                    ui.add(egui::TextEdit::multiline(input_text).desired_width(300.0));
-
-                    if ui
-                        .add(egui::Slider::new(semitone_shift, -24..=24).text("semitone shift"))
-                        .changed()
-                    {
-                        *to_position =
-                            harptabber::semitones_to_position(*from_position, *semitone_shift);
-                    }
-
-                    ui.horizontal(|ui| {
-                        if ui.button("octave down").clicked() {
-                            *semitone_shift -= 12;
-                        }
-                        if ui.button("octave up").clicked() {
-                            *semitone_shift += 12;
-                        }
-                        if ui.button("reset").clicked() {
-                            *semitone_shift = 0;
-                            *to_position =
-                                harptabber::semitones_to_position(*from_position, *semitone_shift);
-                        }
-                    });
-
-                    if ui
-                        .add(egui::Slider::new(from_position, 1..=12).text("starting position"))
-                        .changed()
-                    {
-                        *semitone_shift = harptabber::positions_to_semitones(
-                            *from_position as i32,
-                            *to_position as i32,
-                            0,
-                        );
-                    }
-                    if ui
-                        .add(egui::Slider::new(to_position, 1..=12).text("target position"))
-                        .changed()
-                    {
-                        *semitone_shift = harptabber::positions_to_semitones(
-                            *from_position as i32,
-                            *to_position as i32,
-                            0,
-                        );
-                    }
-
-                    ui.add_space(20.0);
-
-                    if ui.button("go").clicked() {
-                        let style = *style;
-                        *output_text = harptabber::transpose_tabs(
-                            input_text.clone(),
-                            *semitone_shift,
-                            true,
-                            style,
-                        );
-                    }
-
-                    ui.add_space(20.0);
-
-                    ui.collapsing("tab keyboard", |ui| {
-                        tabkeyboard::tabkeyboard(ui, input_text);
-                    });
-
-                    ui.add_space(20.0);
-
-                    ui.vertical(|ui| {
-                        ui.label("tab style");
-                        ui.horizontal(|ui| {
-                            if ui
-                                .selectable_value(style, Style::Default, "default")
-                                .clicked()
-                            {
-                                *style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
-                            }
-                            if ui
-                                .selectable_value(style, Style::BBends, "b-bends")
-                                .clicked()
-                            {
-                                *style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
-                            }
-                            if ui
-                                .selectable_value(style, Style::DrawDefault, "draw-default")
-                                .clicked()
-                            {
-                                *style_example = String::from("2 2'' 3 +4 4 +5 +5o +6");
-                            }
-                            if ui
-                                .selectable_value(style, Style::Plus, "plus/minus")
-                                .clicked()
-                            {
-                                *style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
-                            }
-                        });
-                        if ui
-                            .selectable_value(style, Style::Harpsurgery, "harpsurgery")
-                            .clicked()
-                        {
-                            *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
-                        }
-                        ui.add(egui::TextEdit::singleline(style_example).enabled(false));
-                    });
+                    leftpanel(
+                        ui,
+                        input_text,
+                        output_text,
+                        style,
+                        style_example,
+                        from_position,
+                        to_position,
+                        semitone_shift,
+                    );
                 });
                 ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
                     ui.add(
@@ -182,4 +89,106 @@ impl epi::App for GUIApp {
             });
         });
     }
+}
+
+fn leftpanel(
+    ui: &mut egui::Ui,
+    input_text: &mut String,
+    output_text: &mut String,
+    style: &mut Style,
+    style_example: &mut String,
+    from_position: &mut u32,
+    to_position: &mut u32,
+    semitone_shift: &mut i32,
+) {
+    ui.heading("input");
+
+    ui.add(egui::TextEdit::multiline(input_text).desired_width(300.0));
+
+    if ui
+        .add(egui::Slider::new(semitone_shift, -24..=24).text("semitone shift"))
+        .changed()
+    {
+        *to_position = harptabber::semitones_to_position(*from_position, *semitone_shift);
+    }
+
+    ui.horizontal(|ui| {
+        if ui.button("octave down").clicked() {
+            *semitone_shift -= 12;
+        }
+        if ui.button("octave up").clicked() {
+            *semitone_shift += 12;
+        }
+        if ui.button("reset").clicked() {
+            *semitone_shift = 0;
+            *to_position = harptabber::semitones_to_position(*from_position, *semitone_shift);
+        }
+    });
+
+    if ui
+        .add(egui::Slider::new(from_position, 1..=12).text("starting position"))
+        .changed()
+    {
+        *semitone_shift =
+            harptabber::positions_to_semitones(*from_position as i32, *to_position as i32, 0);
+    }
+    if ui
+        .add(egui::Slider::new(to_position, 1..=12).text("target position"))
+        .changed()
+    {
+        *semitone_shift =
+            harptabber::positions_to_semitones(*from_position as i32, *to_position as i32, 0);
+    }
+
+    ui.add_space(20.0);
+
+    if ui.button("go").clicked() {
+        let style = *style;
+        *output_text = harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true, style);
+    }
+
+    ui.add_space(20.0);
+
+    ui.collapsing("tab keyboard", |ui| {
+        tabkeyboard::tabkeyboard(ui, input_text);
+    });
+
+    ui.add_space(20.0);
+
+    ui.vertical(|ui| {
+        ui.label("tab style");
+        ui.horizontal(|ui| {
+            if ui
+                .selectable_value(style, Style::Default, "default")
+                .clicked()
+            {
+                *style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
+            }
+            if ui
+                .selectable_value(style, Style::BBends, "b-bends")
+                .clicked()
+            {
+                *style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
+            }
+            if ui
+                .selectable_value(style, Style::DrawDefault, "draw-default")
+                .clicked()
+            {
+                *style_example = String::from("2 2'' 3 +4 4 +5 +5o +6");
+            }
+            if ui
+                .selectable_value(style, Style::Plus, "plus/minus")
+                .clicked()
+            {
+                *style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
+            }
+        });
+        if ui
+            .selectable_value(style, Style::Harpsurgery, "harpsurgery")
+            .clicked()
+        {
+            *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+        }
+        ui.add(egui::TextEdit::singleline(style_example).enabled(false));
+    });
 }
