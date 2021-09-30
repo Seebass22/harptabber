@@ -121,6 +121,27 @@ fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
     }
 }
 
+fn fix_enharmonics(note: &str, style: Style) -> &str {
+    match style {
+        Style::Harpsurgery => match note {
+            "3B" => "2D",
+            _ => note,
+        },
+        Style::DrawDefault => match note {
+            "+3" => "2",
+            _ => note,
+        },
+        Style::Plus => match note {
+            "+3" => "-2",
+            _ => note,
+        },
+        _ => match note {
+            "3" => "-2",
+            _ => note,
+        },
+    }
+}
+
 pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool, style: Style) -> String {
     let notes = [
         "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4", "-4'",
@@ -135,6 +156,7 @@ pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool, style: Style)
         let line: Vec<&str> = line.split_whitespace().collect();
 
         for note in line {
+            let note = fix_enharmonics(note, style);
             let new_note = transpose(&notes, note, semitones);
 
             match new_note {
@@ -174,6 +196,10 @@ mod tests {
         // up 5th, down octave (G -> D)
         let res = transpose_tabs(tab, 7 - 12, true, Style::Default);
         assert_eq!(res.as_str(), "-1 2 -2' -2 -3'' -3 -4' -4 \n");
+
+        // test enharmonics
+        let res = transpose_tabs("3B".to_string(), 12, true, Style::Harpsurgery);
+        assert_eq!(res.as_str(), "6B \n");
     }
 
     #[test]
