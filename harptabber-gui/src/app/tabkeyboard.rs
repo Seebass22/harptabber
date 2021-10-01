@@ -28,6 +28,8 @@ pub fn tabkeyboard(
                     input_text.pop();
                     last = input_text.chars().last();
                 }
+                *output_text =
+                    harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true, *style);
             }
         });
 
