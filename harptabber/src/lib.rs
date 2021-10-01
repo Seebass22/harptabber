@@ -2,6 +2,7 @@ use regex::Regex;
 use std::fs;
 #[macro_use]
 extern crate lazy_static;
+mod audio;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Style {
@@ -30,6 +31,23 @@ fn transpose<'a>(notes: &'a [String], note: &str, semitones: i32) -> Result<&'a 
     }
 }
 
+fn get_index_a440(note: &str, style: Style) -> Option<i32> {
+    let notes = [
+        "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4", "-4'",
+        "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8", "8'", "8",
+        "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10", "-10o",
+    ];
+    let notes = change_tab_style(&notes, style);
+
+    match notes.iter().position(|x| *x == note) {
+        Some(p) => {
+            let p = p as i32;
+            Some(p - 9)
+        },
+        None => None,
+    }
+}
+
 pub fn semitones_to_position(starting_pos: u32, semitones: i32) -> u32 {
     let position_diffs = [0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5];
     let index = semitones.rem_euclid(12);
@@ -40,6 +58,21 @@ pub fn semitones_to_position(starting_pos: u32, semitones: i32) -> u32 {
 pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift: i32) -> i32 {
     let diff = to_position - from_position;
     (diff * 7).rem_euclid(12) + 12 * octave_shift
+}
+
+pub fn play_tab(tab: &str, style: Style) {
+    for line in tab.lines() {
+        let line: Vec<&str> = line.split_whitespace().collect();
+
+        for note in line {
+            let note = fix_enharmonics(note, style);
+
+            let index = get_index_a440(note, style);
+            if let Some(index) = index {
+                audio::play(index);
+            }
+        }
+    }
 }
 
 pub fn run(
@@ -114,12 +147,15 @@ pub fn change_tab_style_single(note: &str, style: Style) -> String {
         Style::Harpsurgery => convert_to_harpsurgery_style(note),
         Style::Plus => convert_to_plus_style(note),
         Style::DrawDefault => convert_to_draw_style(note),
-        _ => note.to_string()
+        _ => note.to_string(),
     }
 }
 
 fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
-    notes.iter().map(|s| change_tab_style_single(s, style)).collect()
+    notes
+        .iter()
+        .map(|s| change_tab_style_single(s, style))
+        .collect()
 }
 
 fn fix_enharmonics(note: &str, style: Style) -> &str {
@@ -149,6 +185,7 @@ pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool, style: Style)
         "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8", "8'", "8",
         "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10", "-10o",
     ];
+
     let notes = change_tab_style(&notes, style);
 
     let mut result = String::from("");
@@ -294,15 +331,36 @@ mod tests {
         let input = ["-2", "-3'", "4", "-4'", "-4", "-5", "6"];
 
         let res = change_tab_style(&input, Style::BBends);
-        let expected = ["-2", "-3b", "4", "-4b", "-4", "-5", "6"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        let expected = ["-2", "-3b", "4", "-4b", "-4", "-5", "6"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         assert_eq!(res, expected);
 
         let res = change_tab_style(&input, Style::Harpsurgery);
-        let expected = ["2D", "3D'", "4B", "4D'", "4D", "5D", "6B"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        let expected = ["2D", "3D'", "4B", "4D'", "4D", "5D", "6B"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         assert_eq!(res, expected);
-        
+
         let res = change_tab_style(&input, Style::DrawDefault);
-        let expected = ["2", "3'", "+4", "4'", "4", "5", "+6"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        let expected = ["2", "3'", "+4", "4'", "4", "5", "+6"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_get_index_a440() {
+        let res = get_index_a440("-3''", Style::Default);
+        assert_eq!(res, Some(0));
+
+        let res = get_index_a440("3D''", Style::Harpsurgery);
+        assert_eq!(res, Some(0));
+
+        let res = get_index_a440("-6", Style::Default);
+        assert_eq!(res, Some(12));
     }
 }

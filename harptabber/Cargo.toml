@@ -9,3 +9,4 @@ edition = "2018"
 clap = "2.33.3"
 regex = "1.5"
 lazy_static = "1.4.0"
+rodio = { version = "0.14.0", default-features = false, features = ["vorbis", "flac", "wav"] }
