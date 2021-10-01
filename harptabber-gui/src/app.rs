@@ -157,6 +157,11 @@ fn leftpanel(
 
     ui.add_space(20.0);
 
+    #[cfg(not(target_arch = "wasm32"))]
+    if ui.button("play tab").clicked() {
+        harptabber::play_tab(input_text, *style);
+    }
+
     ui.collapsing("tab keyboard", |ui| {
         tabkeyboard::tabkeyboard(ui, input_text, output_text, semitone_shift, style);
     });
