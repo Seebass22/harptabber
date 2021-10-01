@@ -3,12 +3,34 @@ use harptabber::Style;
 
 pub fn tabkeyboard(
     ui: &mut egui::Ui,
-    tabtext: &mut String,
+    input_text: &mut String,
     output_text: &mut String,
     semitone_shift: &i32,
     style: &Style,
 ) {
     ui.vertical(|ui| {
+        ui.horizontal(|ui| {
+            ui.add_space(373.0);
+            if ui
+                .add(egui::Button::new("return").text_style(egui::TextStyle::Monospace))
+                .clicked()
+            {
+                input_text.push_str("\n");
+            }
+
+            if ui
+                .add(egui::Button::new("backspace").text_style(egui::TextStyle::Monospace))
+                .clicked()
+            {
+                input_text.pop();
+                let mut last = input_text.chars().last();
+                while last.is_some() && last.unwrap() != ' ' {
+                    input_text.pop();
+                    last = input_text.chars().last();
+                }
+            }
+        });
+
         let rows = vec![
             ["", "", "", "", "", "", "", "", "", "10''"],
             ["1o", "", "", "4o", "5o", "6o", "", "8'", "9'", "10'"],
@@ -40,10 +62,10 @@ pub fn tabkeyboard(
                             )
                             .clicked()
                         {
-                            tabtext.push_str(hole.as_str());
-                            tabtext.push_str(" ");
+                            input_text.push_str(hole.as_str());
+                            input_text.push_str(" ");
                             *output_text = harptabber::transpose_tabs(
-                                tabtext.clone(),
+                                input_text.clone(),
                                 *semitone_shift,
                                 true,
                                 *style,
