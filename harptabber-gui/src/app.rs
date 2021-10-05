@@ -1,6 +1,7 @@
 use eframe::{egui, epi};
 use harptabber::Style;
 
+use std::sync::{Arc, Mutex};
 mod tabkeyboard;
 
 pub struct GUIApp {
@@ -11,6 +12,7 @@ pub struct GUIApp {
     to_position: u32,
     style: Style,
     style_example: String,
+    audio_mutex: Arc<Mutex<bool>>,
 }
 
 impl Default for GUIApp {
@@ -23,6 +25,7 @@ impl Default for GUIApp {
             to_position: 1,
             style: Style::Default,
             style_example: "-2 -2'' -3 4 -4 5 5o 6".to_owned(),
+            audio_mutex: Arc::new(Mutex::new(false)),
         }
     }
 }
@@ -41,6 +44,7 @@ impl epi::App for GUIApp {
             to_position,
             style,
             style_example,
+            audio_mutex,
         } = self;
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
@@ -77,6 +81,7 @@ impl epi::App for GUIApp {
                         from_position,
                         to_position,
                         semitone_shift,
+                        audio_mutex,
                     );
                 });
             });
@@ -104,6 +109,7 @@ fn leftpanel(
     from_position: &mut u32,
     to_position: &mut u32,
     semitone_shift: &mut i32,
+    audio_mutex: &mut Arc<Mutex<bool>>,
 ) {
     ui.heading("input");
 
@@ -159,7 +165,7 @@ fn leftpanel(
 
     #[cfg(not(target_arch = "wasm32"))]
     if ui.button("play tab").clicked() {
-        harptabber::play_tab(input_text, *style);
+        harptabber::play_tab(input_text, *style, audio_mutex);
     }
 
     ui.collapsing("tab keyboard", |ui| {

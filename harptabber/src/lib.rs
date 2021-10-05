@@ -3,6 +3,7 @@ use std::fs;
 #[macro_use]
 extern crate lazy_static;
 
+use std::sync::{Arc, Mutex};
 use std::thread;
 mod audio;
 
@@ -62,9 +63,16 @@ pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift
     (diff * 7).rem_euclid(12) + 12 * octave_shift
 }
 
-pub fn play_tab(tab: &str, style: Style) {
+pub fn play_tab(tab: &str, style: Style, _audio_mutex: &mut Arc<Mutex<bool>>) {
     let tab = String::from(tab);
+    let audio = Arc::clone(audio_mutex);
+
     thread::spawn(move || {
+        let a = audio.try_lock();
+        if a.is_err() {
+            return;
+        }
+
         for line in tab.lines() {
             let line: Vec<&str> = line.split_whitespace().collect();
 
