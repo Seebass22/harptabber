@@ -2,6 +2,8 @@ use regex::Regex;
 use std::fs;
 #[macro_use]
 extern crate lazy_static;
+
+use std::thread;
 mod audio;
 
 #[derive(PartialEq, Copy, Clone)]
@@ -43,7 +45,7 @@ fn get_index_a440(note: &str, style: Style) -> Option<i32> {
         Some(p) => {
             let p = p as i32;
             Some(p - 9)
-        },
+        }
         None => None,
     }
 }
@@ -61,18 +63,21 @@ pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift
 }
 
 pub fn play_tab(tab: &str, style: Style) {
-    for line in tab.lines() {
-        let line: Vec<&str> = line.split_whitespace().collect();
+    let tab = String::from(tab);
+    thread::spawn(move || {
+        for line in tab.lines() {
+            let line: Vec<&str> = line.split_whitespace().collect();
 
-        for note in line {
-            let note = fix_enharmonics(note, style);
+            for note in line {
+                let note = fix_enharmonics(note, style);
 
-            let index = get_index_a440(note, style);
-            if let Some(index) = index {
-                audio::play(index);
+                let index = get_index_a440(note, style);
+                if let Some(index) = index {
+                    audio::play(index);
+                }
             }
         }
-    }
+    });
 }
 
 pub fn run(
