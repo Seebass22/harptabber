@@ -61,6 +61,20 @@ fn main() {
                 .help("set tab style (harpsurgery, b-bends, plus, draw, default)"),
         )
         .arg(
+            Arg::with_name("input-tuning")
+                .long("input-tuning")
+                .value_name("TUNING")
+                .default_value("richter")
+                .help("set tuning of input harp"),
+        )
+        .arg(
+            Arg::with_name("output-tuning")
+                .long("output-tuning")
+                .value_name("TUNING")
+                .default_value("richter")
+                .help("set tuning of output harp"),
+        )
+        .arg(
             Arg::with_name("file")
                 .value_name("FILE")
                 .help("file containing tabs")
@@ -71,6 +85,9 @@ fn main() {
     let filename = matches.value_of("file").unwrap();
     let semitones = matches.value_of("semitones").unwrap_or("0");
     let semitones = semitones.parse::<i32>().unwrap();
+    let input_tuning = matches.value_of("input-tuning").unwrap();
+    let output_tuning = matches.value_of("output-tuning").unwrap();
+
     let no_error = matches.is_present("no-error");
     let from_position = matches
         .value_of("from-position")
@@ -107,5 +124,7 @@ fn main() {
         octave_shift,
         no_error,
         style,
+        input_tuning,
+        output_tuning,
     );
 }

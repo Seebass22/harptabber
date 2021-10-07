@@ -1,5 +1,6 @@
 use regex::Regex;
 use std::fs;
+use std::collections::HashMap;
 #[macro_use]
 extern crate lazy_static;
 
@@ -12,9 +13,9 @@ pub enum Style {
     DrawDefault,
 }
 
-fn transpose<'a>(notes: &'a [String], note: &str, semitones: i32) -> Result<&'a str, String> {
+fn transpose<'a>(input_harp_notes: &'a [String], output_harp_notes: &'a [String], note: &str, semitones: i32) -> Result<&'a str, String> {
     let mut pos;
-    match notes.iter().position(|x| x == note) {
+    match input_harp_notes.iter().position(|x| x == note) {
         Some(p) => pos = p as i32,
         None => {
             let error = format!("\"{}\" is not a valid note", note);
@@ -23,7 +24,7 @@ fn transpose<'a>(notes: &'a [String], note: &str, semitones: i32) -> Result<&'a 
     }
 
     pos += semitones;
-    if let Some(new_note) = notes.get(pos as usize) {
+    if let Some(new_note) = output_harp_notes.get(pos as usize) {
         Ok(new_note)
     } else {
         Ok("X")
@@ -50,6 +51,8 @@ pub fn run(
     octave_shift: i32,
     no_error: bool,
     style: Style,
+    input_tuning: &str,
+    output_tuning: &str
 ) {
     let tab = match fs::read_to_string(filename) {
         Ok(s) => s,
@@ -65,7 +68,7 @@ pub fn run(
         semitones = positions_to_semitones(from_position, 1, octave_shift);
     }
 
-    let tabs = transpose_tabs(tab, semitones, no_error, style);
+    let tabs = transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
     print!("{}", tabs);
 }
 
@@ -114,12 +117,15 @@ pub fn change_tab_style_single(note: &str, style: Style) -> String {
         Style::Harpsurgery => convert_to_harpsurgery_style(note),
         Style::Plus => convert_to_plus_style(note),
         Style::DrawDefault => convert_to_draw_style(note),
-        _ => note.to_string()
+        _ => note.to_string(),
     }
 }
 
-fn change_tab_style(notes: &[&str], style: Style) -> Vec<String> {
-    notes.iter().map(|s| change_tab_style_single(s, style)).collect()
+fn change_tab_style<T: AsRef<str>>(notes: &[T], style: Style) -> Vec<String> {
+    notes
+        .iter()
+        .map(|s| change_tab_style_single(s.as_ref(), style))
+        .collect()
 }
 
 fn fix_enharmonics(note: &str, style: Style) -> &str {
@@ -143,13 +149,36 @@ fn fix_enharmonics(note: &str, style: Style) -> &str {
     }
 }
 
-pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool, style: Style) -> String {
-    let notes = [
-        "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4", "-4'",
-        "-4", "4o", "5", "-5", "5o", "6", "-6'", "-6", "6o", "-7", "7", "-7o", "-8", "8'", "8",
-        "-9", "9'", "9", "-9o", "-10", "10''", "10'", "10", "-10o",
-    ];
-    let notes = change_tab_style(&notes, style);
+fn tuning_to_notes(tuning: &str) -> Vec<String> {
+    let mut tunings = HashMap::<&str, &str>::new();
+    tunings.insert("richter", "C E G C E G C E G C\nD G B D F A B D F A\n");
+    tunings.insert("country", "C E G C E G C E G C\nD G B D F# A B D F A\n");
+    tunings.insert("wilde", "C E G C E E G C E A\nD G B D F G B D G C\n");
+    tunings.insert("melody_maker", "C E A C E G C E G C\nD G B D F# A B D F# A\n");
+    tunings.insert("natural_minor", "C Eb G C Eb G C Eb G C\nD G Bb D F A Bb D F A\n");
+    tunings.insert("harmonic_minor", "C Eb G C Eb G C Eb G C\nD G B D F Ab B D F Ab\n");
+    tunings.insert("paddy_richter", "C E A C E G C E G C\nD G B D F A B D F A\n");
+    tunings.insert("pentaharp", "A D E A D E A D E A\nC Eb G C Eb G C Eb G C");
+
+    match tunings.get(tuning) {
+        Some(tuning) => harptool::str_to_notes_in_order(tuning),
+        None => harptool::str_to_notes_in_order(tunings.get("richter").unwrap()),
+    }
+}
+
+pub fn transpose_tabs(
+    tab: String,
+    semitones: i32,
+    no_error: bool,
+    style: Style,
+    input_tuning: &str,
+    output_tuning: &str,
+) -> String {
+    let input_notes = tuning_to_notes(input_tuning);
+    let input_notes = change_tab_style(&input_notes, style);
+
+    let output_notes = tuning_to_notes(output_tuning);
+    let output_notes = change_tab_style(&output_notes, style);
 
     let mut result = String::from("");
 
@@ -158,7 +187,7 @@ pub fn transpose_tabs(tab: String, semitones: i32, no_error: bool, style: Style)
 
         for note in line {
             let note = fix_enharmonics(note, style);
-            let new_note = transpose(&notes, note, semitones);
+            let new_note = transpose(&input_notes, &output_notes, note, semitones);
 
             match new_note {
                 Ok(new_note) => {
@@ -187,19 +216,19 @@ mod tests {
         let tab = String::from("-2 -3'' -3 4 -4 5 5o 6");
 
         // down 5th (G -> C)
-        let res = transpose_tabs(tab.clone(), -7, true, Style::Default);
+        let res = transpose_tabs(tab.clone(), -7, true, Style::Default, "richter", "richter");
         assert_eq!(res.as_str(), "1 -1 2 -2'' -2 -3'' -3 4 \n");
 
         // down 5th, up octave (G -> C)
-        let res = transpose_tabs(tab.clone(), -7 + 12, true, Style::Default);
+        let res = transpose_tabs(tab.clone(), -7 + 12, true, Style::Default, "richter", "richter");
         assert_eq!(res.as_str(), "4 -4 5 -5 6 -6 -7 7 \n");
 
         // up 5th, down octave (G -> D)
-        let res = transpose_tabs(tab, 7 - 12, true, Style::Default);
+        let res = transpose_tabs(tab, 7 - 12, true, Style::Default, "richter", "richter");
         assert_eq!(res.as_str(), "-1 2 -2' -2 -3'' -3 -4' -4 \n");
 
         // test enharmonics
-        let res = transpose_tabs("3B".to_string(), 12, true, Style::Harpsurgery);
+        let res = transpose_tabs("3B".to_string(), 12, true, Style::Harpsurgery, "richter", "richter");
         assert_eq!(res.as_str(), "6B \n");
     }
 
@@ -213,19 +242,19 @@ mod tests {
         let notes: Vec<String> = notes.iter().map(|s| s.to_string()).collect();
 
         let note = "1";
-        let res = transpose(&notes, note, 1);
+        let res = transpose(&notes, &notes, note, 1);
         assert_eq!(res, Ok("-1'"));
 
         let note = "1";
-        let res = transpose(&notes, note, -1);
+        let res = transpose(&notes, &notes, note, -1);
         assert_eq!(res, Ok("X"));
 
         let note = "10";
-        let res = transpose(&notes, note, 2);
+        let res = transpose(&notes, &notes, note, 2);
         assert_eq!(res, Ok("X"));
 
         let note = "asdf";
-        let res = transpose(&notes, note, -1);
+        let res = transpose(&notes, &notes, note, -1);
         assert!(res.is_err());
     }
 
@@ -294,15 +323,24 @@ mod tests {
         let input = ["-2", "-3'", "4", "-4'", "-4", "-5", "6"];
 
         let res = change_tab_style(&input, Style::BBends);
-        let expected = ["-2", "-3b", "4", "-4b", "-4", "-5", "6"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        let expected = ["-2", "-3b", "4", "-4b", "-4", "-5", "6"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         assert_eq!(res, expected);
 
         let res = change_tab_style(&input, Style::Harpsurgery);
-        let expected = ["2D", "3D'", "4B", "4D'", "4D", "5D", "6B"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        let expected = ["2D", "3D'", "4B", "4D'", "4D", "5D", "6B"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         assert_eq!(res, expected);
-        
+
         let res = change_tab_style(&input, Style::DrawDefault);
-        let expected = ["2", "3'", "+4", "4'", "4", "5", "+6"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+        let expected = ["2", "3'", "+4", "4'", "4", "5", "+6"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
         assert_eq!(res, expected);
     }
 }
