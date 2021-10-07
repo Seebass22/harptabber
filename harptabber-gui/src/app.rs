@@ -1,8 +1,6 @@
 use eframe::{egui, epi};
 use harptabber::Style;
 
-mod tabkeyboard;
-
 pub struct GUIApp {
     input_text: String,
     output_text: String,
@@ -11,6 +9,8 @@ pub struct GUIApp {
     to_position: u32,
     style: Style,
     style_example: String,
+    input_tuning: String,
+    output_tuning: String,
 }
 
 impl Default for GUIApp {
@@ -23,6 +23,8 @@ impl Default for GUIApp {
             to_position: 1,
             style: Style::Default,
             style_example: "-2 -2'' -3 4 -4 5 5o 6".to_owned(),
+            input_tuning: "richter".to_owned(),
+            output_tuning: "richter".to_owned(),
         }
     }
 }
@@ -33,16 +35,6 @@ impl epi::App for GUIApp {
     }
 
     fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
-        let Self {
-            input_text,
-            output_text,
-            semitone_shift,
-            from_position,
-            to_position,
-            style,
-            style_example,
-        } = self;
-
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 let style: egui::Style = (*ui.ctx().style()).clone();
@@ -68,139 +60,221 @@ impl epi::App for GUIApp {
             .default_width(330.0)
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    leftpanel(
-                        ui,
-                        input_text,
-                        output_text,
-                        style,
-                        style_example,
-                        from_position,
-                        to_position,
-                        semitone_shift,
-                    );
+                    self.leftpanel(ui);
                 });
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("output");
-                ui.add(egui::TextEdit::multiline(output_text).desired_width(300.0));
+                ui.add(egui::TextEdit::multiline(&mut self.output_text).desired_width(300.0));
                 egui::warn_if_debug_build(ui);
             });
         });
     }
 }
 
-fn transpose(input_text: &String, output_text: &mut String, semitone_shift: &i32, style: &Style) {
-    *output_text = harptabber::transpose_tabs(input_text.clone(), *semitone_shift, true, *style);
-}
-
-fn leftpanel(
-    ui: &mut egui::Ui,
-    input_text: &mut String,
-    output_text: &mut String,
-    style: &mut Style,
-    style_example: &mut String,
-    from_position: &mut u32,
-    to_position: &mut u32,
-    semitone_shift: &mut i32,
-) {
-    ui.heading("input");
-
-    if ui
-        .add(egui::TextEdit::multiline(input_text).desired_width(600.0))
-        .changed()
-    {
-        transpose(input_text, output_text, semitone_shift, style);
-    };
-
-    if ui
-        .add(egui::Slider::new(semitone_shift, -24..=24).text("semitone shift"))
-        .changed()
-    {
-        *to_position = harptabber::semitones_to_position(*from_position, *semitone_shift);
-        transpose(input_text, output_text, semitone_shift, style);
+impl GUIApp {
+    fn transpose(&mut self) {
+        self.output_text = harptabber::transpose_tabs(
+            self.input_text.clone(),
+            self.semitone_shift,
+            true,
+            self.style,
+            &self.input_tuning,
+            &self.output_tuning,
+        );
     }
 
-    ui.horizontal(|ui| {
-        if ui.button("octave down").clicked() {
-            *semitone_shift -= 12;
-            transpose(input_text, output_text, semitone_shift, style);
+    fn leftpanel(&mut self, ui: &mut egui::Ui) {
+        ui.heading("input");
+
+        if ui
+            .add(egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0))
+            .changed()
+        {
+            self.transpose();
+        };
+
+        if ui
+            .add(egui::Slider::new(&mut self.semitone_shift, -24..=24).text("semitone shift"))
+            .changed()
+        {
+            self.to_position =
+                harptabber::semitones_to_position(self.from_position, self.semitone_shift);
+            self.transpose();
         }
-        if ui.button("octave up").clicked() {
-            *semitone_shift += 12;
-            transpose(input_text, output_text, semitone_shift, style);
-        }
-        if ui.button("reset").clicked() {
-            *semitone_shift = 0;
-            *to_position = harptabber::semitones_to_position(*from_position, *semitone_shift);
-            transpose(input_text, output_text, semitone_shift, style);
-        }
-    });
 
-    if ui
-        .add(egui::Slider::new(from_position, 1..=12).text("starting position"))
-        .changed()
-    {
-        *semitone_shift =
-            harptabber::positions_to_semitones(*from_position as i32, *to_position as i32, 0);
-        transpose(input_text, output_text, semitone_shift, style);
-    }
-    if ui
-        .add(egui::Slider::new(to_position, 1..=12).text("target position"))
-        .changed()
-    {
-        *semitone_shift =
-            harptabber::positions_to_semitones(*from_position as i32, *to_position as i32, 0);
-        transpose(input_text, output_text, semitone_shift, style);
-    }
-
-    ui.add_space(20.0);
-
-    ui.collapsing("tab keyboard", |ui| {
-        tabkeyboard::tabkeyboard(ui, input_text, output_text, semitone_shift, style);
-    });
-
-    ui.add_space(20.0);
-
-    ui.vertical(|ui| {
-        ui.label("tab style");
         ui.horizontal(|ui| {
-            if ui
-                .selectable_value(style, Style::Default, "default")
-                .clicked()
-            {
-                *style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
+            if ui.button("octave down").clicked() {
+                self.semitone_shift -= 12;
+                self.transpose();
             }
-            if ui
-                .selectable_value(style, Style::BBends, "b-bends")
-                .clicked()
-            {
-                *style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
+            if ui.button("octave up").clicked() {
+                self.semitone_shift += 12;
+                self.transpose();
             }
-            if ui
-                .selectable_value(style, Style::DrawDefault, "draw-default")
-                .clicked()
-            {
-                *style_example = String::from("2 2'' 3 +4 4 +5 +5o +6");
-            }
-            if ui
-                .selectable_value(style, Style::Plus, "plus/minus")
-                .clicked()
-            {
-                *style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
-            }
-            if ui
-                .selectable_value(style, Style::Harpsurgery, "harpsurgery")
-                .clicked()
-            {
-                *style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+            if ui.button("reset").clicked() {
+                self.semitone_shift = 0;
+                self.to_position =
+                    harptabber::semitones_to_position(self.from_position, self.semitone_shift);
+                self.transpose();
             }
         });
-        ui.add(
-            egui::TextEdit::singleline(style_example)
-                .desired_width(350.0)
-                .enabled(false),
-        );
-    });
+
+        if ui
+            .add(egui::Slider::new(&mut self.from_position, 1..=12).text("starting position"))
+            .changed()
+        {
+            self.semitone_shift = harptabber::positions_to_semitones(
+                self.from_position as i32,
+                self.to_position as i32,
+                0,
+            );
+            self.transpose();
+        }
+        if ui
+            .add(egui::Slider::new(&mut self.to_position, 1..=12).text("target position"))
+            .changed()
+        {
+            self.semitone_shift = harptabber::positions_to_semitones(
+                self.from_position as i32,
+                self.to_position as i32,
+                0,
+            );
+            self.transpose();
+        }
+
+        ui.add_space(20.0);
+
+        ui.collapsing("tab keyboard", |ui| {
+            self.tabkeyboard(ui);
+        });
+
+        ui.add_space(20.0);
+
+        ui.vertical(|ui| {
+            ui.label("tab style");
+            ui.horizontal(|ui| {
+                self.tab_style_selector(ui);
+            });
+            ui.add(
+                egui::TextEdit::singleline(&mut self.style_example)
+                    .desired_width(350.0)
+                    .enabled(false),
+            );
+        });
+    }
+
+    fn tab_style_selector(&mut self, ui: &mut egui::Ui) {
+        if ui
+            .selectable_value(&mut self.style, Style::Default, "default")
+            .clicked()
+        {
+            self.style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
+        }
+        if ui
+            .selectable_value(&mut self.style, Style::BBends, "b-bends")
+            .clicked()
+        {
+            self.style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
+        }
+        if ui
+            .selectable_value(&mut self.style, Style::DrawDefault, "draw-default")
+            .clicked()
+        {
+            self.style_example = String::from("2 2'' 3 +4 4 +5 +5o +6");
+        }
+        if ui
+            .selectable_value(&mut self.style, Style::Plus, "plus/minus")
+            .clicked()
+        {
+            self.style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
+        }
+        if ui
+            .selectable_value(&mut self.style, Style::Harpsurgery, "harpsurgery")
+            .clicked()
+        {
+            self.style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+        }
+    }
+
+    fn tabkeyboard(&mut self, ui: &mut egui::Ui) {
+        ui.vertical(|ui| {
+            ui.horizontal(|ui| {
+                ui.add_space(373.0);
+                if ui
+                    .add(egui::Button::new("return").text_style(egui::TextStyle::Monospace))
+                    .clicked()
+                {
+                    self.input_text.push_str("\n");
+                }
+
+                if ui
+                    .add(egui::Button::new("backspace").text_style(egui::TextStyle::Monospace))
+                    .clicked()
+                {
+                    self.input_text.pop();
+                    let mut last = self.input_text.chars().last();
+                    while last.is_some() && last.unwrap() != ' ' {
+                        self.input_text.pop();
+                        last = self.input_text.chars().last();
+                    }
+                    self.transpose();
+                }
+            });
+
+            let rows = vec![
+                ["", "", "", "", "", "", "", "", "", "10''"],
+                ["1o", "", "", "4o", "5o", "6o", "", "8'", "9'", "10'"],
+                ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                ["-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10"],
+                [
+                    "-1'", "-2'", "-3'", "-4'", "", "-6'", "-7o", "", "-9o", "-10o",
+                ],
+                ["", "-2''", "-3''", "", "", "", "", "", "", ""],
+                ["", "", "-3'''", "", "", "", "", "", "", ""],
+            ];
+            for (i, row) in rows.iter().enumerate() {
+                ui.horizontal(|ui| {
+                    for hole in row {
+                        if *hole == "" {
+                            ui.add(
+                                egui::Button::new("     ")
+                                    .text_style(egui::TextStyle::Monospace)
+                                    .enabled(false),
+                            );
+                        } else {
+                            let hole = harptabber::change_tab_style_single(hole, self.style);
+
+                            let text = format!("{:width$}", hole, width = 5);
+                            if ui
+                                .add(
+                                    egui::Button::new(text.as_str())
+                                        .text_style(egui::TextStyle::Monospace),
+                                )
+                                .clicked()
+                            {
+                                self.input_text.push_str(hole.as_str());
+                                self.input_text.push_str(" ");
+                                self.transpose();
+                            }
+                        }
+                    }
+                });
+                if i == 2 {
+                    ui.horizontal(|ui| {
+                        for hole in row {
+                            let text = format!("{:width$}", hole, width = 5);
+                            ui.add(
+                                egui::Button::new(text.as_str())
+                                    .text_style(egui::TextStyle::Monospace)
+                                    .enabled(false),
+                            );
+                        }
+                    });
+                }
+            }
+        });
+    }
 }
