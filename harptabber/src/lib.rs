@@ -233,6 +233,18 @@ mod tests {
     }
 
     #[test]
+    fn test_transpose_tabs_different_tunings() {
+        let res = transpose_tabs("-2 -3' 4 -4' -4 -5 6".to_string(), 0, true, Style::Default, "richter", "wilde");
+        assert_eq!(res.as_str(), "-2 -3' 4 -4' -4 -5 -6 \n");
+
+        let res = transpose_tabs("-2 -3' 4 -4' -4 -5 6".to_string(), 12, true, Style::Default, "richter", "wilde");
+        assert_eq!(res.as_str(), "-6 -7' 8 -8' -8 -9'' -9 \n");
+
+        let res = transpose_tabs("-3'' -3 4 -4 5 -5 6 -6".to_string(), -2, true, Style::Default, "richter", "natural_minor");
+        assert_eq!(res.as_str(), "-2 -3' -3 4 -4 5 -5 6 \n");
+    }
+
+    #[test]
     fn test_transpose() {
         let notes = [
             "1", "-1'", "-1", "1o", "2", "-2''", "-2'", "-2", "-3'''", "-3''", "-3'", "-3", "4",
