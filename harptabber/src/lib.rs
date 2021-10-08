@@ -159,10 +159,15 @@ fn tuning_to_notes(tuning: &str) -> Vec<String> {
     tunings.insert("harmonic_minor", "C Eb G C Eb G C Eb G C\nD G B D F Ab B D F Ab\n");
     tunings.insert("paddy_richter", "C E A C E G C E G C\nD G B D F A B D F A\n");
     tunings.insert("pentaharp", "A D E A D E A D E A\nC Eb G C Eb G C Eb G C");
+    tunings.insert("powerdraw", "C E G C E G A C E A\nD G B D F A B D G C");
+    tunings.insert("powerbender", "C E G C D F A C E A\nD G B D E G B D G C");
 
     match tunings.get(tuning) {
         Some(tuning) => harptool::str_to_notes_in_order(tuning),
-        None => harptool::str_to_notes_in_order(tunings.get("richter").unwrap()),
+        None => {
+            eprintln!("tuning not found: {}", tuning);
+            harptool::str_to_notes_in_order(tunings.get("richter").unwrap())
+        },
     }
 }
 

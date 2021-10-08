@@ -164,6 +164,80 @@ impl GUIApp {
                     .enabled(false),
             );
         });
+
+        ui.add_space(20.0);
+
+        self.tuning_selector(ui);
+    }
+
+    fn tuning_selector(&mut self, ui: &mut egui::Ui) {
+        egui::ComboBox::from_label("output tuning")
+            .selected_text(&self.output_tuning)
+            .width(150.0)
+            .show_ui(ui, |ui| {
+                if ui
+                    .selectable_value(&mut self.output_tuning, "richter".to_string(), "richter")
+                    .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "paddy_richter".to_string(),
+                            "paddy richter",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "natural_minor".to_string(),
+                            "natural minor",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "harmonic_minor".to_string(),
+                            "harmonic minor",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "wilde".to_string(),
+                            "wilde tuning",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "pentaharp".to_string(),
+                            "pentaharp",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "powerbender".to_string(),
+                            "powerbender",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "powerdraw".to_string(),
+                            "powerdraw",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut self.output_tuning,
+                            "melody_maker".to_string(),
+                            "melody maker",
+                        )
+                        .changed()
+                {
+                    self.transpose();
+                }
+            });
     }
 
     fn tab_style_selector(&mut self, ui: &mut egui::Ui) {
