@@ -1,6 +1,6 @@
 use regex::Regex;
-use std::fs;
 use std::collections::HashMap;
+use std::fs;
 #[macro_use]
 extern crate lazy_static;
 
@@ -13,7 +13,12 @@ pub enum Style {
     DrawDefault,
 }
 
-fn transpose<'a>(input_harp_notes: &'a [String], output_harp_notes: &'a [String], note: &str, semitones: i32) -> Result<&'a str, String> {
+fn transpose<'a>(
+    input_harp_notes: &'a [String],
+    output_harp_notes: &'a [String],
+    note: &str,
+    semitones: i32,
+) -> Result<&'a str, String> {
     let mut pos;
     match input_harp_notes.iter().position(|x| x == note) {
         Some(p) => pos = p as i32,
@@ -43,17 +48,31 @@ pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift
     (diff * 7).rem_euclid(12) + 12 * octave_shift
 }
 
-pub fn run(
-    filename: &str,
-    mut semitones: i32,
-    from_position: i32,
-    to_position: Option<i32>,
-    octave_shift: i32,
-    no_error: bool,
-    style: Style,
-    input_tuning: &str,
-    output_tuning: &str
-) {
+pub struct RunOptions<'a> {
+    pub filename: &'a str,
+    pub semitones: i32,
+    pub from_position: i32,
+    pub to_position: Option<i32>,
+    pub octave_shift: i32,
+    pub no_error: bool,
+    pub style: Style,
+    pub input_tuning: &'a str,
+    pub output_tuning: &'a str,
+}
+
+pub fn run(options: RunOptions) {
+    let RunOptions {
+        filename,
+        mut semitones,
+        from_position,
+        to_position,
+        octave_shift,
+        no_error,
+        style,
+        input_tuning,
+        output_tuning,
+    } = options;
+
     let tab = match fs::read_to_string(filename) {
         Ok(s) => s,
         Err(_) => {
@@ -154,10 +173,22 @@ fn tuning_to_notes(tuning: &str) -> Vec<String> {
     tunings.insert("richter", "C E G C E G C E G C\nD G B D F A B D F A\n");
     tunings.insert("country", "C E G C E G C E G C\nD G B D F# A B D F A\n");
     tunings.insert("wilde", "C E G C E E G C E A\nD G B D F G B D G C\n");
-    tunings.insert("melody_maker", "C E A C E G C E G C\nD G B D F# A B D F# A\n");
-    tunings.insert("natural_minor", "C Eb G C Eb G C Eb G C\nD G Bb D F A Bb D F A\n");
-    tunings.insert("harmonic_minor", "C Eb G C Eb G C Eb G C\nD G B D F Ab B D F Ab\n");
-    tunings.insert("paddy_richter", "C E A C E G C E G C\nD G B D F A B D F A\n");
+    tunings.insert(
+        "melody_maker",
+        "C E A C E G C E G C\nD G B D F# A B D F# A\n",
+    );
+    tunings.insert(
+        "natural_minor",
+        "C Eb G C Eb G C Eb G C\nD G Bb D F A Bb D F A\n",
+    );
+    tunings.insert(
+        "harmonic_minor",
+        "C Eb G C Eb G C Eb G C\nD G B D F Ab B D F Ab\n",
+    );
+    tunings.insert(
+        "paddy_richter",
+        "C E A C E G C E G C\nD G B D F A B D F A\n",
+    );
     tunings.insert("pentaharp", "A D E A D E A D E A\nC Eb G C Eb G C Eb G C");
     tunings.insert("powerdraw", "C E G C E G A C E A\nD G B D F A B D G C");
     tunings.insert("powerbender", "C E G C D F A C E A\nD G B D E G B D G C");
@@ -167,7 +198,7 @@ fn tuning_to_notes(tuning: &str) -> Vec<String> {
         None => {
             eprintln!("tuning not found: {}", tuning);
             harptool::str_to_notes_in_order(tunings.get("richter").unwrap())
-        },
+        }
     }
 }
 
@@ -225,7 +256,14 @@ mod tests {
         assert_eq!(res.as_str(), "1 -1 2 -2'' -2 -3'' -3 4 \n");
 
         // down 5th, up octave (G -> C)
-        let res = transpose_tabs(tab.clone(), -7 + 12, true, Style::Default, "richter", "richter");
+        let res = transpose_tabs(
+            tab.clone(),
+            -7 + 12,
+            true,
+            Style::Default,
+            "richter",
+            "richter",
+        );
         assert_eq!(res.as_str(), "4 -4 5 -5 6 -6 -7 7 \n");
 
         // up 5th, down octave (G -> D)
@@ -233,19 +271,47 @@ mod tests {
         assert_eq!(res.as_str(), "-1 2 -2' -2 -3'' -3 -4' -4 \n");
 
         // test enharmonics
-        let res = transpose_tabs("3B".to_string(), 12, true, Style::Harpsurgery, "richter", "richter");
+        let res = transpose_tabs(
+            "3B".to_string(),
+            12,
+            true,
+            Style::Harpsurgery,
+            "richter",
+            "richter",
+        );
         assert_eq!(res.as_str(), "6B \n");
     }
 
     #[test]
     fn test_transpose_tabs_different_tunings() {
-        let res = transpose_tabs("-2 -3' 4 -4' -4 -5 6".to_string(), 0, true, Style::Default, "richter", "wilde");
+        let res = transpose_tabs(
+            "-2 -3' 4 -4' -4 -5 6".to_string(),
+            0,
+            true,
+            Style::Default,
+            "richter",
+            "wilde",
+        );
         assert_eq!(res.as_str(), "-2 -3' 4 -4' -4 -5 -6 \n");
 
-        let res = transpose_tabs("-2 -3' 4 -4' -4 -5 6".to_string(), 12, true, Style::Default, "richter", "wilde");
+        let res = transpose_tabs(
+            "-2 -3' 4 -4' -4 -5 6".to_string(),
+            12,
+            true,
+            Style::Default,
+            "richter",
+            "wilde",
+        );
         assert_eq!(res.as_str(), "-6 -7' 8 -8' -8 -9'' -9 \n");
 
-        let res = transpose_tabs("-3'' -3 4 -4 5 -5 6 -6".to_string(), -2, true, Style::Default, "richter", "natural_minor");
+        let res = transpose_tabs(
+            "-3'' -3 4 -4 5 -5 6 -6".to_string(),
+            -2,
+            true,
+            Style::Default,
+            "richter",
+            "natural_minor",
+        );
         assert_eq!(res.as_str(), "-2 -3' -3 4 -4 5 -5 6 \n");
     }
 

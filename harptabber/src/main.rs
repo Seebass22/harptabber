@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use harptabber::{run, Style};
+use harptabber::{run, RunOptions, Style};
 
 fn is_int(val: String) -> Result<(), String> {
     if val.parse::<i32>().is_ok() {
@@ -116,7 +116,7 @@ fn main() {
         }
     }
 
-    run(
+    let options = RunOptions {
         filename,
         semitones,
         from_position,
@@ -126,5 +126,7 @@ fn main() {
         style,
         input_tuning,
         output_tuning,
-    );
+    };
+
+    run(options);
 }
