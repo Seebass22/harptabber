@@ -167,6 +167,16 @@ impl GUIApp {
 
         ui.add_space(20.0);
 
+        egui::ComboBox::from_label("input tuning")
+            .selected_text(&self.input_tuning)
+            .width(150.0)
+            .show_ui(ui, |ui| {
+                if ui
+                    .selectable_value(&mut self.input_tuning, "richter".to_string(), "richter")
+                    .changed()
+                {}
+            });
+
         self.tuning_selector(ui);
     }
 
