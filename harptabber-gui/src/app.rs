@@ -167,84 +167,62 @@ impl GUIApp {
 
         ui.add_space(20.0);
 
-        egui::ComboBox::from_label("input tuning")
-            .selected_text(&self.input_tuning)
-            .width(150.0)
-            .show_ui(ui, |ui| {
-                if ui
-                    .selectable_value(&mut self.input_tuning, "richter".to_string(), "richter")
-                    .changed()
-                {}
-            });
-
-        self.tuning_selector(ui);
+        self.tuning_selector(ui, true);
+        self.tuning_selector(ui, false);
     }
 
-    fn tuning_selector(&mut self, ui: &mut egui::Ui) {
-        egui::ComboBox::from_label("output tuning")
-            .selected_text(&self.output_tuning)
+    fn tuning_selector(&mut self, ui: &mut egui::Ui, is_input: bool) {
+        let mut tuning;
+        let label_name;
+        if is_input {
+            label_name = "input tuning";
+            tuning = self.input_tuning.clone();
+        } else {
+            label_name = "output tuning";
+            tuning = self.output_tuning.clone();
+        }
+
+        egui::ComboBox::from_label(label_name)
+            .selected_text(&mut tuning)
             .width(150.0)
             .show_ui(ui, |ui| {
                 if ui
-                    .selectable_value(&mut self.output_tuning, "richter".to_string(), "richter")
+                    .selectable_value(&mut tuning, "richter".to_string(), "richter")
                     .changed()
                     || ui
-                        .selectable_value(
-                            &mut self.output_tuning,
-                            "paddy_richter".to_string(),
-                            "paddy richter",
-                        )
+                        .selectable_value(&mut tuning, "paddy_richter".to_string(), "paddy richter")
+                        .changed()
+                    || ui
+                        .selectable_value(&mut tuning, "natural_minor".to_string(), "natural minor")
                         .changed()
                     || ui
                         .selectable_value(
-                            &mut self.output_tuning,
-                            "natural_minor".to_string(),
-                            "natural minor",
-                        )
-                        .changed()
-                    || ui
-                        .selectable_value(
-                            &mut self.output_tuning,
+                            &mut tuning,
                             "harmonic_minor".to_string(),
                             "harmonic minor",
                         )
                         .changed()
                     || ui
-                        .selectable_value(
-                            &mut self.output_tuning,
-                            "wilde".to_string(),
-                            "wilde tuning",
-                        )
+                        .selectable_value(&mut tuning, "wilde".to_string(), "wilde tuning")
                         .changed()
                     || ui
-                        .selectable_value(
-                            &mut self.output_tuning,
-                            "pentaharp".to_string(),
-                            "pentaharp",
-                        )
+                        .selectable_value(&mut tuning, "pentaharp".to_string(), "pentaharp")
                         .changed()
                     || ui
-                        .selectable_value(
-                            &mut self.output_tuning,
-                            "powerbender".to_string(),
-                            "powerbender",
-                        )
+                        .selectable_value(&mut tuning, "powerbender".to_string(), "powerbender")
                         .changed()
                     || ui
-                        .selectable_value(
-                            &mut self.output_tuning,
-                            "powerdraw".to_string(),
-                            "powerdraw",
-                        )
+                        .selectable_value(&mut tuning, "powerdraw".to_string(), "powerdraw")
                         .changed()
                     || ui
-                        .selectable_value(
-                            &mut self.output_tuning,
-                            "melody_maker".to_string(),
-                            "melody maker",
-                        )
+                        .selectable_value(&mut tuning, "melody_maker".to_string(), "melody maker")
                         .changed()
                 {
+                    if is_input {
+                        self.input_tuning = tuning;
+                    } else {
+                        self.output_tuning = tuning;
+                    }
                     self.transpose();
                 }
             });
