@@ -217,6 +217,9 @@ impl GUIApp {
                     || ui
                         .selectable_value(&mut tuning, "melody_maker".to_string(), "melody maker")
                         .changed()
+                    || ui
+                        .selectable_value(&mut tuning, "easy_3rd".to_string(), "easy 3rd")
+                        .changed()
                 {
                     if is_input {
                         self.input_tuning = tuning;

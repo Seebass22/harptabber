@@ -9,4 +9,4 @@ edition = "2018"
 clap = "2.33.3"
 regex = "1.5"
 lazy_static = "1.4.0"
-harptool = { git = "https://github.com/Seebass22/harptool", rev = "7baca3d" }
+harptool = { git = "https://github.com/Seebass22/harptool", rev = "b0d01df" }

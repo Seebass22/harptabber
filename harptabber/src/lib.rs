@@ -182,6 +182,7 @@ fn tuning_to_notes(tuning: &str) -> (Vec<String>, Vec<String>) {
     tunings.insert("pentaharp", "A D E A D E A D E A\nC Eb G C Eb G C Eb G C");
     tunings.insert("powerdraw", "C E G C E G A C E A\nD G B D F A B D G C");
     tunings.insert("powerbender", "C E G C D F A C E A\nD G B D E G B D G C");
+    tunings.insert("easy_3rd", "C E G C E G C E G C\nD F A D F A B D F A");
 
     match tunings.get(tuning) {
         Some(tuning) => harptool::str_to_notes_in_order(tuning),
@@ -304,6 +305,21 @@ mod tests {
             "natural_minor",
         );
         assert_eq!(res.as_str(), "-2 -3' -3 4 -4 5 -5 6 \n");
+    }
+
+    #[test]
+    fn test_easy_3rd_tuning() {
+        let input = "-3'' -3 4 -4 5 -5 6 -6";
+        let res = transpose_tabs(input.to_string(), 5, true, Style::Default, "richter", "easy_3rd");
+        assert_eq!(res.as_str(), "-4 5 -5 6 -6 6o 7 -8 \n");
+
+        let input = "-3'' -3 4 -4 5 -5 6 -6";
+        let res = transpose_tabs(input.to_string(), -7, true, Style::Default, "richter", "easy_3rd");
+        assert_eq!(res.as_str(), "-1 2 -2 3 -3 3o 4 -4 \n");
+
+        let input = "1 -1 2 -2'' -2 -3'' -3 4";
+        let res = transpose_tabs(input.to_string(), 0, true, Style::Default, "richter", "easy_3rd");
+        assert_eq!(res.as_str(), "1 -1 2 -2 3 -3 X 4 \n");
     }
 
     #[test]
