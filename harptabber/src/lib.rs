@@ -147,28 +147,18 @@ fn change_tab_style<T: AsRef<str>>(notes: &[T], style: Style) -> Vec<String> {
         .collect()
 }
 
-fn fix_enharmonics(note: &str, style: Style) -> &str {
-    match style {
-        Style::Harpsurgery => match note {
-            "3B" => "2D",
-            _ => note,
-        },
-        Style::DrawDefault => match note {
-            "+3" => "2",
-            _ => note,
-        },
-        Style::Plus => match note {
-            "+3" => "-2",
-            _ => note,
-        },
-        _ => match note {
-            "3" => "-2",
-            _ => note,
-        },
+fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a Vec<String>) -> &'a str {
+    let mut i = 0;
+    while i < duplicated_notes.len() {
+        if note == duplicated_notes.get(i).unwrap() {
+            return duplicated_notes.get(i+1).unwrap();
+        }
+        i += 2;
     }
+    note
 }
 
-fn tuning_to_notes(tuning: &str) -> Vec<String> {
+fn tuning_to_notes(tuning: &str) -> (Vec<String>, Vec<String>) {
     let mut tunings = HashMap::<&str, &str>::new();
     tunings.insert("richter", "C E G C E G C E G C\nD G B D F A B D F A\n");
     tunings.insert("country", "C E G C E G C E G C\nD G B D F# A B D F A\n");
@@ -210,10 +200,11 @@ pub fn transpose_tabs(
     input_tuning: &str,
     output_tuning: &str,
 ) -> String {
-    let input_notes = tuning_to_notes(input_tuning);
+    let (input_notes, duplicated_notes) = tuning_to_notes(input_tuning);
     let input_notes = change_tab_style(&input_notes, style);
+    let duplicated_notes = change_tab_style(&duplicated_notes, style);
 
-    let output_notes = tuning_to_notes(output_tuning);
+    let (output_notes, _) = tuning_to_notes(output_tuning);
     let output_notes = change_tab_style(&output_notes, style);
 
     let mut result = String::from("");
@@ -222,7 +213,7 @@ pub fn transpose_tabs(
         let line: Vec<&str> = line.split_whitespace().collect();
 
         for note in line {
-            let note = fix_enharmonics(note, style);
+            let note = fix_enharmonics(note, &duplicated_notes);
             let new_note = transpose(&input_notes, &output_notes, note, semitones);
 
             match new_note {
