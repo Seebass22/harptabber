@@ -151,7 +151,7 @@ fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a Vec<String>) -> &'a 
     let mut i = 0;
     while i < duplicated_notes.len() {
         if note == duplicated_notes.get(i).unwrap() {
-            return duplicated_notes.get(i+1).unwrap();
+            return duplicated_notes.get(i + 1).unwrap();
         }
         i += 2;
     }
@@ -162,27 +162,28 @@ fn tuning_to_notes(tuning: &str) -> (Vec<String>, Vec<String>) {
     let mut tunings = HashMap::<&str, &str>::new();
     tunings.insert("richter", "C E G C E G C E G C\nD G B D F A B D F A\n");
     tunings.insert("country", "C E G C E G C E G C\nD G B D F# A B D F A\n");
-    tunings.insert("wilde", "C E G C E E G C E A\nD G B D F G B D G C\n");
+    tunings.insert("wilde tuning", "C E G C E E G C E A\nD G B D F G B D G C\n");
     tunings.insert(
-        "melody_maker",
+        "melody maker",
         "C E A C E G C E G C\nD G B D F# A B D F# A\n",
     );
     tunings.insert(
-        "natural_minor",
+        "natural minor",
         "C Eb G C Eb G C Eb G C\nD G Bb D F A Bb D F A\n",
     );
     tunings.insert(
-        "harmonic_minor",
+        "harmonic minor",
         "C Eb G C Eb G C Eb G C\nD G B D F Ab B D F Ab\n",
     );
     tunings.insert(
-        "paddy_richter",
+        "paddy richter",
         "C E A C E G C E G C\nD G B D F A B D F A\n",
     );
     tunings.insert("pentaharp", "A D E A D E A D E A\nC Eb G C Eb G C Eb G C");
     tunings.insert("powerdraw", "C E G C E G A C E A\nD G B D F A B D G C");
     tunings.insert("powerbender", "C E G C D F A C E A\nD G B D E G B D G C");
-    tunings.insert("easy_3rd", "C E G C E G C E G C\nD F A D F A B D F A");
+    tunings.insert("easy 3rd", "C E G C E G C E G C\nD F A D F A B D F A");
+    tunings.insert("4 hole richter", "C E G C\nD F A B");
 
     match tunings.get(tuning) {
         Some(tuning) => harptool::str_to_notes_in_order(tuning),
@@ -282,7 +283,7 @@ mod tests {
             true,
             Style::Default,
             "richter",
-            "wilde",
+            "wilde tuning",
         );
         assert_eq!(res.as_str(), "-2 -3' 4 -4' -4 -5 -6 \n");
 
@@ -292,7 +293,7 @@ mod tests {
             true,
             Style::Default,
             "richter",
-            "wilde",
+            "wilde tuning",
         );
         assert_eq!(res.as_str(), "-6 -7' 8 -8' -8 -9'' -9 \n");
 
@@ -302,7 +303,7 @@ mod tests {
             true,
             Style::Default,
             "richter",
-            "natural_minor",
+            "natural minor",
         );
         assert_eq!(res.as_str(), "-2 -3' -3 4 -4 5 -5 6 \n");
     }
@@ -310,15 +311,36 @@ mod tests {
     #[test]
     fn test_easy_3rd_tuning() {
         let input = "-3'' -3 4 -4 5 -5 6 -6";
-        let res = transpose_tabs(input.to_string(), 5, true, Style::Default, "richter", "easy_3rd");
+        let res = transpose_tabs(
+            input.to_string(),
+            5,
+            true,
+            Style::Default,
+            "richter",
+            "easy 3rd",
+        );
         assert_eq!(res.as_str(), "-4 5 -5 6 -6 6o 7 -8 \n");
 
         let input = "-3'' -3 4 -4 5 -5 6 -6";
-        let res = transpose_tabs(input.to_string(), -7, true, Style::Default, "richter", "easy_3rd");
+        let res = transpose_tabs(
+            input.to_string(),
+            -7,
+            true,
+            Style::Default,
+            "richter",
+            "easy 3rd",
+        );
         assert_eq!(res.as_str(), "-1 2 -2 3 -3 3o 4 -4 \n");
 
         let input = "1 -1 2 -2'' -2 -3'' -3 4";
-        let res = transpose_tabs(input.to_string(), 0, true, Style::Default, "richter", "easy_3rd");
+        let res = transpose_tabs(
+            input.to_string(),
+            0,
+            true,
+            Style::Default,
+            "richter",
+            "easy 3rd",
+        );
         assert_eq!(res.as_str(), "1 -1 2 -2 3 -3 X 4 \n");
     }
 

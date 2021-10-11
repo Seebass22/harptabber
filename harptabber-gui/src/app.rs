@@ -190,20 +190,20 @@ impl GUIApp {
                     .selectable_value(&mut tuning, "richter".to_string(), "richter")
                     .changed()
                     || ui
-                        .selectable_value(&mut tuning, "paddy_richter".to_string(), "paddy richter")
+                        .selectable_value(&mut tuning, "paddy richter".to_string(), "paddy richter")
                         .changed()
                     || ui
-                        .selectable_value(&mut tuning, "natural_minor".to_string(), "natural minor")
+                        .selectable_value(&mut tuning, "natural minor".to_string(), "natural minor")
                         .changed()
                     || ui
                         .selectable_value(
                             &mut tuning,
-                            "harmonic_minor".to_string(),
+                            "harmonic minor".to_string(),
                             "harmonic minor",
                         )
                         .changed()
                     || ui
-                        .selectable_value(&mut tuning, "wilde".to_string(), "wilde tuning")
+                        .selectable_value(&mut tuning, "wilde tuning".to_string(), "wilde tuning")
                         .changed()
                     || ui
                         .selectable_value(&mut tuning, "pentaharp".to_string(), "pentaharp")
@@ -215,10 +215,13 @@ impl GUIApp {
                         .selectable_value(&mut tuning, "powerdraw".to_string(), "powerdraw")
                         .changed()
                     || ui
-                        .selectable_value(&mut tuning, "melody_maker".to_string(), "melody maker")
+                        .selectable_value(&mut tuning, "melody maker".to_string(), "melody maker")
                         .changed()
                     || ui
-                        .selectable_value(&mut tuning, "easy_3rd".to_string(), "easy 3rd")
+                        .selectable_value(&mut tuning, "easy 3rd".to_string(), "easy 3rd")
+                        .changed()
+                    || ui
+                        .selectable_value(&mut tuning, "4 hole richter".to_string(), "4 hole richter")
                         .changed()
                 {
                     if is_input {
