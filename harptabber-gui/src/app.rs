@@ -11,6 +11,7 @@ pub struct GUIApp {
     style_example: String,
     input_tuning: String,
     output_tuning: String,
+    keyboard_layout: Vec<Vec<String>>,
 }
 
 impl Default for GUIApp {
@@ -25,6 +26,7 @@ impl Default for GUIApp {
             style_example: "-2 -2'' -3 4 -4 5 5o 6".to_owned(),
             input_tuning: "richter".to_owned(),
             output_tuning: "richter".to_owned(),
+            keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
         }
     }
 }
@@ -221,10 +223,15 @@ impl GUIApp {
                         .selectable_value(&mut tuning, "easy 3rd".to_string(), "easy 3rd")
                         .changed()
                     || ui
-                        .selectable_value(&mut tuning, "4 hole richter".to_string(), "4 hole richter")
+                        .selectable_value(
+                            &mut tuning,
+                            "4 hole richter".to_string(),
+                            "4 hole richter",
+                        )
                         .changed()
                 {
                     if is_input {
+                        self.keyboard_layout = harptabber::get_tabkeyboard_layout(&tuning);
                         self.input_tuning = tuning;
                     } else {
                         self.output_tuning = tuning;
@@ -292,17 +299,8 @@ impl GUIApp {
                 }
             });
 
-            let rows = vec![
-                ["", "", "", "", "", "", "", "", "", "10''"],
-                ["1o", "", "", "4o", "5o", "6o", "", "8'", "9'", "10'"],
-                ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-                ["-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10"],
-                [
-                    "-1'", "-2'", "-3'", "-4'", "", "-6'", "-7o", "", "-9o", "-10o",
-                ],
-                ["", "-2''", "-3''", "", "", "", "", "", "", ""],
-                ["", "", "-3'''", "", "", "", "", "", "", ""],
-            ];
+            let rows = self.keyboard_layout.clone();
+
             for (i, row) in rows.iter().enumerate() {
                 ui.horizontal(|ui| {
                     for hole in row {

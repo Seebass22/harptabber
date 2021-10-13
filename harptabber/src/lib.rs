@@ -158,7 +158,7 @@ fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a Vec<String>) -> &'a 
     note
 }
 
-fn tuning_to_notes(tuning: &str) -> (Vec<String>, Vec<String>) {
+pub fn tuning_to_notes(tuning: &str) -> &'static str {
     let mut tunings = HashMap::<&str, &str>::new();
     tunings.insert("richter", "C E G C E G C E G C\nD G B D F A B D F A\n");
     tunings.insert("country", "C E G C E G C E G C\nD G B D F# A B D F A\n");
@@ -186,12 +186,17 @@ fn tuning_to_notes(tuning: &str) -> (Vec<String>, Vec<String>) {
     tunings.insert("4 hole richter", "C E G C\nD F A B");
 
     match tunings.get(tuning) {
-        Some(tuning) => harptool::str_to_notes_in_order(tuning),
+        Some(tuning) => tuning,
         None => {
             eprintln!("tuning not found: {}", tuning);
-            harptool::str_to_notes_in_order(tunings.get("richter").unwrap())
+            tunings.get("richter").unwrap()
         }
     }
+}
+
+fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
+    let notes = tuning_to_notes(tuning);
+    harptool::str_to_notes_in_order(notes)
 }
 
 pub fn transpose_tabs(
@@ -202,11 +207,11 @@ pub fn transpose_tabs(
     input_tuning: &str,
     output_tuning: &str,
 ) -> String {
-    let (input_notes, duplicated_notes) = tuning_to_notes(input_tuning);
+    let (input_notes, duplicated_notes) = tuning_to_notes_in_order(input_tuning);
     let input_notes = change_tab_style(&input_notes, style);
     let duplicated_notes = change_tab_style(&duplicated_notes, style);
 
-    let (output_notes, _) = tuning_to_notes(output_tuning);
+    let (output_notes, _) = tuning_to_notes_in_order(output_tuning);
     let output_notes = change_tab_style(&output_notes, style);
 
     let mut result = String::from("");
@@ -236,9 +241,116 @@ pub fn transpose_tabs(
     result
 }
 
+pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
+    let notes = tuning_to_notes(input_tuning);
+    let tuning = harptool::Tuning::from(notes);
+    let harplen = tuning.blow.len();
+
+    let mut blow: Vec<String> = Vec::new();
+    let mut draw: Vec<String> = Vec::new();
+    let mut blow_bends_1: Vec<String> = Vec::new();
+    let mut blow_bends_2: Vec<String> = Vec::new();
+    let mut draw_bends_1: Vec<String> = Vec::new();
+    let mut draw_bends_2: Vec<String> = Vec::new();
+    let mut draw_bends_3: Vec<String> = Vec::new();
+
+    for i in 0..harplen {
+        blow.push((i + 1).to_string());
+        blow_bends_1.push("".to_string());
+        blow_bends_2.push("".to_string());
+        draw_bends_1.push("".to_string());
+        draw_bends_2.push("".to_string());
+        draw_bends_3.push("".to_string());
+    }
+    for i in 0..harplen {
+        let i = ((i + 1) as i32) * -1;
+        draw.push((i).to_string());
+    }
+    for i in 0..harplen {
+        let mut note = (i + 1).to_string();
+        if tuning.blow_bends_half.get(i).unwrap().is_some() {
+            note.push('\'');
+            *blow_bends_1.get_mut(i).unwrap() = note;
+        } else if tuning.overblows.get(i).unwrap().is_some() {
+            note.push('o');
+            *blow_bends_1.get_mut(i).unwrap() = note;
+        }
+    }
+
+    for i in 0..harplen {
+        let mut note = (i + 1).to_string();
+        if tuning.blow_bends_full.get(i).unwrap().is_some() {
+            note.push_str("''");
+            *blow_bends_2.get_mut(i).unwrap() = note;
+        }
+    }
+
+    for i in 0..harplen {
+        let index = i as i32;
+        let mut note = ((index + 1) * -1).to_string();
+        if tuning.bends_half.get(i).unwrap().is_some() {
+            note.push('\'');
+            *draw_bends_1.get_mut(i).unwrap() = note;
+        } else if tuning.overdraws.get(i).unwrap().is_some() {
+            note.push('o');
+            *draw_bends_1.get_mut(i).unwrap() = note;
+        }
+    }
+
+    for i in 0..harplen {
+        let index = i as i32;
+        let mut note = ((index + 1) * -1).to_string();
+        if tuning.bends_full.get(i).unwrap().is_some() {
+            note.push_str("''");
+            *draw_bends_2.get_mut(i).unwrap() = note;
+        }
+    }
+
+    for i in 0..harplen {
+        let index = i as i32;
+        let mut note = ((index + 1) * -1).to_string();
+        if tuning.bends_one_and_half.get(i).unwrap().is_some() {
+            note.push_str("'''");
+            *draw_bends_3.get_mut(i).unwrap() = note;
+        }
+    }
+
+    vec![blow_bends_2, blow_bends_1, blow, draw, draw_bends_1, draw_bends_2, draw_bends_3]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_get_tabkeyboard_layout() {
+        let res = get_tabkeyboard_layout("richter");
+        let expected = vec![
+            vec!["", "", "", "", "", "", "", "", "", "10''"],
+            vec!["1o", "", "", "4o", "5o", "6o", "", "8'", "9'", "10'"],
+            vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+            vec!["-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10"],
+            vec!["-1'", "-2'", "-3'", "-4'", "", "-6'", "-7o", "", "-9o", "-10o"],
+            vec!["", "-2''", "-3''", "", "", "", "", "", "", ""],
+            vec!["", "", "-3'''", "", "", "", "", "", "", ""],
+        ];
+        assert_eq!(res, expected);
+
+        let res = get_tabkeyboard_layout("asdf");
+        assert_eq!(res, expected);
+
+        let res = get_tabkeyboard_layout("wilde tuning");
+        let expected = vec![
+            vec!["", "", "", "", "", "", "", "", "", ""],
+            vec!["1o", "", "", "4o", "", "", "", "8o", "9o", "10o"],
+            vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+            vec!["-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10"],
+            vec!["-1'", "-2'", "-3'", "-4'", "", "-6'", "-7'", "-8'", "-9'", "-10'"],
+            vec!["", "-2''", "-3''", "", "", "-6''", "-7''", "", "-9''", "-10''"],
+            vec!["", "", "-3'''", "", "", "", "-7'''", "", "", ""],
+        ];
+        assert_eq!(res, expected);
+    }
 
     #[test]
     fn test_transpose_tabs() {
