@@ -147,7 +147,7 @@ fn change_tab_style<T: AsRef<str>>(notes: &[T], style: Style) -> Vec<String> {
         .collect()
 }
 
-fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a Vec<String>) -> &'a str {
+fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a [String]) -> &'a str {
     let mut i = 0;
     while i < duplicated_notes.len() {
         if note == duplicated_notes.get(i).unwrap() {
@@ -263,7 +263,7 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
         draw_bends_3.push("".to_string());
     }
     for i in 0..harplen {
-        let i = ((i + 1) as i32) * -1;
+        let i = -((i + 1) as i32);
         draw.push((i).to_string());
     }
     for i in 0..harplen {
@@ -287,7 +287,7 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
 
     for i in 0..harplen {
         let index = i as i32;
-        let mut note = ((index + 1) * -1).to_string();
+        let mut note = (-(index + 1)).to_string();
         if tuning.bends_half.get(i).unwrap().is_some() {
             note.push('\'');
             *draw_bends_1.get_mut(i).unwrap() = note;
@@ -299,7 +299,7 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
 
     for i in 0..harplen {
         let index = i as i32;
-        let mut note = ((index + 1) * -1).to_string();
+        let mut note = (-(index + 1)).to_string();
         if tuning.bends_full.get(i).unwrap().is_some() {
             note.push_str("''");
             *draw_bends_2.get_mut(i).unwrap() = note;
@@ -308,7 +308,7 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
 
     for i in 0..harplen {
         let index = i as i32;
-        let mut note = ((index + 1) * -1).to_string();
+        let mut note = (-(index + 1)).to_string();
         if tuning.bends_one_and_half.get(i).unwrap().is_some() {
             note.push_str("'''");
             *draw_bends_3.get_mut(i).unwrap() = note;
