@@ -22,4 +22,11 @@ features = [
   'GainNode',
   'OscillatorNode',
   'OscillatorType',
+  'Document',
+  'Element',
+  'HtmlElement',
+  'Node',
+  'Window',
+  'Event',
+  'console',
 ]
