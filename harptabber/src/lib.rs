@@ -4,6 +4,8 @@ use std::fs;
 #[macro_use]
 extern crate lazy_static;
 
+pub mod audioplayback;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum Style {
     Default,

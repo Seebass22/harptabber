@@ -726,6 +726,8 @@ dependencies = [
  "harptool",
  "lazy_static",
  "regex",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]

@@ -12,6 +12,7 @@ pub struct GUIApp {
     input_tuning: String,
     output_tuning: String,
     keyboard_layout: Vec<Vec<String>>,
+    fmosc: harptabber::audioplayback::FmOsc,
 }
 
 impl Default for GUIApp {
@@ -27,8 +28,18 @@ impl Default for GUIApp {
             input_tuning: "richter".to_owned(),
             output_tuning: "richter".to_owned(),
             keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
+            fmosc: osc_init(),
         }
     }
+}
+
+fn osc_init() -> harptabber::audioplayback::FmOsc{
+    let fmosc = harptabber::audioplayback::FmOsc::new().unwrap();
+    // fmosc.set_note(50);
+    // fmosc.set_fm_frequency(0.0);
+    // fmosc.set_fm_amount(0.0);
+    // fmosc.set_gain(0.4);
+    fmosc
 }
 
 impl epi::App for GUIApp {
@@ -283,6 +294,11 @@ impl GUIApp {
                     .clicked()
                 {
                     self.input_text.push_str("\n");
+                    //sleep(Duration::from_millis(1000));
+                    self.fmosc.set_note(50);
+                    self.fmosc.set_fm_frequency(0.0);
+                    self.fmosc.set_fm_amount(0.0);
+                    self.fmosc.set_gain(0.4);
                 }
 
                 if ui

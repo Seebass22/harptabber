@@ -1,6 +1,10 @@
 WINDOWS = x86_64-pc-windows-gnu
 OUTDIR = builds
 
+test_web:
+	./build_web.sh
+	./start_server.sh
+
 build: windows linux web
 
 windows:

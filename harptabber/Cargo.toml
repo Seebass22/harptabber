@@ -10,3 +10,16 @@ clap = "2.33.3"
 regex = "1.5"
 lazy_static = "1.4.0"
 harptool = { git = "https://github.com/Seebass22/harptool", rev = "03dd6c3" }
+wasm-bindgen = "0.2.78"
+
+[dependencies.web-sys]
+version = "0.3.4"
+features = [
+  'AudioContext',
+  'AudioDestinationNode',
+  'AudioNode',
+  'AudioParam',
+  'GainNode',
+  'OscillatorNode',
+  'OscillatorType',
+]
