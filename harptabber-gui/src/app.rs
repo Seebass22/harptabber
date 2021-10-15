@@ -1,4 +1,6 @@
 use eframe::{egui, epi};
+use harptabber::animate::adsr_curve;
+use harptabber::audioplayback::FmOsc;
 use harptabber::Style;
 
 pub struct GUIApp {
@@ -33,13 +35,12 @@ impl Default for GUIApp {
     }
 }
 
-fn osc_init() -> harptabber::audioplayback::FmOsc{
-    let fmosc = harptabber::audioplayback::FmOsc::new().unwrap();
+fn osc_init() -> harptabber::audioplayback::FmOsc {
+    FmOsc::new().unwrap()
     // fmosc.set_note(50);
     // fmosc.set_fm_frequency(0.0);
     // fmosc.set_fm_amount(0.0);
     // fmosc.set_gain(0.4);
-    fmosc
 }
 
 impl epi::App for GUIApp {
@@ -294,11 +295,7 @@ impl GUIApp {
                     .clicked()
                 {
                     self.input_text.push_str("\n");
-                    //sleep(Duration::from_millis(1000));
-                    self.fmosc.set_note(50);
-                    self.fmosc.set_fm_frequency(0.0);
-                    self.fmosc.set_fm_amount(0.0);
-                    self.fmosc.set_gain(0.4);
+                    adsr_curve();
                 }
 
                 if ui
