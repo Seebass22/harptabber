@@ -1,7 +1,5 @@
 use wasm_bindgen::prelude::*;
 use web_sys::{AudioContext, OscillatorType};
-use std::thread::sleep;
-use std::time::Duration;
 
 /// Converts a midi note to frequency
 ///
@@ -138,20 +136,4 @@ impl FmOsc {
             .frequency()
             .set_value(self.fm_freq_ratio * self.primary.frequency().value());
     }
-
-//     #[wasm_bindgen]
-//     pub fn adsr_curve(&mut self, _a:u8, _d:u8, _s:u8, _r:u8) {
-//         let vol_max = 1.0;
-//        // let time_curve = vol_max / a as f32;
-//        // let adsr_time = a + d + r;
-//         let mut gain = 0.0;
-//         (0..10).into_iter().for_each(|i|{
-//             sleep(Duration::from_millis(10));
-//             gain += 0.1;
-//             self.set_gain(gain);
-//         });
-//         }
-    
 }
-
-    
