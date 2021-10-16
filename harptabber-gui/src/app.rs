@@ -1,5 +1,5 @@
 use eframe::{egui, epi};
-use harptabber::animate::adsr_curve;
+use harptabber::adsr::adsr_curve;
 use harptabber::audioplayback::FmOsc;
 use harptabber::Style;
 
@@ -295,7 +295,7 @@ impl GUIApp {
                     .clicked()
                 {
                     self.input_text.push_str("\n");
-                    adsr_curve();
+                    adsr_curve(50, 100, 30, 0.4, 60);
                 }
 
                 if ui
