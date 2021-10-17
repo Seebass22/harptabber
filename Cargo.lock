@@ -739,7 +739,6 @@ dependencies = [
 [[package]]
 name = "harptool"
 version = "0.1.0"
-source = "git+https://github.com/Seebass22/harptool?rev=e2462bc#e2462bc8955c9a9e588af94c9f7bc04bce015598"
 dependencies = [
  "clap",
  "colored",

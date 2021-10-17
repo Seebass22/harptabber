@@ -12,10 +12,16 @@ pub struct GUIApp {
     input_tuning: String,
     output_tuning: String,
     keyboard_layout: Vec<Vec<String>>,
+
+    should_display_notes: bool,
+    key: String,
+    notes_in_order: Vec<String>,
+    duplicated_notes: Vec<String>,
 }
 
 impl Default for GUIApp {
     fn default() -> Self {
+        let (notes, duplicated) = harptabber::tuning_to_notes_in_order("richter");
         Self {
             input_text: "".to_owned(),
             output_text: "".to_owned(),
@@ -27,6 +33,11 @@ impl Default for GUIApp {
             input_tuning: "richter".to_owned(),
             output_tuning: "richter".to_owned(),
             keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
+
+            should_display_notes: false,
+            key: "C".to_owned(),
+            notes_in_order: notes,
+            duplicated_notes: duplicated,
         }
     }
 }
@@ -247,6 +258,11 @@ impl GUIApp {
                     if is_input {
                         self.keyboard_layout = harptabber::get_tabkeyboard_layout(&tuning);
                         self.input_tuning = tuning;
+
+                        let (notes, duplicated) =
+                            harptabber::tuning_to_notes_in_order(&self.input_tuning);
+                        self.notes_in_order = notes;
+                        self.duplicated_notes = duplicated;
                     } else {
                         self.output_tuning = tuning;
                     }
@@ -291,12 +307,13 @@ impl GUIApp {
     fn tabkeyboard(&mut self, ui: &mut egui::Ui) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                ui.add_space(373.0);
+                ui.checkbox(&mut self.should_display_notes, "display as notes");
+                ui.add_space(258.0);
                 if ui
                     .add(egui::Button::new("return").text_style(egui::TextStyle::Monospace))
                     .clicked()
                 {
-                    self.input_text.push_str("\n");
+                    self.input_text.push('\n');
                 }
 
                 if ui
@@ -318,16 +335,29 @@ impl GUIApp {
             for (i, row) in rows.iter().enumerate() {
                 ui.horizontal(|ui| {
                     for hole in row {
-                        if *hole == "" {
+                        if hole.is_empty() {
                             ui.add(
                                 egui::Button::new("     ")
                                     .text_style(egui::TextStyle::Monospace)
                                     .enabled(false),
                             );
                         } else {
+                            let display_note;
+                            if self.should_display_notes {
+                                display_note = harptabber::tab_to_note(
+                                    hole,
+                                    &self.key,
+                                    &self.notes_in_order,
+                                    &self.duplicated_notes,
+                                );
+                            } else {
+                                display_note =
+                                    harptabber::change_tab_style_single(hole, self.style);
+                            }
+
                             let hole = harptabber::change_tab_style_single(hole, self.style);
 
-                            let text = format!("{:width$}", hole, width = 5);
+                            let text = format!("{:width$}", &display_note, width = 5);
                             if ui
                                 .add(
                                     egui::Button::new(text.as_str())
@@ -336,7 +366,7 @@ impl GUIApp {
                                 .clicked()
                             {
                                 self.input_text.push_str(hole.as_str());
-                                self.input_text.push_str(" ");
+                                self.input_text.push(' ');
                                 self.transpose();
                             }
                         }

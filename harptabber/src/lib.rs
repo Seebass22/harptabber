@@ -199,7 +199,25 @@ pub fn tuning_to_notes(tuning: &str) -> &'static str {
     }
 }
 
-fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
+pub fn tab_to_note(
+    tab: &str,
+    key: &str,
+    notes_in_order: &[String],
+    duplicated_notes: &[String],
+) -> String {
+    let scale = harptool::ChromaticScale::new(key, None);
+    let tab = fix_enharmonics(tab, duplicated_notes);
+
+    if let Some(index) = notes_in_order.iter().position(|t| t == tab) {
+        let index = index.rem_euclid(12);
+        let res = scale.notes.get(index).unwrap();
+        String::from(res)
+    } else {
+        String::from("X")
+    }
+}
+
+pub fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
     let notes = tuning_to_notes(tuning);
     harptool::str_to_notes_in_order(notes)
 }
