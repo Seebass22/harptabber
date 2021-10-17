@@ -186,6 +186,7 @@ pub fn tuning_to_notes(tuning: &str) -> &'static str {
     tunings.insert("pentaharp", "A D E A D E A D E A\nC Eb G C Eb G C Eb G C");
     tunings.insert("powerdraw", "C E G C E G A C E A\nD G B D F A B D G C");
     tunings.insert("powerbender", "C E G C D F A C E A\nD G B D E G B D G C");
+    tunings.insert("lucky 13 powerchromatic", "C D F A C D F A C D F A C\nD E G B D E G B D E G B D");
     tunings.insert("easy 3rd", "C E G C E G C E G C\nD F A D F A B D F A");
     tunings.insert("4 hole richter", "C E G C\nD F A B");
     tunings.insert("5 hole richter", "C E G C E\nD F A B D");

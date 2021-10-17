@@ -199,74 +199,42 @@ impl GUIApp {
             .selected_text(&mut tuning)
             .width(150.0)
             .show_ui(ui, |ui| {
-                if ui
-                    .selectable_value(&mut tuning, "richter".to_string(), "richter")
-                    .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "paddy richter".to_string(), "paddy richter")
-                        .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "natural minor".to_string(), "natural minor")
-                        .changed()
-                    || ui
-                        .selectable_value(
-                            &mut tuning,
-                            "harmonic minor".to_string(),
-                            "harmonic minor",
-                        )
-                        .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "wilde tuning".to_string(), "wilde tuning")
-                        .changed()
-                    || ui
-                        .selectable_value(
-                            &mut tuning,
-                            "wilde minor tuning".to_string(),
-                            "wilde minor tuning",
-                        )
-                        .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "pentaharp".to_string(), "pentaharp")
-                        .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "powerbender".to_string(), "powerbender")
-                        .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "powerdraw".to_string(), "powerdraw")
-                        .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "melody maker".to_string(), "melody maker")
-                        .changed()
-                    || ui
-                        .selectable_value(&mut tuning, "easy 3rd".to_string(), "easy 3rd")
-                        .changed()
-                    || ui
-                        .selectable_value(
-                            &mut tuning,
-                            "4 hole richter".to_string(),
-                            "4 hole richter",
-                        )
-                        .changed()
-                    || ui
-                        .selectable_value(
-                            &mut tuning,
-                            "5 hole richter".to_string(),
-                            "5 hole richter",
-                        )
-                        .changed()
+                for tuning_text in [
+                    "richter",
+                    "paddy richter",
+                    "country",
+                    "natural minor",
+                    "harmonic minor",
+                    "wilde tuning",
+                    "wilde minor tuning",
+                    "pentaharp",
+                    "powerbender",
+                    "powerdraw",
+                    "lucky 13 powerchromatic",
+                    "melody maker",
+                    "easy 3rd",
+                    "4 hole richter",
+                    "5 hole richter",
+                ]
+                .iter()
                 {
-                    if is_input {
-                        self.keyboard_layout = harptabber::get_tabkeyboard_layout(&tuning);
-                        self.input_tuning = tuning;
+                    if ui
+                        .selectable_value(&mut tuning, tuning_text.to_string(), tuning_text)
+                        .changed()
+                    {
+                        if is_input {
+                            self.keyboard_layout = harptabber::get_tabkeyboard_layout(&tuning);
+                            self.input_tuning = tuning.clone();
 
-                        let (notes, duplicated) =
-                            harptabber::tuning_to_notes_in_order(&self.input_tuning);
-                        self.notes_in_order = notes;
-                        self.duplicated_notes = duplicated;
-                    } else {
-                        self.output_tuning = tuning;
+                            let (notes, duplicated) =
+                                harptabber::tuning_to_notes_in_order(&self.input_tuning);
+                            self.notes_in_order = notes;
+                            self.duplicated_notes = duplicated;
+                        } else {
+                            self.output_tuning = tuning.clone();
+                        }
+                        self.transpose();
                     }
-                    self.transpose();
                 }
             });
     }
@@ -313,7 +281,11 @@ impl GUIApp {
                         .selected_text(&mut self.key)
                         .width(60.0)
                         .show_ui(ui, |ui| {
-                            for note in ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"].iter() {
+                            for note in [
+                                "C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B",
+                            ]
+                            .iter()
+                            {
                                 ui.selectable_value(&mut self.key, note.to_string(), note);
                             }
                         });
@@ -332,12 +304,7 @@ impl GUIApp {
                     .add(egui::Button::new("backspace").text_style(egui::TextStyle::Monospace))
                     .clicked()
                 {
-                    self.input_text.pop();
-                    let mut last = self.input_text.chars().last();
-                    while last.is_some() && last.unwrap() != ' ' {
-                        self.input_text.pop();
-                        last = self.input_text.chars().last();
-                    }
+                    self.backspace();
                     self.transpose();
                 }
             });
@@ -398,5 +365,14 @@ impl GUIApp {
                 }
             }
         });
+    }
+
+    fn backspace(&mut self) {
+        self.input_text.pop();
+        let mut last = self.input_text.chars().last();
+        while last.is_some() && last.unwrap() != ' ' {
+            self.input_text.pop();
+            last = self.input_text.chars().last();
+        }
     }
 }
