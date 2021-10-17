@@ -245,30 +245,35 @@ impl GUIApp {
             .clicked()
         {
             self.style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
+            self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::BBends, "b-bends")
             .clicked()
         {
             self.style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
+            self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::DrawDefault, "draw-default")
             .clicked()
         {
             self.style_example = String::from("2 2'' 3 +4 4 +5 +5o +6");
+            self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::Plus, "plus/minus")
             .clicked()
         {
             self.style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
+            self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::Harpsurgery, "harpsurgery")
             .clicked()
         {
             self.style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+            self.transpose();
         }
     }
 
