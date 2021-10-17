@@ -208,6 +208,13 @@ impl GUIApp {
                         .selectable_value(&mut tuning, "wilde tuning".to_string(), "wilde tuning")
                         .changed()
                     || ui
+                        .selectable_value(
+                            &mut tuning,
+                            "wilde minor tuning".to_string(),
+                            "wilde minor tuning",
+                        )
+                        .changed()
+                    || ui
                         .selectable_value(&mut tuning, "pentaharp".to_string(), "pentaharp")
                         .changed()
                     || ui
@@ -227,6 +234,13 @@ impl GUIApp {
                             &mut tuning,
                             "4 hole richter".to_string(),
                             "4 hole richter",
+                        )
+                        .changed()
+                    || ui
+                        .selectable_value(
+                            &mut tuning,
+                            "5 hole richter".to_string(),
+                            "5 hole richter",
                         )
                         .changed()
                 {

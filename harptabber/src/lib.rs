@@ -164,6 +164,10 @@ pub fn tuning_to_notes(tuning: &str) -> &'static str {
     tunings.insert("country", "C E G C E G C E G C\nD G B D F# A B D F A\n");
     tunings.insert("wilde tuning", "C E G C E E G C E A\nD G B D F G B D G C\n");
     tunings.insert(
+        "wilde minor tuning",
+        "C Eb G C Eb Eb G C Eb A\nD G Bb D F G Bb D G C\n",
+    );
+    tunings.insert(
         "melody maker",
         "C E A C E G C E G C\nD G B D F# A B D F# A\n",
     );
@@ -184,6 +188,7 @@ pub fn tuning_to_notes(tuning: &str) -> &'static str {
     tunings.insert("powerbender", "C E G C D F A C E A\nD G B D E G B D G C");
     tunings.insert("easy 3rd", "C E G C E G C E G C\nD F A D F A B D F A");
     tunings.insert("4 hole richter", "C E G C\nD F A B");
+    tunings.insert("5 hole richter", "C E G C E\nD F A B D");
 
     match tunings.get(tuning) {
         Some(tuning) => tuning,
@@ -315,7 +320,15 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
         }
     }
 
-    vec![blow_bends_2, blow_bends_1, blow, draw, draw_bends_1, draw_bends_2, draw_bends_3]
+    vec![
+        blow_bends_2,
+        blow_bends_1,
+        blow,
+        draw,
+        draw_bends_1,
+        draw_bends_2,
+        draw_bends_3,
+    ]
 }
 
 #[cfg(test)]
@@ -330,7 +343,9 @@ mod tests {
             vec!["1o", "", "", "4o", "5o", "6o", "", "8'", "9'", "10'"],
             vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
             vec!["-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10"],
-            vec!["-1'", "-2'", "-3'", "-4'", "", "-6'", "-7o", "", "-9o", "-10o"],
+            vec![
+                "-1'", "-2'", "-3'", "-4'", "", "-6'", "-7o", "", "-9o", "-10o",
+            ],
             vec!["", "-2''", "-3''", "", "", "", "", "", "", ""],
             vec!["", "", "-3'''", "", "", "", "", "", "", ""],
         ];
@@ -345,8 +360,12 @@ mod tests {
             vec!["1o", "", "", "4o", "", "", "", "8o", "9o", "10o"],
             vec!["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
             vec!["-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10"],
-            vec!["-1'", "-2'", "-3'", "-4'", "", "-6'", "-7'", "-8'", "-9'", "-10'"],
-            vec!["", "-2''", "-3''", "", "", "-6''", "-7''", "", "-9''", "-10''"],
+            vec![
+                "-1'", "-2'", "-3'", "-4'", "", "-6'", "-7'", "-8'", "-9'", "-10'",
+            ],
+            vec![
+                "", "-2''", "-3''", "", "", "-6''", "-7''", "", "-9''", "-10''",
+            ],
             vec!["", "", "-3'''", "", "", "", "-7'''", "", "", ""],
         ];
         assert_eq!(res, expected);
