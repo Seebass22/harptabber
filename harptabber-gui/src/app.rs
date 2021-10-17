@@ -308,7 +308,19 @@ impl GUIApp {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
                 ui.checkbox(&mut self.should_display_notes, "display as notes");
-                ui.add_space(258.0);
+                if self.should_display_notes {
+                    egui::ComboBox::from_label("key")
+                        .selected_text(&mut self.key)
+                        .width(60.0)
+                        .show_ui(ui, |ui| {
+                            for note in ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"].iter() {
+                                ui.selectable_value(&mut self.key, note.to_string(), note);
+                            }
+                        });
+                    ui.add_space(155.0);
+                } else {
+                    ui.add_space(258.0);
+                }
                 if ui
                     .add(egui::Button::new("return").text_style(egui::TextStyle::Monospace))
                     .clicked()
