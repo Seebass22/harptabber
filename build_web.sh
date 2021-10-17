@@ -29,13 +29,13 @@ wasm-bindgen "target/wasm32-unknown-unknown/${BUILD}/${TARGET_NAME}" \
 
 echo "Finished: docs/${CRATE_NAME_SNAKE_CASE}.wasm"
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  # Linux, ex: Fedora
-  xdg-open http://localhost:8080/index.html
-elif [[ "$OSTYPE" == "msys" ]]; then
-  # Windows
-  start http://localhost:8080/index.html
-else
-  # Darwin/MacOS, or something else
-  open http://localhost:8080/index.html
-fi
+# if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+#   # Linux, ex: Fedora
+#   xdg-open http://localhost:8080/index.html
+# elif [[ "$OSTYPE" == "msys" ]]; then
+#   # Windows
+#   start http://localhost:8080/index.html
+# else
+#   # Darwin/MacOS, or something else
+#   open http://localhost:8080/index.html
+# fi
