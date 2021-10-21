@@ -60,6 +60,28 @@ impl epi::App for GUIApp {
                         frame.quit();
                     }
                 });
+                egui::menu::menu(ui, "Help", |ui| {
+                    ui.label("- do not use double quotes");
+                    ui.label("(use single quotes for");
+                    ui.label("bends)");
+                    ui.add_space(10.0);
+                    ui.label("- if a note is too high");
+                    ui.label("or low to be played, or");
+                    ui.label("would require bending");
+                    ui.label("an overblow, it will");
+                    ui.label("appear as X");
+                    ui.add_space(10.0);
+                    ui.label("- don't forget to set the");
+                    ui.label("tab style to the one you");
+                    ui.label("use, so the tab can be");
+                    ui.label("interpreted correctly");
+                    ui.add_space(10.0);
+                    ui.label("- everything other a valid");
+                    ui.label("note is ignored");
+                    ui.add_space(10.0);
+                    ui.label("- the tab keyboard can");
+                    ui.label("only append to the tab");
+                });
                 egui::menu::menu(ui, "About", |ui| {
                     ui.label("harptabber-gui");
                     ui.add_space(10.0);
