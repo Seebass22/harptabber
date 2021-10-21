@@ -61,9 +61,18 @@ impl epi::App for GUIApp {
                     }
                 });
                 egui::menu::menu(ui, "About", |ui| {
+                    ui.label("harptabber-gui");
+                    ui.add_space(10.0);
+                    ui.label("Copyright © 2021");
+                    ui.label("Sebastian Thuemmel");
+                    ui.add_space(10.0);
                     ui.add(
                         egui::Hyperlink::new("https://github.com/Seebass22/harptabber")
-                            .text("Source code"),
+                            .text("source code"),
+                    );
+                    ui.add(
+                        egui::Hyperlink::new("https://seebass22.itch.io/harmonica-tab-transposer")
+                            .text("web version & downloads"),
                     );
                 });
             });
