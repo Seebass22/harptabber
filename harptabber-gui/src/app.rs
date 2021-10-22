@@ -355,6 +355,7 @@ impl GUIApp {
                                 false,
                                 egui::Button::new("     ")
                                     .text_style(egui::TextStyle::Monospace)
+                                    .fill(egui::color::Color32::TRANSPARENT),
                             );
                         } else {
                             let display_note;
@@ -394,7 +395,7 @@ impl GUIApp {
                             ui.add_enabled(
                                 false,
                                 egui::Button::new(text.as_str())
-                                    .text_style(egui::TextStyle::Monospace)
+                                    .text_style(egui::TextStyle::Monospace),
                             );
                         }
                     });
