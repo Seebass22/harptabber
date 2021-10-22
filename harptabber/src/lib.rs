@@ -87,7 +87,7 @@ pub fn run(options: RunOptions) {
         semitones = positions_to_semitones(from_position, 1, octave_shift);
     }
 
-    let tabs = transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
+    let (tabs, _) = transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
     print!("{}", tabs);
 }
 
@@ -186,7 +186,10 @@ pub fn tuning_to_notes(tuning: &str) -> &'static str {
     tunings.insert("pentaharp", "A D E A D E A D E A\nC Eb G C Eb G C Eb G C");
     tunings.insert("powerdraw", "C E G C E G A C E A\nD G B D F A B D G C");
     tunings.insert("powerbender", "C E G C D F A C E A\nD G B D E G B D G C");
-    tunings.insert("lucky 13 powerchromatic", "C D F A C D F A C D F A C\nD E G B D E G B D E G B D");
+    tunings.insert(
+        "lucky 13 powerchromatic",
+        "C D F A C D F A C D F A C\nD E G B D E G B D E G B D",
+    );
     tunings.insert("easy 3rd", "C E G C E G C E G C\nD F A D F A B D F A");
     tunings.insert("4 hole richter", "C E G C\nD F A B");
     tunings.insert("5 hole richter", "C E G C E\nD F A B D");
@@ -230,7 +233,7 @@ pub fn transpose_tabs(
     style: Style,
     input_tuning: &str,
     output_tuning: &str,
-) -> String {
+) -> (String, Vec<String>) {
     let (input_notes, duplicated_notes) = tuning_to_notes_in_order(input_tuning);
     let input_notes = change_tab_style(&input_notes, style);
     let duplicated_notes = change_tab_style(&duplicated_notes, style);
@@ -239,6 +242,7 @@ pub fn transpose_tabs(
     let output_notes = change_tab_style(&output_notes, style);
 
     let mut result = String::from("");
+    let mut errors: Vec<String> = Vec::new();
 
     for line in tab.lines() {
         let line: Vec<&str> = line.split_whitespace().collect();
@@ -253,6 +257,7 @@ pub fn transpose_tabs(
                     result.push(' ');
                 }
                 Err(s) => {
+                    errors.push(note.to_string());
                     if !no_error {
                         eprintln!("{}", s);
                         std::process::exit(-1);
@@ -262,7 +267,7 @@ pub fn transpose_tabs(
         }
         result.push('\n');
     }
-    result
+    (result, errors)
 }
 
 pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
@@ -395,11 +400,11 @@ mod tests {
         let tab = String::from("-2 -3'' -3 4 -4 5 5o 6");
 
         // down 5th (G -> C)
-        let res = transpose_tabs(tab.clone(), -7, true, Style::Default, "richter", "richter");
+        let (res, _) = transpose_tabs(tab.clone(), -7, true, Style::Default, "richter", "richter");
         assert_eq!(res.as_str(), "1 -1 2 -2'' -2 -3'' -3 4 \n");
 
         // down 5th, up octave (G -> C)
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             tab.clone(),
             -7 + 12,
             true,
@@ -410,11 +415,11 @@ mod tests {
         assert_eq!(res.as_str(), "4 -4 5 -5 6 -6 -7 7 \n");
 
         // up 5th, down octave (G -> D)
-        let res = transpose_tabs(tab, 7 - 12, true, Style::Default, "richter", "richter");
+        let (res, _) = transpose_tabs(tab, 7 - 12, true, Style::Default, "richter", "richter");
         assert_eq!(res.as_str(), "-1 2 -2' -2 -3'' -3 -4' -4 \n");
 
         // test enharmonics
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             "3B".to_string(),
             12,
             true,
@@ -427,7 +432,7 @@ mod tests {
 
     #[test]
     fn test_transpose_tabs_different_tunings() {
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             "-2 -3' 4 -4' -4 -5 6".to_string(),
             0,
             true,
@@ -437,7 +442,7 @@ mod tests {
         );
         assert_eq!(res.as_str(), "-2 -3' 4 -4' -4 -5 -6 \n");
 
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             "-2 -3' 4 -4' -4 -5 6".to_string(),
             12,
             true,
@@ -447,7 +452,7 @@ mod tests {
         );
         assert_eq!(res.as_str(), "-6 -7' 8 -8' -8 -9'' -9 \n");
 
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             "-3'' -3 4 -4 5 -5 6 -6".to_string(),
             -2,
             true,
@@ -461,7 +466,7 @@ mod tests {
     #[test]
     fn test_easy_3rd_tuning() {
         let input = "-3'' -3 4 -4 5 -5 6 -6";
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             input.to_string(),
             5,
             true,
@@ -472,7 +477,7 @@ mod tests {
         assert_eq!(res.as_str(), "-4 5 -5 6 -6 6o 7 -8 \n");
 
         let input = "-3'' -3 4 -4 5 -5 6 -6";
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             input.to_string(),
             -7,
             true,
@@ -483,7 +488,7 @@ mod tests {
         assert_eq!(res.as_str(), "-1 2 -2 3 -3 3o 4 -4 \n");
 
         let input = "1 -1 2 -2'' -2 -3'' -3 4";
-        let res = transpose_tabs(
+        let (res, _) = transpose_tabs(
             input.to_string(),
             0,
             true,

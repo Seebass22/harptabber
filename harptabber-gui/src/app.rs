@@ -17,6 +17,8 @@ pub struct GUIApp {
     key: String,
     notes_in_order: Vec<String>,
     duplicated_notes: Vec<String>,
+
+    error_text: String,
 }
 
 impl Default for GUIApp {
@@ -38,6 +40,8 @@ impl Default for GUIApp {
             key: "C".to_owned(),
             notes_in_order: notes,
             duplicated_notes: duplicated,
+
+            error_text: "".to_owned(),
         }
     }
 }
@@ -113,6 +117,16 @@ impl epi::App for GUIApp {
                 ui.heading("output");
                 ui.add(egui::TextEdit::multiline(&mut self.output_text).desired_width(300.0));
                 egui::warn_if_debug_build(ui);
+
+                if !self.error_text.is_empty() {
+                    ui.add_space(20.0);
+
+                    ui.label("invalid notes");
+                    ui.add_enabled(
+                        false,
+                        egui::TextEdit::multiline(&mut self.error_text).desired_width(300.0),
+                    );
+                }
             });
         });
     }
@@ -120,7 +134,7 @@ impl epi::App for GUIApp {
 
 impl GUIApp {
     fn transpose(&mut self) {
-        self.output_text = harptabber::transpose_tabs(
+        let (tabs, errors) = harptabber::transpose_tabs(
             self.input_text.clone(),
             self.semitone_shift,
             true,
@@ -128,6 +142,8 @@ impl GUIApp {
             &self.input_tuning,
             &self.output_tuning,
         );
+        self.output_text = tabs;
+        self.error_text = errors.join(" ");
     }
 
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
