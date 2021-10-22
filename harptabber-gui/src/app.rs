@@ -205,7 +205,7 @@ impl GUIApp {
             ui.add(
                 egui::TextEdit::singleline(&mut self.style_example)
                     .desired_width(350.0)
-                    .enabled(false),
+                    .interactive(false),
             );
         });
 
@@ -351,10 +351,10 @@ impl GUIApp {
                 ui.horizontal(|ui| {
                     for hole in row {
                         if hole.is_empty() {
-                            ui.add(
+                            ui.add_enabled(
+                                false,
                                 egui::Button::new("     ")
                                     .text_style(egui::TextStyle::Monospace)
-                                    .enabled(false),
                             );
                         } else {
                             let display_note;
@@ -391,10 +391,10 @@ impl GUIApp {
                     ui.horizontal(|ui| {
                         for hole in row {
                             let text = format!("{:width$}", hole, width = 5);
-                            ui.add(
+                            ui.add_enabled(
+                                false,
                                 egui::Button::new(text.as_str())
                                     .text_style(egui::TextStyle::Monospace)
-                                    .enabled(false),
                             );
                         }
                     });

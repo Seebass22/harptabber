@@ -504,9 +504,10 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 [[package]]
 name = "eframe"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 dependencies = [
  "egui",
+ "egui-winit",
  "egui_glium",
  "egui_web",
  "epi",
@@ -515,15 +516,17 @@ dependencies = [
 [[package]]
 name = "egui"
 version = "0.14.2"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 dependencies = [
+ "ahash",
  "epaint",
+ "nohash-hasher",
 ]
 
 [[package]]
 name = "egui-winit"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 dependencies = [
  "copypasta",
  "egui",
@@ -535,7 +538,7 @@ dependencies = [
 [[package]]
 name = "egui_glium"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 dependencies = [
  "egui",
  "egui-winit",
@@ -546,7 +549,7 @@ dependencies = [
 [[package]]
 name = "egui_web"
 version = "0.14.1"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 dependencies = [
  "egui",
  "epi",
@@ -559,12 +562,12 @@ dependencies = [
 [[package]]
 name = "emath"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 
 [[package]]
 name = "epaint"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -576,7 +579,7 @@ dependencies = [
 [[package]]
 name = "epi"
 version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=5539dbe#5539dbe620f3a184490010a706104de36ba80c3e"
+source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
 dependencies = [
  "egui",
 ]
