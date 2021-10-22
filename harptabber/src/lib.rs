@@ -92,6 +92,9 @@ pub fn run(options: RunOptions) {
 }
 
 fn convert_to_plus_style(note: &str) -> String {
+    if note == "X" {
+        return String::from("X");
+    }
     match note.chars().next().unwrap() {
         '-' => note.to_string(),
         _ => {
@@ -103,6 +106,9 @@ fn convert_to_plus_style(note: &str) -> String {
 }
 
 fn convert_to_draw_style(note: &str) -> String {
+    if note == "X" {
+        return String::from("X");
+    }
     match note.chars().next().unwrap() {
         '-' => note[1..].to_string(),
         _ => {
@@ -118,16 +124,17 @@ fn convert_to_harpsurgery_style(note: &str) -> String {
         static ref RE: Regex = Regex::new(r"(?P<dir>-?)(?P<note>\d{1,2})(?P<rest>.*)").unwrap();
     }
 
-    let caps = RE.captures(note).unwrap();
-
-    let dir = if &caps["dir"] == "-" { "D" } else { "B" };
-    let rest = if &caps["rest"] == "o" {
-        "#"
+    if let Some(caps) = RE.captures(note) {
+        let dir = if &caps["dir"] == "-" { "D" } else { "B" };
+        let rest = if &caps["rest"] == "o" {
+            "#"
+        } else {
+            &caps["rest"]
+        };
+        format!("{}{}{}", &caps["note"], dir, rest)
     } else {
-        &caps["rest"]
-    };
-
-    format!("{}{}{}", &caps["note"], dir, rest)
+        String::from("X")
+    }
 }
 
 pub fn change_tab_style_single(note: &str, style: Style) -> String {
