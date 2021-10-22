@@ -197,6 +197,11 @@ impl GUIApp {
 
         ui.add_space(20.0);
 
+        self.tuning_selector(ui, true);
+        self.tuning_selector(ui, false);
+
+        ui.add_space(20.0);
+
         ui.vertical(|ui| {
             ui.label("tab style");
             ui.horizontal(|ui| {
@@ -208,11 +213,6 @@ impl GUIApp {
                     .interactive(false),
             );
         });
-
-        ui.add_space(20.0);
-
-        self.tuning_selector(ui, true);
-        self.tuning_selector(ui, false);
     }
 
     fn tuning_selector(&mut self, ui: &mut egui::Ui, is_input: bool) {
