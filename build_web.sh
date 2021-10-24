@@ -28,14 +28,3 @@ wasm-bindgen "target/wasm32-unknown-unknown/${BUILD}/${TARGET_NAME}" \
 # wasm-opt docs/${CRATE_NAME_SNAKE_CASE}_bg.wasm -O2 --fast-math -o docs/${CRATE_NAME_SNAKE_CASE}_bg.wasm # add -g to get debug symbols
 
 echo "Finished: docs/${CRATE_NAME_SNAKE_CASE}.wasm"
-
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  # Linux, ex: Fedora
-  xdg-open http://localhost:8080/index.html
-elif [[ "$OSTYPE" == "msys" ]]; then
-  # Windows
-  start http://localhost:8080/index.html
-else
-  # Darwin/MacOS, or something else
-  open http://localhost:8080/index.html
-fi
