@@ -19,6 +19,8 @@ pub struct GUIApp {
     duplicated_notes: Vec<String>,
 
     error_text: String,
+    about_open: bool,
+    help_open: bool,
 }
 
 impl Default for GUIApp {
@@ -42,6 +44,8 @@ impl Default for GUIApp {
             duplicated_notes: duplicated,
 
             error_text: "".to_owned(),
+            about_open: false,
+            help_open: false,
         }
     }
 }
@@ -59,48 +63,20 @@ impl epi::App for GUIApp {
                 if let Some(visuals) = new_visuals {
                     ui.ctx().set_visuals(visuals);
                 }
+
                 egui::menu::menu(ui, "File", |ui| {
                     if ui.button("Quit").clicked() {
                         frame.quit();
                     }
                 });
-                egui::menu::menu(ui, "Help", |ui| {
-                    ui.label("- do not use double quotes");
-                    ui.label("(use single quotes for");
-                    ui.label("bends)");
-                    ui.add_space(10.0);
-                    ui.label("- if a note is too high");
-                    ui.label("or low to be played, or");
-                    ui.label("would require bending");
-                    ui.label("an overblow, it will");
-                    ui.label("appear as X");
-                    ui.add_space(10.0);
-                    ui.label("- don't forget to set the");
-                    ui.label("tab style to the one you");
-                    ui.label("use, so the tab can be");
-                    ui.label("interpreted correctly");
-                    ui.add_space(10.0);
-                    ui.label("- everything other a valid");
-                    ui.label("note is ignored");
-                    ui.add_space(10.0);
-                    ui.label("- the tab keyboard can");
-                    ui.label("only append to the tab");
-                });
-                egui::menu::menu(ui, "About", |ui| {
-                    ui.label("harptabber-gui");
-                    ui.add_space(10.0);
-                    ui.label("Copyright © 2021");
-                    ui.label("Sebastian Thuemmel");
-                    ui.add_space(10.0);
-                    ui.add(
-                        egui::Hyperlink::new("https://github.com/Seebass22/harptabber")
-                            .text("source code"),
-                    );
-                    ui.add(
-                        egui::Hyperlink::new("https://seebass22.itch.io/harmonica-tab-transposer")
-                            .text("web version & downloads"),
-                    );
-                });
+
+                if ui.button("Help").clicked() {
+                    self.help_open = true;
+                }
+
+                if ui.button("About").clicked() {
+                    self.about_open = true;
+                }
             });
         });
 
@@ -129,6 +105,9 @@ impl epi::App for GUIApp {
                 }
             });
         });
+
+        self.help_window(&ctx);
+        self.about_window(&ctx);
     }
 }
 
@@ -427,5 +406,49 @@ impl GUIApp {
             self.input_text.pop();
             last = self.input_text.chars().last();
         }
+    }
+
+    fn help_window(&mut self, ctx: &egui::CtxRef) {
+        egui::Window::new("Help")
+            .collapsible(false)
+            .resizable(false)
+            .open(&mut self.help_open)
+            .show(ctx, |ui| {
+                ui.label("- if a note is too high or low to be played, or would");
+                ui.label("  require bending an overblow, it will appear as X");
+                ui.add_space(10.0);
+                ui.label("- don't use double quotes (use single quotes for bends)");
+                ui.add_space(10.0);
+                ui.label("- don't forget spaces between notes");
+                ui.add_space(10.0);
+                ui.label("- set the tab style to the one you use, so the tab can");
+                ui.label("  be interpreted correctly");
+                ui.add_space(10.0);
+                ui.label("- everything other a valid note is ignored");
+                ui.add_space(10.0);
+                ui.label("- the tab keyboard can only append to the tab");
+            });
+    }
+
+    fn about_window(&mut self, ctx: &egui::CtxRef) {
+        egui::Window::new("About")
+            .collapsible(false)
+            .resizable(false)
+            .open(&mut self.about_open)
+            .show(ctx, |ui| {
+                ui.label("harptabber-gui");
+                ui.add_space(10.0);
+                ui.label("Copyright © 2021");
+                ui.label("Sebastian Thuemmel");
+                ui.add_space(10.0);
+                ui.add(
+                    egui::Hyperlink::new("https://github.com/Seebass22/harptabber")
+                        .text("source code"),
+                );
+                ui.add(
+                    egui::Hyperlink::new("https://seebass22.itch.io/harmonica-tab-transposer")
+                        .text("web version & downloads"),
+                );
+            });
     }
 }
