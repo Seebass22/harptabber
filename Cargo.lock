@@ -503,8 +503,9 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "eframe"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a084390b90aa223d5fb6ee3d2ac3a2ded0df212f684f91fbb5f0f45ab9e0724"
 dependencies = [
  "egui",
  "egui-winit",
@@ -515,8 +516,9 @@ dependencies = [
 
 [[package]]
 name = "egui"
-version = "0.14.2"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c8d416a3343cbfc6f4d17bb1cba46b4d7efecb9ee541967763e0b5e04e5fae7"
 dependencies = [
  "ahash",
  "epaint",
@@ -525,8 +527,9 @@ dependencies = [
 
 [[package]]
 name = "egui-winit"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc403e91d1bd693239f1c734193cdf0eb38c8682bbfb9990c4b6cd2db5ee368e"
 dependencies = [
  "copypasta",
  "egui",
@@ -537,8 +540,9 @@ dependencies = [
 
 [[package]]
 name = "egui_glium"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26478ec89b8c9c41a45687a90f9c8fc18106e3ffd8a08559285d625185a2ac92"
 dependencies = [
  "egui",
  "egui-winit",
@@ -548,8 +552,9 @@ dependencies = [
 
 [[package]]
 name = "egui_web"
-version = "0.14.1"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "43f2af8984a1c9ecaaaf7f11424c78185c89b5cfe8dab3bd0fac641db81c5763"
 dependencies = [
  "egui",
  "epi",
@@ -561,13 +566,15 @@ dependencies = [
 
 [[package]]
 name = "emath"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "24a1aaa922d55da6a2bf32957c3d153e7fb9d52ed8d69777a75092240172eb6e"
 
 [[package]]
 name = "epaint"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "16bb4d3b8bbbd132c99d2a5efec8567e8b6d09b742f758ae6cf1e4b104fe0231"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -578,8 +585,9 @@ dependencies = [
 
 [[package]]
 name = "epi"
-version = "0.14.0"
-source = "git+https://github.com/emilk/egui?rev=19766bf#19766bfe4cd756e27c07e338075493a2a22f5131"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f5e4e08127f9b86e2c450c96a3032764b63546eb170c2fc54684dc70ff3fc82"
 dependencies = [
  "egui",
 ]
