@@ -135,6 +135,7 @@ impl GUIApp {
             self.transpose();
         };
 
+        ui.spacing_mut().slider_width = 150.0;
         if ui
             .add(egui::Slider::new(&mut self.semitone_shift, -24..=24).text("semitone shift"))
             .changed()
