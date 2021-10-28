@@ -425,7 +425,7 @@ impl GUIApp {
                 ui.label("- set the tab style to the one you use, so the tab can");
                 ui.label("  be interpreted correctly");
                 ui.add_space(10.0);
-                ui.label("- everything other a valid note is ignored");
+                ui.label("- everything other than a valid note is ignored");
                 ui.add_space(10.0);
                 ui.label("- the tab keyboard can only append to the tab");
             });
