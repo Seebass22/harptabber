@@ -17,6 +17,9 @@ pub struct GUIApp {
     key: String,
     notes_in_order: Vec<String>,
     duplicated_notes: Vec<String>,
+    playable_without_overblows: Vec<(u32, i32)>,
+    playable_without_bends: Vec<(u32, i32)>,
+    allow_bends: bool,
 
     error_text: String,
     about_open: bool,
@@ -42,6 +45,9 @@ impl Default for GUIApp {
             key: "C".to_owned(),
             notes_in_order: notes,
             duplicated_notes: duplicated,
+            playable_without_overblows: Vec::new(),
+            playable_without_bends: Vec::new(),
+            allow_bends: true,
 
             error_text: "".to_owned(),
             about_open: false,
@@ -103,11 +109,15 @@ impl epi::App for GUIApp {
                         egui::TextEdit::multiline(&mut self.error_text).desired_width(300.0),
                     );
                 }
+
+                ui.collapsing("playable positions", |ui| {
+                    self.playable_positions_panel(ui);
+                });
             });
         });
 
-        self.help_window(&ctx);
-        self.about_window(&ctx);
+        self.help_window(ctx);
+        self.about_window(ctx);
     }
 }
 
@@ -123,6 +133,69 @@ impl GUIApp {
         );
         self.output_text = tabs;
         self.error_text = errors.join(" ");
+
+        self.playable_without_overblows = harptabber::get_playable_positions(
+            &self.input_text,
+            self.from_position,
+            &self.input_tuning,
+            &self.output_tuning,
+            self.style,
+            true,
+        );
+        self.playable_without_bends = harptabber::get_playable_positions(
+            &self.input_text,
+            self.from_position,
+            &self.input_tuning,
+            &self.output_tuning,
+            self.style,
+            false,
+        );
+    }
+
+    fn playable_positions_panel(&mut self, ui: &mut egui::Ui) {
+        fn to_ordinal(num: u32) -> String {
+            let end = match num {
+                1 => "st",
+                2 => "nd",
+                3 => "rd",
+                _ => "th",
+            };
+            let mut res = num.to_string();
+            res.push_str(end);
+            res
+        }
+        let pairs = if self.allow_bends {
+            self.playable_without_overblows.clone()
+        } else {
+            self.playable_without_bends.clone()
+        };
+
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.allow_bends, true, "without overblows");
+            ui.selectable_value(&mut self.allow_bends, false, "without bends");
+        });
+
+        ui.add_enabled(
+            false,
+            egui::Button::new("position, semitone change").text_style(egui::TextStyle::Monospace),
+        );
+        for (position, semitones) in pairs.iter() {
+            let text = format!(
+                "{:width$} {:+width$}",
+                to_ordinal(*position),
+                semitones,
+                width = 7
+            );
+
+            if ui
+                .add(egui::Button::new(text).text_style(egui::TextStyle::Monospace))
+                .clicked()
+            {
+                self.semitone_shift = *semitones;
+                self.to_position = *position;
+                self.transpose();
+            }
+        }
     }
 
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
