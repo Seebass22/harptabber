@@ -277,6 +277,59 @@ pub fn transpose_tabs(
     (result, errors)
 }
 
+trait Tab {
+    fn contains_overblow(&self) -> bool;
+    fn contains_bend(&self) -> bool;
+    fn is_playable(&self) -> bool;
+}
+
+impl Tab for str {
+    fn contains_overblow(&self) -> bool {
+        self.contains('o') || self.contains('#')
+    }
+    fn contains_bend(&self) -> bool {
+        self.contains('\'') || self.contains('b')
+    }
+    fn is_playable(&self) -> bool {
+        !self.contains('X')
+    }
+}
+
+pub fn get_playable_positions(
+    tab: &str,
+    input_position: u32,
+    input_tuning: &str,
+    output_tuning: &str,
+    style: Style,
+    allow_bends: bool,
+) -> Vec<(u32, i32)> {
+    let mut results: Vec<(u32, i32)> = Vec::new();
+    if tab.is_empty() {
+        return results;
+    }
+    for semitones in -24..=24 {
+        let (notes, _errors) = transpose_tabs(
+            tab.to_string(),
+            semitones,
+            true,
+            style,
+            input_tuning,
+            output_tuning,
+        );
+        let is_playable = if allow_bends {
+            notes.is_playable() && !notes.contains_overblow()
+        } else {
+            notes.is_playable() && !notes.contains_overblow() && !notes.contains_bend()
+        };
+
+        if is_playable {
+            let position = semitones_to_position(input_position, semitones);
+            results.push((position, semitones));
+        }
+    }
+    results
+}
+
 pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
     let notes = tuning_to_notes(input_tuning);
     let tuning = harptool::Tuning::from(notes);
@@ -615,6 +668,14 @@ mod tests {
             .iter()
             .map(|s| s.to_string())
             .collect::<Vec<String>>();
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn test_get_playable_positions() {
+        let tab = "4 -4 5 -5 6 -6 -7 7";
+        let expected = vec![(1, -12), (3, -10), (12, -7), (1, 0), (2, 7), (1, 12)];
+        let res = get_playable_positions(tab, 1, "richter", "richter", Style::Default, true);
         assert_eq!(res, expected);
     }
 }
