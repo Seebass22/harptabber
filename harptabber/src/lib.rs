@@ -330,6 +330,18 @@ pub fn get_playable_positions(
     results
 }
 
+pub fn to_ordinal(num: u32) -> String {
+    let end = match num {
+        1 => "st",
+        2 => "nd",
+        3 => "rd",
+        _ => "th",
+    };
+    let mut res = num.to_string();
+    res.push_str(end);
+    res
+}
+
 pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
     let notes = tuning_to_notes(input_tuning);
     let tuning = harptool::Tuning::from(notes);

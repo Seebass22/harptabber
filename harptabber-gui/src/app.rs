@@ -153,17 +153,6 @@ impl GUIApp {
     }
 
     fn playable_positions_panel(&mut self, ui: &mut egui::Ui) {
-        fn to_ordinal(num: u32) -> String {
-            let end = match num {
-                1 => "st",
-                2 => "nd",
-                3 => "rd",
-                _ => "th",
-            };
-            let mut res = num.to_string();
-            res.push_str(end);
-            res
-        }
         let pairs = if self.allow_bends {
             self.playable_without_overblows.clone()
         } else {
@@ -182,7 +171,7 @@ impl GUIApp {
         for (position, semitones) in pairs.iter() {
             let text = format!(
                 "{:width$} {:+width$}",
-                to_ordinal(*position),
+                harptabber::to_ordinal(*position),
                 semitones,
                 width = 7
             );
