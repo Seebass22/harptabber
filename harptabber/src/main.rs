@@ -80,6 +80,18 @@ fn main() {
                 .help("file containing tabs")
                 .required(true),
         )
+        .arg(
+            Arg::with_name("playable-positions")
+                .short("p")
+                .long("playable-positions")
+                .help("transpose to all playable positions (without overblows)"),
+        )
+        .arg(
+            Arg::with_name("no-bends")
+                .short("n")
+                .long("no-bends")
+                .help("disallow bends (with --playable-positions)"),
+        )
         .get_matches();
 
     let filename = matches.value_of("file").unwrap();
@@ -116,7 +128,7 @@ fn main() {
         }
     }
 
-    let options = RunOptions {
+    let mut options = RunOptions {
         filename,
         semitones,
         from_position,
@@ -126,7 +138,14 @@ fn main() {
         style,
         input_tuning,
         output_tuning,
+        playable_positions: false,
+        allow_bends: false,
     };
+
+    if matches.is_present("playable-positions") {
+        options.playable_positions = true;
+        options.allow_bends = !matches.is_present("no-bends");
+    }
 
     run(options);
 }

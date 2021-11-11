@@ -58,6 +58,8 @@ pub struct RunOptions<'a> {
     pub style: Style,
     pub input_tuning: &'a str,
     pub output_tuning: &'a str,
+    pub playable_positions: bool,
+    pub allow_bends: bool,
 }
 
 pub fn run(options: RunOptions) {
@@ -71,6 +73,8 @@ pub fn run(options: RunOptions) {
         style,
         input_tuning,
         output_tuning,
+        playable_positions,
+        allow_bends,
     } = options;
 
     let tab = match fs::read_to_string(filename) {
@@ -87,8 +91,22 @@ pub fn run(options: RunOptions) {
         semitones = positions_to_semitones(from_position, 1, octave_shift);
     }
 
-    let (tabs, _) = transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
-    print!("{}", tabs);
+    let res;
+    if playable_positions {
+        res = transpose_playable_positions(
+            &tab,
+            from_position as u32,
+            input_tuning,
+            output_tuning,
+            style,
+            allow_bends,
+        );
+    } else {
+        let (tabs, _) =
+            transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
+        res = tabs;
+    }
+    print!("{}", res);
 }
 
 fn convert_to_plus_style(note: &str) -> String {
@@ -339,6 +357,48 @@ pub fn to_ordinal(num: u32) -> String {
     };
     let mut res = num.to_string();
     res.push_str(end);
+    res
+}
+
+fn transpose_playable_positions(
+    tab: &str,
+    input_position: u32,
+    input_tuning: &str,
+    output_tuning: &str,
+    style: Style,
+    allow_bends: bool,
+) -> String {
+    let playable = get_playable_positions(
+        tab,
+        input_position,
+        input_tuning,
+        output_tuning,
+        style,
+        allow_bends,
+    );
+
+    let mut res = String::from("");
+    for (position, semitones) in playable.iter() {
+        res.push_str(
+            format!(
+                "{:width$} position, {:+width$} semitones\n",
+                to_ordinal(*position),
+                semitones,
+                width = 4
+            )
+            .as_str(),
+        );
+        let (transposed, _) = transpose_tabs(
+            tab.to_string(),
+            *semitones,
+            true,
+            style,
+            input_tuning,
+            output_tuning,
+        );
+        res.push_str(&transposed);
+        res.push('\n');
+    }
     res
 }
 
