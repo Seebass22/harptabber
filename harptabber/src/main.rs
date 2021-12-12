@@ -92,6 +92,12 @@ fn main() {
                 .long("no-bends")
                 .help("disallow bends (with --playable-positions)"),
         )
+        .arg(
+            Arg::with_name("play")
+                .short("a")
+                .long("play")
+                .help("play tab as audio"),
+        )
         .get_matches();
 
     let filename = matches.value_of("file").unwrap();
@@ -128,6 +134,8 @@ fn main() {
         }
     }
 
+    let play_audio = matches.is_present("play");
+
     let mut options = RunOptions {
         filename,
         semitones,
@@ -138,6 +146,7 @@ fn main() {
         style,
         input_tuning,
         output_tuning,
+        _play_audio: play_audio,
         playable_positions: false,
         allow_bends: false,
     };

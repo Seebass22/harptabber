@@ -4,6 +4,9 @@ use std::fs;
 #[macro_use]
 extern crate lazy_static;
 
+#[cfg(not(target_arch = "wasm32"))]
+mod audio;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum Style {
     Default,
@@ -58,8 +61,22 @@ pub struct RunOptions<'a> {
     pub style: Style,
     pub input_tuning: &'a str,
     pub output_tuning: &'a str,
+    pub _play_audio: bool,
     pub playable_positions: bool,
     pub allow_bends: bool,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn get_index_a440(note: &str, notes: &[String], style: Style) -> Option<i32> {
+    let notes = change_tab_style(notes, style);
+
+    match notes.iter().position(|x| *x == note) {
+        Some(p) => {
+            let p = p as i32;
+            Some(p - 9)
+        }
+        None => None,
+    }
 }
 
 pub fn run(options: RunOptions) {
@@ -73,6 +90,7 @@ pub fn run(options: RunOptions) {
         style,
         input_tuning,
         output_tuning,
+        _play_audio,
         playable_positions,
         allow_bends,
     } = options;
@@ -103,10 +121,15 @@ pub fn run(options: RunOptions) {
         );
     } else {
         let (tabs, _) =
-            transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
+            transpose_tabs(tab.clone(), semitones, no_error, style, input_tuning, output_tuning);
         res = tabs;
     }
     print!("{}", res);
+
+    #[cfg(not(target_arch = "wasm32"))]
+    if _play_audio {
+        play_tab(res, output_tuning, style);
+    }
 }
 
 fn convert_to_plus_style(note: &str) -> String {
@@ -249,6 +272,25 @@ pub fn tab_to_note(
 pub fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
     let notes = tuning_to_notes(tuning);
     harptool::str_to_notes_in_order(notes)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn play_tab(tab: String, tuning: &str, style: Style) {
+    let (notes, duplicated_notes) = tuning_to_notes_in_order(tuning);
+    let notes = change_tab_style(&notes, style);
+    let duplicated_notes = change_tab_style(&duplicated_notes, style);
+
+    for line in tab.lines() {
+        let line: Vec<&str> = line.split_whitespace().collect();
+
+        for note in line {
+            let note = fix_enharmonics(note, &duplicated_notes);
+
+            if let Some(index) = get_index_a440(note, &notes, style) {
+                audio::play(index);
+            }
+        }
+    }
 }
 
 pub fn transpose_tabs(
