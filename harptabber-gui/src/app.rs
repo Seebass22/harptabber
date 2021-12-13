@@ -247,7 +247,14 @@ impl GUIApp {
             self.transpose();
         }
 
-        ui.add_space(20.0);
+        ui.add_space(10.0);
+
+        #[cfg(not(target_arch = "wasm32"))]
+        if ui.button("play tab").clicked() {
+            harptabber::play_tab(self.output_text.clone(), &self.output_tuning, self.style);
+        }
+
+        ui.add_space(10.0);
 
         ui.collapsing("tab keyboard", |ui| {
             self.tabkeyboard(ui);
