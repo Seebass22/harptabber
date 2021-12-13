@@ -251,7 +251,12 @@ impl GUIApp {
 
         #[cfg(not(target_arch = "wasm32"))]
         if ui.button("play tab").clicked() {
-            harptabber::play_tab(self.output_text.clone(), &self.output_tuning, self.style);
+            let txt = self.output_text.clone();
+            let tuning = self.output_tuning.clone();
+            let style = self.style;
+            std::thread::spawn(move || {
+                harptabber::play_tab(txt, &tuning, style);
+            });
         }
 
         ui.add_space(10.0);
