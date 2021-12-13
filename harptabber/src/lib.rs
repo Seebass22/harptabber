@@ -6,6 +6,8 @@ extern crate lazy_static;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod audio;
+#[cfg(not(target_arch = "wasm32"))]
+use rodio::{OutputStream, Sink};
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Style {
@@ -121,14 +123,17 @@ pub fn run(options: RunOptions) {
         );
     } else {
         let (tabs, _) =
-            transpose_tabs(tab.clone(), semitones, no_error, style, input_tuning, output_tuning);
+            transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
         res = tabs;
     }
     print!("{}", res);
 
     #[cfg(not(target_arch = "wasm32"))]
     if _play_audio {
-        play_tab(res, output_tuning, style);
+        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        let sink = Sink::try_new(&stream_handle).unwrap();
+        play_tab(res, output_tuning, style, &sink);
+        sink.sleep_until_end();
     }
 }
 
@@ -275,7 +280,7 @@ pub fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn play_tab(tab: String, tuning: &str, style: Style) {
+pub fn play_tab(tab: String, tuning: &str, style: Style, sink: &rodio::Sink) {
     let (notes, duplicated_notes) = tuning_to_notes_in_order(tuning);
     let notes = change_tab_style(&notes, style);
     let duplicated_notes = change_tab_style(&duplicated_notes, style);
@@ -287,7 +292,7 @@ pub fn play_tab(tab: String, tuning: &str, style: Style) {
             let note = fix_enharmonics(note, &duplicated_notes);
 
             if let Some(index) = get_index_a440(note, &notes, style) {
-                audio::play(index);
+                audio::play(index, &sink);
             }
         }
     }
