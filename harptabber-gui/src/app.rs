@@ -29,19 +29,31 @@ pub struct GUIApp {
     help_open: bool,
 
     #[cfg(not(target_arch = "wasm32"))]
+    audio_context: AudioContext,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+struct AudioContext {
     _output_stream: rodio::OutputStream,
-    #[cfg(not(target_arch = "wasm32"))]
     _stream_handle: rodio::OutputStreamHandle,
-    #[cfg(not(target_arch = "wasm32"))]
-    audio_sink: rodio::Sink,
+    sink: rodio::Sink,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl AudioContext {
+    fn new() -> Self {
+        let (_output_stream, _stream_handle) = OutputStream::try_default().unwrap();
+        let sink = Sink::try_new(&_stream_handle).unwrap();
+        AudioContext {
+            _output_stream,
+            _stream_handle,
+            sink,
+        }
+    }
 }
 
 impl Default for GUIApp {
     fn default() -> Self {
-        #[cfg(not(target_arch = "wasm32"))]
-        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-        #[cfg(not(target_arch = "wasm32"))]
-        let sink = Sink::try_new(&stream_handle).unwrap();
         let (notes, duplicated) = harptabber::tuning_to_notes_in_order("richter");
 
         Self {
@@ -69,11 +81,7 @@ impl Default for GUIApp {
             help_open: false,
 
             #[cfg(not(target_arch = "wasm32"))]
-            _output_stream: _stream,
-            #[cfg(not(target_arch = "wasm32"))]
-            _stream_handle: stream_handle,
-            #[cfg(not(target_arch = "wasm32"))]
-            audio_sink: sink,
+            audio_context: AudioContext::new(),
         }
     }
 }
@@ -274,18 +282,17 @@ impl GUIApp {
         #[cfg(not(target_arch = "wasm32"))]
         ui.horizontal(|ui| {
             if ui.button("play tab").clicked() {
+                self.audio_context = AudioContext::new();
                 harptabber::play_tab(
                     self.output_text.clone(),
                     &self.output_tuning,
                     self.style,
-                    &self.audio_sink,
+                    &self.audio_context.sink,
                 );
-                self.audio_sink.play();
+                self.audio_context.sink.play();
             }
-            // create a new sink
-            // calling .stop() kills the sink
-            if ui.button("pause").clicked() {
-                self.audio_sink.pause();
+            if ui.button("stop").clicked() {
+                self.audio_context.sink.stop();
             }
         });
 
