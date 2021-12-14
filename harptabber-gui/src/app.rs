@@ -1,6 +1,7 @@
 use eframe::{egui, epi};
 use harptabber::Style;
 
+#[cfg(not(target_arch = "wasm32"))]
 use rodio::{OutputStream, Sink};
 
 pub struct GUIApp {
@@ -27,16 +28,22 @@ pub struct GUIApp {
     about_open: bool,
     help_open: bool,
 
+    #[cfg(not(target_arch = "wasm32"))]
     _output_stream: rodio::OutputStream,
+    #[cfg(not(target_arch = "wasm32"))]
     _stream_handle: rodio::OutputStreamHandle,
+    #[cfg(not(target_arch = "wasm32"))]
     audio_sink: rodio::Sink,
 }
 
 impl Default for GUIApp {
     fn default() -> Self {
-        let (notes, duplicated) = harptabber::tuning_to_notes_in_order("richter");
+        #[cfg(not(target_arch = "wasm32"))]
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        #[cfg(not(target_arch = "wasm32"))]
         let sink = Sink::try_new(&stream_handle).unwrap();
+        let (notes, duplicated) = harptabber::tuning_to_notes_in_order("richter");
+
         Self {
             input_text: "".to_owned(),
             output_text: "".to_owned(),
@@ -61,8 +68,11 @@ impl Default for GUIApp {
             about_open: false,
             help_open: false,
 
+            #[cfg(not(target_arch = "wasm32"))]
             _output_stream: _stream,
+            #[cfg(not(target_arch = "wasm32"))]
             _stream_handle: stream_handle,
+            #[cfg(not(target_arch = "wasm32"))]
             audio_sink: sink,
         }
     }
@@ -262,20 +272,22 @@ impl GUIApp {
         ui.add_space(10.0);
 
         #[cfg(not(target_arch = "wasm32"))]
-        if ui.button("play tab").clicked() {
-            harptabber::play_tab(
-                self.output_text.clone(),
-                &self.output_tuning,
-                self.style,
-                &self.audio_sink,
-            );
-            self.audio_sink.play();
-        }
-        // create a new sink
-        // calling .stop() kills the sink
-        if ui.button("pause").clicked() {
-            self.audio_sink.pause();
-        }
+        ui.horizontal(|ui| {
+            if ui.button("play tab").clicked() {
+                harptabber::play_tab(
+                    self.output_text.clone(),
+                    &self.output_tuning,
+                    self.style,
+                    &self.audio_sink,
+                );
+                self.audio_sink.play();
+            }
+            // create a new sink
+            // calling .stop() kills the sink
+            if ui.button("pause").clicked() {
+                self.audio_sink.pause();
+            }
+        });
 
         ui.add_space(10.0);
 
