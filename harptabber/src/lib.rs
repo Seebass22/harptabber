@@ -69,9 +69,7 @@ pub struct RunOptions<'a> {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn get_index_a440(note: &str, notes: &[String], style: Style) -> Option<i32> {
-    let notes = change_tab_style(notes, style);
-
+fn get_index_a440(note: &str, notes: &[String]) -> Option<i32> {
     match notes.iter().position(|x| *x == note) {
         Some(p) => {
             let p = p as i32;
@@ -291,7 +289,7 @@ pub fn play_tab(tab: String, tuning: &str, style: Style, sink: &rodio::Sink) {
         for note in line {
             let note = fix_enharmonics(note, &duplicated_notes);
 
-            if let Some(index) = get_index_a440(note, &notes, style) {
+            if let Some(index) = get_index_a440(note, &notes) {
                 audio::play(index, &sink);
             }
         }
