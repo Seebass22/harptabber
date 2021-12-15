@@ -30,6 +30,8 @@ pub struct GUIApp {
 
     #[cfg(not(target_arch = "wasm32"))]
     audio_context: AudioContext,
+    #[cfg(not(target_arch = "wasm32"))]
+    should_play_note: bool,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -82,6 +84,8 @@ impl Default for GUIApp {
 
             #[cfg(not(target_arch = "wasm32"))]
             audio_context: AudioContext::new(),
+            #[cfg(not(target_arch = "wasm32"))]
+            should_play_note: false,
         }
     }
 }
@@ -292,7 +296,7 @@ impl GUIApp {
                 self.audio_context.sink.play();
             }
             if ui.button("stop").clicked() {
-                self.audio_context.sink.stop();
+                self.audio_context = AudioContext::new();
             }
         });
 
@@ -419,6 +423,14 @@ impl GUIApp {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
                 ui.checkbox(&mut self.should_display_notes, "display as notes");
+
+                let mut _space = 155.0;
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    _space = 70.0;
+                    ui.checkbox(&mut self.should_play_note, "play notes");
+                }
+
                 if self.should_display_notes {
                     egui::ComboBox::from_label("key")
                         .selected_text(&mut self.key)
@@ -432,9 +444,9 @@ impl GUIApp {
                                 ui.selectable_value(&mut self.key, note.to_string(), note);
                             }
                         });
-                    ui.add_space(155.0);
+                    ui.add_space(_space);
                 } else {
-                    ui.add_space(258.0);
+                    ui.add_space(_space + 103.0);
                 }
                 if ui
                     .add(egui::Button::new("return").text_style(egui::TextStyle::Monospace))
@@ -491,6 +503,16 @@ impl GUIApp {
                                 self.input_text.push_str(hole.as_str());
                                 self.input_text.push(' ');
                                 self.transpose();
+
+                                #[cfg(not(target_arch = "wasm32"))]
+                                if self.should_play_note {
+                                    harptabber::play_tab(
+                                        hole,
+                                        &self.input_tuning,
+                                        self.style,
+                                        &self.audio_context.sink,
+                                    );
+                                }
                             }
                         }
                     }
