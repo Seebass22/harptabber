@@ -288,8 +288,8 @@ impl GUIApp {
             if ui.button("play tab").clicked() {
                 self.audio_context = AudioContext::new();
                 harptabber::play_tab(
-                    self.output_text.clone(),
-                    &self.output_tuning,
+                    self.input_text.clone(),
+                    &self.input_tuning,
                     self.style,
                     &self.audio_context.sink,
                 );
