@@ -30,7 +30,6 @@ pub struct GUIApp {
 
     #[cfg(not(target_arch = "wasm32"))]
     audio_context: AudioContext,
-    #[cfg(not(target_arch = "wasm32"))]
     should_play_note: bool,
 }
 
@@ -84,7 +83,6 @@ impl Default for GUIApp {
 
             #[cfg(not(target_arch = "wasm32"))]
             audio_context: AudioContext::new(),
-            #[cfg(not(target_arch = "wasm32"))]
             should_play_note: false,
         }
     }
@@ -287,10 +285,11 @@ impl GUIApp {
         ui.horizontal(|ui| {
             if ui.button("play tab").clicked() {
                 self.audio_context = AudioContext::new();
-                harptabber::play_tab(
+                harptabber::play_tab_in_key(
                     self.input_text.clone(),
                     &self.input_tuning,
                     self.style,
+                    &self.key,
                     &self.audio_context.sink,
                 );
                 self.audio_context.sink.play();
@@ -431,7 +430,7 @@ impl GUIApp {
                     ui.checkbox(&mut self.should_play_note, "play notes");
                 }
 
-                if self.should_display_notes {
+                if self.should_display_notes || self.should_play_note {
                     egui::ComboBox::from_label("key")
                         .selected_text(&mut self.key)
                         .width(60.0)
@@ -506,10 +505,11 @@ impl GUIApp {
 
                                 #[cfg(not(target_arch = "wasm32"))]
                                 if self.should_play_note {
-                                    harptabber::play_tab(
+                                    harptabber::play_tab_in_key(
                                         hole,
                                         &self.input_tuning,
                                         self.style,
+                                        &self.key,
                                         &self.audio_context.sink,
                                     );
                                 }

@@ -68,7 +68,6 @@ pub struct RunOptions<'a> {
     pub allow_bends: bool,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn get_index_a440(note: &str, notes: &[String]) -> Option<i32> {
     match notes.iter().position(|x| *x == note) {
         Some(p) => {
@@ -279,10 +278,47 @@ pub fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn play_tab(tab: String, tuning: &str, style: Style, sink: &rodio::Sink) {
+    let indices = get_audio_indices(tab, tuning, style);
+    play_indices_as_audio(&indices, sink);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, sink: &rodio::Sink) {
+    let mut indices = get_audio_indices(tab, tuning, style);
+
+    let sharp = if key == "F#" {
+        Some(true)
+    } else if ["Bb", "Eb", "Ab", "Db"].contains(&key) {
+        Some(false)
+    } else {
+        None
+    };
+
+    let scale = harptool::ChromaticScale::new("C", sharp);
+    let mut offset = scale.notes.iter().position(|n| n == key).unwrap() as i32;
+
+    if ["G", "A", "B", "Ab", "Bb"].contains(&key) {
+        offset -= 12;
+    }
+    for i in indices.iter_mut() {
+        *i += offset;
+    }
+    play_indices_as_audio(&indices, sink);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn play_indices_as_audio(indices: &[i32], sink: &rodio::Sink){
+    for i in indices.iter() {
+        audio::play(*i, sink);
+    }
+}
+
+pub fn get_audio_indices(tab: String, tuning: &str, style: Style) -> Vec<i32> {
     let (notes, duplicated_notes) = tuning_to_notes_in_order(tuning);
     let notes = change_tab_style(&notes, style);
     let duplicated_notes = change_tab_style(&duplicated_notes, style);
 
+    let mut res: Vec<i32> = Vec::new();
     for line in tab.lines() {
         let line: Vec<&str> = line.split_whitespace().collect();
 
@@ -290,10 +326,11 @@ pub fn play_tab(tab: String, tuning: &str, style: Style, sink: &rodio::Sink) {
             let note = fix_enharmonics(note, &duplicated_notes);
 
             if let Some(index) = get_index_a440(note, &notes) {
-                audio::play(index, &sink);
+                res.push(index);
             }
         }
     }
+    res
 }
 
 pub fn transpose_tabs(
