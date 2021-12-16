@@ -16,4 +16,4 @@ $ harptabber --from 2 --to 1 tabs.txt
 ```
 
 ### GUI version
-![GUI version](https://img.itch.zone/aW1hZ2UvMTIwOTEzMi83MTg2OTA0LnBuZw==/original/PDMgEs.png)
+![GUI version](https://img.itch.zone/aW1hZ2UvMTIwOTEzMi83NjgyNjIzLnBuZw==/original/RXN67f.png)
