@@ -1,6 +1,8 @@
 use eframe::{egui, epi};
 use harptabber::Style;
 
+use rodio::{OutputStream, Sink};
+
 pub struct GUIApp {
     input_text: String,
     output_text: String,
@@ -24,11 +26,17 @@ pub struct GUIApp {
     error_text: String,
     about_open: bool,
     help_open: bool,
+
+    _output_stream: rodio::OutputStream,
+    _stream_handle: rodio::OutputStreamHandle,
+    audio_sink: rodio::Sink,
 }
 
 impl Default for GUIApp {
     fn default() -> Self {
         let (notes, duplicated) = harptabber::tuning_to_notes_in_order("richter");
+        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        let sink = Sink::try_new(&stream_handle).unwrap();
         Self {
             input_text: "".to_owned(),
             output_text: "".to_owned(),
@@ -52,6 +60,10 @@ impl Default for GUIApp {
             error_text: "".to_owned(),
             about_open: false,
             help_open: false,
+
+            _output_stream: _stream,
+            _stream_handle: stream_handle,
+            audio_sink: sink,
         }
     }
 }
@@ -251,12 +263,18 @@ impl GUIApp {
 
         #[cfg(not(target_arch = "wasm32"))]
         if ui.button("play tab").clicked() {
-            let txt = self.output_text.clone();
-            let tuning = self.output_tuning.clone();
-            let style = self.style;
-            std::thread::spawn(move || {
-                harptabber::play_tab(txt, &tuning, style);
-            });
+            harptabber::play_tab(
+                self.output_text.clone(),
+                &self.output_tuning,
+                self.style,
+                &self.audio_sink,
+            );
+            self.audio_sink.play();
+        }
+        // create a new sink
+        // calling .stop() kills the sink
+        if ui.button("pause").clicked() {
+            self.audio_sink.pause();
         }
 
         ui.add_space(10.0);

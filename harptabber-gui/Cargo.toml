@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 eframe = "0.15.0" # Gives us egui, epi and web+native backends
+rodio = "0.14"
 harptabber = { path = "../harptabber" }
 
 [features]

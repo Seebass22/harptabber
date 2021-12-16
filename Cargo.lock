@@ -894,6 +894,7 @@ version = "0.1.0"
 dependencies = [
  "eframe",
  "harptabber",
+ "rodio",
 ]
 
 [[package]]
