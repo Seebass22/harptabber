@@ -132,6 +132,10 @@ impl epi::App for GUIApp {
                 ui.add(egui::TextEdit::multiline(&mut self.output_text).desired_width(300.0));
                 egui::warn_if_debug_build(ui);
 
+                if ui.button("copy").clicked() {
+                    ui.output().copied_text = self.output_text.clone();
+                }
+
                 if !self.error_text.is_empty() {
                     ui.add_space(20.0);
 
@@ -228,6 +232,10 @@ impl GUIApp {
         {
             self.transpose();
         };
+
+        if ui.button("copy").clicked() {
+            ui.output().copied_text = self.input_text.clone();
+        }
 
         ui.spacing_mut().slider_width = 150.0;
         if ui
