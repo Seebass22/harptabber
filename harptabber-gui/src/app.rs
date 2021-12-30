@@ -1,4 +1,4 @@
-use eframe::egui::{Button, RichText};
+use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle};
 use eframe::{egui, epi};
 use harptabber::Style;
 
@@ -130,7 +130,7 @@ impl epi::App for GUIApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("output");
-                ui.add(egui::TextEdit::multiline(&mut self.output_text).desired_width(300.0));
+                ui.add(TextEdit::multiline(&mut self.output_text).desired_width(300.0));
                 egui::warn_if_debug_build(ui);
 
                 if ui.button("copy").clicked() {
@@ -143,7 +143,7 @@ impl epi::App for GUIApp {
                     ui.label("invalid notes");
                     ui.add_enabled(
                         false,
-                        egui::TextEdit::multiline(&mut self.error_text).desired_width(300.0),
+                        TextEdit::multiline(&mut self.error_text).desired_width(300.0),
                     );
                 }
 
@@ -204,7 +204,7 @@ impl GUIApp {
         ui.add_enabled(
             false,
             Button::new(
-                RichText::new("position, semitone change").text_style(egui::TextStyle::Monospace),
+                RichText::new("position, semitone change").text_style(TextStyle::Monospace),
             ),
         );
         for (position, semitones) in pairs.iter() {
@@ -217,7 +217,7 @@ impl GUIApp {
 
             if ui
                 .add(Button::new(
-                    RichText::new(text).text_style(egui::TextStyle::Monospace),
+                    RichText::new(text).text_style(TextStyle::Monospace),
                 ))
                 .clicked()
             {
@@ -232,7 +232,7 @@ impl GUIApp {
         ui.heading("input");
 
         if ui
-            .add(egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0))
+            .add(TextEdit::multiline(&mut self.input_text).desired_width(600.0))
             .changed()
         {
             self.transpose();
@@ -244,7 +244,7 @@ impl GUIApp {
 
         ui.spacing_mut().slider_width = 150.0;
         if ui
-            .add(egui::Slider::new(&mut self.semitone_shift, -24..=24).text("semitone shift"))
+            .add(Slider::new(&mut self.semitone_shift, -24..=24).text("semitone shift"))
             .changed()
         {
             self.to_position =
@@ -270,7 +270,7 @@ impl GUIApp {
         });
 
         if ui
-            .add(egui::Slider::new(&mut self.from_position, 1..=12).text("starting position"))
+            .add(Slider::new(&mut self.from_position, 1..=12).text("starting position"))
             .changed()
         {
             self.semitone_shift = harptabber::positions_to_semitones(
@@ -281,7 +281,7 @@ impl GUIApp {
             self.transpose();
         }
         if ui
-            .add(egui::Slider::new(&mut self.to_position, 1..=12).text("target position"))
+            .add(Slider::new(&mut self.to_position, 1..=12).text("target position"))
             .changed()
         {
             self.semitone_shift = harptabber::positions_to_semitones(
@@ -331,7 +331,7 @@ impl GUIApp {
                 self.tab_style_selector(ui);
             });
             ui.add(
-                egui::TextEdit::singleline(&mut self.style_example)
+                TextEdit::singleline(&mut self.style_example)
                     .desired_width(350.0)
                     .interactive(false),
             );
@@ -462,7 +462,7 @@ impl GUIApp {
                 }
                 if ui
                     .add(Button::new(
-                        RichText::new("return").text_style(egui::TextStyle::Monospace),
+                        RichText::new("return").text_style(TextStyle::Monospace),
                     ))
                     .clicked()
                 {
@@ -471,7 +471,7 @@ impl GUIApp {
 
                 if ui
                     .add(Button::new(
-                        RichText::new("backspace").text_style(egui::TextStyle::Monospace),
+                        RichText::new("backspace").text_style(TextStyle::Monospace),
                     ))
                     .clicked()
                 {
@@ -489,7 +489,7 @@ impl GUIApp {
                             ui.add_enabled(
                                 false,
                                 Button::new(
-                                    RichText::new("     ").text_style(egui::TextStyle::Monospace),
+                                    RichText::new("     ").text_style(TextStyle::Monospace),
                                 )
                                 .fill(egui::color::Color32::TRANSPARENT),
                             );
@@ -512,8 +512,7 @@ impl GUIApp {
                             let text = format!("{:width$}", &display_note, width = 5);
                             if ui
                                 .add(Button::new(
-                                    RichText::new(text.as_str())
-                                        .text_style(egui::TextStyle::Monospace),
+                                    RichText::new(text.as_str()).text_style(TextStyle::Monospace),
                                 ))
                                 .clicked()
                             {
@@ -542,8 +541,7 @@ impl GUIApp {
                             ui.add_enabled(
                                 false,
                                 Button::new(
-                                    RichText::new(text.as_str())
-                                        .text_style(egui::TextStyle::Monospace),
+                                    RichText::new(text.as_str()).text_style(TextStyle::Monospace),
                                 ),
                             );
                         }
