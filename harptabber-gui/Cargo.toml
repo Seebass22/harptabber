@@ -9,7 +9,7 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-eframe = "0.15.0" # Gives us egui, epi and web+native backends
+eframe = "0.16.0" # Gives us egui, epi and web+native backends
 harptabber = { path = "../harptabber" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

@@ -1,3 +1,4 @@
+use eframe::egui::{Button, RichText};
 use eframe::{egui, epi};
 use harptabber::Style;
 
@@ -93,7 +94,7 @@ impl epi::App for GUIApp {
         "harmonica tab transposer"
     }
 
-    fn update(&mut self, ctx: &egui::CtxRef, frame: &mut epi::Frame<'_>) {
+    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 let style: egui::Style = (*ui.ctx().style()).clone();
@@ -102,7 +103,7 @@ impl epi::App for GUIApp {
                     ui.ctx().set_visuals(visuals);
                 }
 
-                egui::menu::menu(ui, "File", |ui| {
+                ui.menu_button("File", |ui| {
                     if ui.button("Quit").clicked() {
                         frame.quit();
                     }
@@ -202,7 +203,9 @@ impl GUIApp {
 
         ui.add_enabled(
             false,
-            egui::Button::new("position, semitone change").text_style(egui::TextStyle::Monospace),
+            Button::new(
+                RichText::new("position, semitone change").text_style(egui::TextStyle::Monospace),
+            ),
         );
         for (position, semitones) in pairs.iter() {
             let text = format!(
@@ -213,7 +216,9 @@ impl GUIApp {
             );
 
             if ui
-                .add(egui::Button::new(text).text_style(egui::TextStyle::Monospace))
+                .add(Button::new(
+                    RichText::new(text).text_style(egui::TextStyle::Monospace),
+                ))
                 .clicked()
             {
                 self.semitone_shift = *semitones;
@@ -345,7 +350,7 @@ impl GUIApp {
         }
 
         egui::ComboBox::from_label(label_name)
-            .selected_text(&mut tuning)
+            .selected_text(&tuning)
             .width(150.0)
             .show_ui(ui, |ui| {
                 for tuning_text in [
@@ -368,7 +373,7 @@ impl GUIApp {
                 .iter()
                 {
                     if ui
-                        .selectable_value(&mut tuning, tuning_text.to_string(), tuning_text)
+                        .selectable_value(&mut tuning, tuning_text.to_string(), *tuning_text)
                         .changed()
                     {
                         if is_input {
@@ -440,7 +445,7 @@ impl GUIApp {
 
                 if self.should_display_notes || self.should_play_note {
                     egui::ComboBox::from_label("key")
-                        .selected_text(&mut self.key)
+                        .selected_text(&self.key)
                         .width(60.0)
                         .show_ui(ui, |ui| {
                             for note in [
@@ -448,7 +453,7 @@ impl GUIApp {
                             ]
                             .iter()
                             {
-                                ui.selectable_value(&mut self.key, note.to_string(), note);
+                                ui.selectable_value(&mut self.key, note.to_string(), *note);
                             }
                         });
                     ui.add_space(_space);
@@ -456,14 +461,18 @@ impl GUIApp {
                     ui.add_space(_space + 103.0);
                 }
                 if ui
-                    .add(egui::Button::new("return").text_style(egui::TextStyle::Monospace))
+                    .add(Button::new(
+                        RichText::new("return").text_style(egui::TextStyle::Monospace),
+                    ))
                     .clicked()
                 {
                     self.input_text.push('\n');
                 }
 
                 if ui
-                    .add(egui::Button::new("backspace").text_style(egui::TextStyle::Monospace))
+                    .add(Button::new(
+                        RichText::new("backspace").text_style(egui::TextStyle::Monospace),
+                    ))
                     .clicked()
                 {
                     self.backspace();
@@ -479,9 +488,10 @@ impl GUIApp {
                         if hole.is_empty() {
                             ui.add_enabled(
                                 false,
-                                egui::Button::new("     ")
-                                    .text_style(egui::TextStyle::Monospace)
-                                    .fill(egui::color::Color32::TRANSPARENT),
+                                Button::new(
+                                    RichText::new("     ").text_style(egui::TextStyle::Monospace),
+                                )
+                                .fill(egui::color::Color32::TRANSPARENT),
                             );
                         } else {
                             let display_note;
@@ -501,10 +511,10 @@ impl GUIApp {
 
                             let text = format!("{:width$}", &display_note, width = 5);
                             if ui
-                                .add(
-                                    egui::Button::new(text.as_str())
+                                .add(Button::new(
+                                    RichText::new(text.as_str())
                                         .text_style(egui::TextStyle::Monospace),
-                                )
+                                ))
                                 .clicked()
                             {
                                 self.input_text.push_str(hole.as_str());
@@ -531,8 +541,10 @@ impl GUIApp {
                             let text = format!("{:width$}", hole, width = 5);
                             ui.add_enabled(
                                 false,
-                                egui::Button::new(text.as_str())
-                                    .text_style(egui::TextStyle::Monospace),
+                                Button::new(
+                                    RichText::new(text.as_str())
+                                        .text_style(egui::TextStyle::Monospace),
+                                ),
                             );
                         }
                     });
@@ -583,14 +595,14 @@ impl GUIApp {
                 ui.label("Copyright © 2021");
                 ui.label("Sebastian Thuemmel");
                 ui.add_space(10.0);
-                ui.add(
-                    egui::Hyperlink::new("https://github.com/Seebass22/harptabber")
-                        .text("source code"),
-                );
-                ui.add(
-                    egui::Hyperlink::new("https://seebass22.itch.io/harmonica-tab-transposer")
-                        .text("web version & downloads"),
-                );
+                ui.add(egui::Hyperlink::from_label_and_url(
+                    "source code",
+                    "https://github.com/Seebass22/harptabber",
+                ));
+                ui.add(egui::Hyperlink::from_label_and_url(
+                    "web version & downloads",
+                    "https://seebass22.itch.io/harmonica-tab-transposer",
+                ));
             });
     }
 }
