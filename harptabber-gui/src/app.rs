@@ -590,8 +590,8 @@ impl GUIApp {
             .show(ctx, |ui| {
                 ui.label("harptabber-gui");
                 ui.add_space(10.0);
-                ui.label("Copyright © 2021");
-                ui.label("Sebastian Thuemmel");
+                ui.label("Copyright © 2021-2022");
+                ui.label("Sebastian James Thuemmel");
                 ui.add_space(10.0);
                 ui.add(egui::Hyperlink::from_label_and_url(
                     "source code",
