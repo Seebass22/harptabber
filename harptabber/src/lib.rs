@@ -1,5 +1,5 @@
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 #[macro_use]
 extern crate lazy_static;
@@ -307,7 +307,7 @@ pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, sink:
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn play_indices_as_audio(indices: &[i32], sink: &rodio::Sink){
+pub fn play_indices_as_audio(indices: &[i32], sink: &rodio::Sink) {
     for i in indices.iter() {
         audio::play(*i, sink);
     }
@@ -567,6 +567,44 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
         draw_bends_2,
         draw_bends_3,
     ]
+}
+
+pub fn get_scales() -> BTreeMap<String, Vec<&'static str>> {
+    harptool::scales::get_scales()
+}
+
+fn scale_degree_to_index(degree: &str) -> usize {
+    let degrees = [
+        "1", "b2", "2", "b3", "3", "4", "#4", "5", "b6", "6", "b7", "7",
+    ];
+    degrees.iter().position(|d| *d == degree).unwrap()
+}
+
+fn index_to_tab(notes: &[String], index: usize) -> String {
+    match notes.get(index) {
+        Some(note) => note.to_string(),
+        None => String::from("X"),
+    }
+}
+
+pub fn scale_to_tab(scale: &str, tuning: &str, position: i32, style: Style) -> String {
+    let semitone_shift = positions_to_semitones(1, position, 0);
+    let scales = get_scales();
+    let scale_degrees = scales.get(scale).unwrap();
+    let (notes, _) = tuning_to_notes_in_order(tuning);
+    let notes = change_tab_style(&notes, style);
+
+    let mut res = scale_degrees
+        .iter()
+        .map(|d| scale_degree_to_index(d))
+        .map(|i| index_to_tab(&notes, i + semitone_shift as usize))
+        .map(|mut s| {
+            s.push(' ');
+            s
+        })
+        .collect::<String>();
+    res.push_str(&index_to_tab(&notes, 12 + semitone_shift as usize));
+    res
 }
 
 #[cfg(test)]
@@ -831,5 +869,10 @@ mod tests {
         let expected = vec![(1, -12), (3, -10), (12, -7), (1, 0), (2, 7), (1, 12)];
         let res = get_playable_positions(tab, 1, "richter", "richter", Style::Default, true);
         assert_eq!(res, expected);
+    }
+    #[test]
+    fn test_scale_to_tab() {
+        let res = scale_to_tab("major", "richter", 1, Style::Default);
+        assert_eq!(res, "1 -1 2 -2'' -2 -3'' -3 4")
     }
 }
