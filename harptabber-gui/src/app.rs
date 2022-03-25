@@ -1,6 +1,7 @@
 use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle};
 use eframe::{egui, epi};
 use harptabber::Style;
+use std::collections::BTreeMap;
 
 #[cfg(not(target_arch = "wasm32"))]
 use rodio::{OutputStream, Sink};
@@ -32,6 +33,8 @@ pub struct GUIApp {
     #[cfg(not(target_arch = "wasm32"))]
     audio_context: AudioContext,
     should_play_note: bool,
+
+    scales: BTreeMap<String, Vec<&'static str>>,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -85,6 +88,8 @@ impl Default for GUIApp {
             #[cfg(not(target_arch = "wasm32"))]
             audio_context: AudioContext::new(),
             should_play_note: false,
+
+            scales: harptabber::get_scales(),
         }
     }
 }
@@ -116,6 +121,8 @@ impl epi::App for GUIApp {
                 if ui.button("About").clicked() {
                     self.about_open = true;
                 }
+
+                self.scale_menu(ui);
             });
         });
 
@@ -602,5 +609,21 @@ impl GUIApp {
                     "https://seebass22.itch.io/harmonica-tab-transposer",
                 ));
             });
+    }
+
+    fn scale_menu(&mut self, ui: &mut egui::Ui) {
+        ui.menu_button("Scales", |ui| {
+            for scale in self.scales.clone().keys() {
+                if ui.button(scale).clicked() {
+                    self.input_text = harptabber::scale_to_tab(
+                        scale,
+                        &self.input_tuning,
+                        self.from_position as i32,
+                        self.style
+                    );
+                    self.transpose();
+                }
+            }
+        });
     }
 }
