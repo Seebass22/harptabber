@@ -1,5 +1,5 @@
+use eframe::egui;
 use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle};
-use eframe::{egui, epi};
 use harptabber::Style;
 use std::collections::BTreeMap;
 
@@ -94,12 +94,14 @@ impl Default for GUIApp {
     }
 }
 
-impl epi::App for GUIApp {
-    fn name(&self) -> &str {
-        "harmonica tab transposer"
+impl GUIApp {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+        Self::default()
     }
+}
 
-    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
+impl eframe::App for GUIApp {
+    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 let style: egui::Style = (*ui.ctx().style()).clone();
@@ -567,7 +569,7 @@ impl GUIApp {
         }
     }
 
-    fn help_window(&mut self, ctx: &egui::CtxRef) {
+    fn help_window(&mut self, ctx: &egui::Context) {
         egui::Window::new("Help")
             .collapsible(false)
             .resizable(false)
@@ -589,7 +591,7 @@ impl GUIApp {
             });
     }
 
-    fn about_window(&mut self, ctx: &egui::CtxRef) {
+    fn about_window(&mut self, ctx: &egui::Context) {
         egui::Window::new("About")
             .collapsible(false)
             .resizable(false)
@@ -619,7 +621,7 @@ impl GUIApp {
                         scale,
                         &self.input_tuning,
                         self.from_position as i32,
-                        self.style
+                        self.style,
                     );
                     self.transpose();
                 }

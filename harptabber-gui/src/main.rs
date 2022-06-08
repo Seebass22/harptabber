@@ -6,7 +6,12 @@
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    let app = harptabber_gui::GUIApp::default();
+    use harptabber_gui::GUIApp;
+
     let native_options = eframe::NativeOptions::default();
-    eframe::run_native(Box::new(app), native_options);
+    eframe::run_native(
+        "harmonica tab transposer",
+        native_options,
+        Box::new(|cc| Box::new(GUIApp::new(cc))),
+    );
 }
