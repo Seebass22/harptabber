@@ -40,6 +40,7 @@ pub struct GUIApp {
 
     // autotabber
     receiver: Option<Receiver<String>>,
+    enable_autotabber: bool,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -97,6 +98,7 @@ impl Default for GUIApp {
             scales: harptabber::get_scales(),
 
             receiver: None,
+            enable_autotabber: false,
         }
     }
 }
@@ -132,6 +134,11 @@ impl eframe::App for GUIApp {
                 }
 
                 self.scale_menu(ui);
+
+                if ui.button("Autotabber").clicked() {
+                    self.enable_autotabber =
+                        !self.enable_autotabber;
+                }
             });
         });
 
@@ -250,7 +257,9 @@ impl GUIApp {
 
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
         ui.heading("input");
-        self.autotabber(ui);
+        if self.enable_autotabber {
+            self.autotabber(ui);
+        }
 
         let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
         let tedit_output = input_field.show(ui);
@@ -673,6 +682,7 @@ impl GUIApp {
 
     fn autotabber(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
+            ui.label("autotabber");
             if ui.button("run").clicked() {
                 let (sender, receiver) = mpsc::channel();
                 self.receiver = Some(receiver);
