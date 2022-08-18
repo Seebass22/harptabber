@@ -9,7 +9,7 @@ mod audio;
 #[cfg(not(target_arch = "wasm32"))]
 use rodio::{OutputStream, Sink};
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Style {
     Default,
     Harpsurgery,
@@ -24,14 +24,13 @@ fn transpose<'a>(
     note: &str,
     semitones: i32,
 ) -> Result<&'a str, String> {
-    let mut pos;
-    match input_harp_notes.iter().position(|x| x == note) {
-        Some(p) => pos = p as i32,
+    let mut pos = match input_harp_notes.iter().position(|x| x == note) {
+        Some(p) => p as i32,
         None => {
             let error = format!("\"{}\" is not a valid note", note);
             return Err(error);
         }
-    }
+    };
 
     pos += semitones;
     if let Some(new_note) = output_harp_notes.get(pos as usize) {
@@ -108,21 +107,20 @@ pub fn run(options: RunOptions) {
         semitones = positions_to_semitones(from_position, 1, octave_shift);
     }
 
-    let res;
-    if playable_positions {
-        res = transpose_playable_positions(
+    let res = if playable_positions {
+        transpose_playable_positions(
             &tab,
             from_position as u32,
             input_tuning,
             output_tuning,
             style,
             allow_bends,
-        );
+        )
     } else {
         let (tabs, _) =
             transpose_tabs(tab, semitones, no_error, style, input_tuning, output_tuning);
-        res = tabs;
-    }
+        tabs
+    };
     print!("{}", res);
 
     #[cfg(not(target_arch = "wasm32"))]
@@ -182,7 +180,7 @@ fn convert_to_harpsurgery_style(note: &str) -> String {
 
 pub fn change_tab_style_single(note: &str, style: Style) -> String {
     match style {
-        Style::BBends => note.replace("'", "b"),
+        Style::BBends => note.replace('\'', "b"),
         Style::Harpsurgery => convert_to_harpsurgery_style(note),
         Style::Plus => convert_to_plus_style(note),
         Style::DrawDefault => convert_to_draw_style(note),
