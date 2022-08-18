@@ -516,18 +516,16 @@ impl GUIApp {
                                 .fill(egui::color::Color32::TRANSPARENT),
                             );
                         } else {
-                            let display_note;
-                            if self.should_display_notes {
-                                display_note = harptabber::tab_to_note(
+                            let display_note = if self.should_display_notes {
+                                harptabber::tab_to_note(
                                     hole,
                                     &self.key,
                                     &self.notes_in_order,
                                     &self.duplicated_notes,
-                                );
+                                )
                             } else {
-                                display_note =
-                                    harptabber::change_tab_style_single(hole, self.style);
-                            }
+                                harptabber::change_tab_style_single(hole, self.style)
+                            };
 
                             let hole = harptabber::change_tab_style_single(hole, self.style);
 
