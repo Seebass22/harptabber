@@ -135,6 +135,7 @@ impl eframe::App for GUIApp {
 
                 self.scale_menu(ui);
 
+                #[cfg(not(target_arch = "wasm32"))]
                 if ui.button("Autotabber").clicked() {
                     self.enable_autotabber =
                         !self.enable_autotabber;
