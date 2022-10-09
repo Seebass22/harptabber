@@ -240,12 +240,11 @@ impl GUIApp {
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
         ui.heading("input");
 
-        if ui
-            .add(TextEdit::multiline(&mut self.input_text).desired_width(600.0))
-            .changed()
-        {
+        let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
+        let tedit_output = input_field.show(ui);
+        if tedit_output.response.changed() {
             self.transpose();
-        };
+        }
 
         if ui.button("copy").clicked() {
             ui.output().copied_text = self.input_text.clone();
@@ -324,7 +323,7 @@ impl GUIApp {
         ui.add_space(10.0);
 
         ui.collapsing("tab keyboard", |ui| {
-            self.tabkeyboard(ui);
+            self.tabkeyboard(ui, tedit_output.response.id);
         });
 
         ui.add_space(20.0);
@@ -440,7 +439,21 @@ impl GUIApp {
         }
     }
 
-    fn tabkeyboard(&mut self, ui: &mut egui::Ui) {
+    fn insert_text_at_pos(&mut self, ui: &mut egui::Ui, text: &str, tedit_id: egui::Id) {
+        if let Some(mut state) = egui::TextEdit::load_state(ui.ctx(), tedit_id) {
+            use egui::TextBuffer as _;
+            if let Some(ccursor) = state.ccursor_range() {
+                self.input_text.insert_text(text, ccursor.primary.index);
+                let new_ccursor =
+                    egui::text::CCursor::new(ccursor.primary.index + text.chars().count());
+                state.set_ccursor_range(Some(egui::text::CCursorRange::one(new_ccursor)));
+                state.store(ui.ctx(), tedit_id);
+                ui.ctx().memory().request_focus(tedit_id); // give focus back to the [`TextEdit`].
+            }
+        }
+    }
+
+    fn tabkeyboard(&mut self, ui: &mut egui::Ui, tedit_id: egui::Id) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
                 ui.checkbox(&mut self.should_display_notes, "display as notes");
@@ -525,8 +538,8 @@ impl GUIApp {
                                 ))
                                 .clicked()
                             {
-                                self.input_text.push_str(hole.as_str());
-                                self.input_text.push(' ');
+                                self.insert_text_at_pos(ui, hole.as_str(), tedit_id);
+                                self.insert_text_at_pos(ui, " ", tedit_id);
                                 self.transpose();
 
                                 #[cfg(not(target_arch = "wasm32"))]
