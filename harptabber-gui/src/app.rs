@@ -488,7 +488,7 @@ impl GUIApp {
                     ))
                     .clicked()
                 {
-                    self.input_text.push('\n');
+                    self.insert_text_at_pos(ui, "\n", tedit_id);
                 }
 
                 if ui
