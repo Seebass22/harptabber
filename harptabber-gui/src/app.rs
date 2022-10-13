@@ -497,7 +497,7 @@ impl GUIApp {
                     ))
                     .clicked()
                 {
-                    self.backspace();
+                    self.backspace(ui, tedit_id);
                     self.transpose();
                 }
             });
@@ -573,12 +573,33 @@ impl GUIApp {
         });
     }
 
-    fn backspace(&mut self) {
-        self.input_text.pop();
-        let mut last = self.input_text.chars().last();
-        while last.is_some() && last.unwrap() != ' ' {
-            self.input_text.pop();
-            last = self.input_text.chars().last();
+    fn backspace(&mut self, ui: &mut egui::Ui, tedit_id: egui::Id) {
+        if let Some(mut state) = egui::TextEdit::load_state(ui.ctx(), tedit_id) {
+            use egui::TextBuffer as _;
+            if let Some(ccursor) = state.ccursor_range() {
+                let mut deletion_start_point = ccursor.primary.index;
+                if deletion_start_point > 0 {
+                    deletion_start_point -= 1;
+                }
+                let chars: Vec<char> = self.input_text.chars().collect();
+                while deletion_start_point > 0 && chars[deletion_start_point - 1] != ' ' {
+                    deletion_start_point -= 1;
+                }
+                self.input_text
+                    .delete_char_range(deletion_start_point..(ccursor.primary.index));
+
+                let new_ccursor = egui::text::CCursor::new(deletion_start_point);
+                state.set_ccursor_range(Some(egui::text::CCursorRange::one(new_ccursor)));
+                state.store(ui.ctx(), tedit_id);
+                ui.ctx().memory().request_focus(tedit_id); // give focus back to the [`TextEdit`].
+            } else {
+                self.input_text.pop();
+                let mut last = self.input_text.chars().last();
+                while last.is_some() && last.unwrap() != ' ' {
+                    self.input_text.pop();
+                    last = self.input_text.chars().last();
+                }
+            }
         }
     }
 
