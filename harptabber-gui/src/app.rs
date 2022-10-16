@@ -137,8 +137,7 @@ impl eframe::App for GUIApp {
 
                 #[cfg(not(target_arch = "wasm32"))]
                 if ui.button("Autotabber").clicked() {
-                    self.enable_autotabber =
-                        !self.enable_autotabber;
+                    self.enable_autotabber = !self.enable_autotabber;
                 }
             });
         });
@@ -701,6 +700,18 @@ impl GUIApp {
             if ui.button("stop").clicked() {
                 self.receiver = None;
             }
+            egui::ComboBox::from_label("harp key")
+                .selected_text(&self.key)
+                .width(60.0)
+                .show_ui(ui, |ui| {
+                    for note in [
+                        "C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B",
+                    ]
+                    .iter()
+                    {
+                        ui.selectable_value(&mut self.key, note.to_string(), *note);
+                    }
+                });
         });
         if let Some(receiver) = &self.receiver {
             match receiver.try_recv() {
