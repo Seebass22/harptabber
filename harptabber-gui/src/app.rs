@@ -40,7 +40,27 @@ pub struct GUIApp {
 
     // autotabber
     receiver: Option<Receiver<String>>,
+    autotabber_opts: AutotabberOpts,
     enable_autotabber: bool,
+}
+
+#[derive(Clone)]
+struct AutotabberOpts {
+    buffer_size: usize,
+    count: u8,
+    full: bool,
+    min_volume: f64,
+}
+
+impl Default for AutotabberOpts {
+    fn default() -> Self {
+        Self {
+            buffer_size: 512,
+            count: 4,
+            full: false,
+            min_volume: 0.12,
+        }
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -98,6 +118,7 @@ impl Default for GUIApp {
             scales: harptabber::get_scales(),
 
             receiver: None,
+            autotabber_opts: AutotabberOpts::default(),
             enable_autotabber: false,
         }
     }
@@ -687,14 +708,18 @@ impl GUIApp {
                 let (sender, receiver) = mpsc::channel();
                 self.receiver = Some(receiver);
 
-                let buffer_size = 512;
-                let count = 4;
-                let full = false;
-                let min_volume = 0.12;
+                let opts = self.autotabber_opts.clone();
                 let key = self.key.clone();
 
                 std::thread::spawn(move || {
-                    autotabber::run(buffer_size, count, full, min_volume, key, sender);
+                    autotabber::run(
+                        opts.buffer_size,
+                        opts.count,
+                        opts.full,
+                        opts.min_volume,
+                        key,
+                        sender,
+                    );
                 });
             }
             if ui.button("stop").clicked() {
