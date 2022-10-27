@@ -618,8 +618,6 @@ impl GUIApp {
                 ui.label("  be interpreted correctly");
                 ui.add_space(10.0);
                 ui.label("- everything other than a valid note is ignored");
-                ui.add_space(10.0);
-                ui.label("- the tab keyboard can only append to the tab");
             });
     }
 
