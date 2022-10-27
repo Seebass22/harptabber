@@ -2,6 +2,8 @@ use eframe::egui;
 use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle};
 use harptabber::Style;
 use std::collections::BTreeMap;
+use std::sync::mpsc;
+use std::sync::mpsc::Receiver;
 
 #[cfg(not(target_arch = "wasm32"))]
 use rodio::{OutputStream, Sink};
@@ -35,6 +37,9 @@ pub struct GUIApp {
     should_play_note: bool,
 
     scales: BTreeMap<String, Vec<&'static str>>,
+
+    // autotabber
+    receiver: Option<Receiver<String>>,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -90,6 +95,8 @@ impl Default for GUIApp {
             should_play_note: false,
 
             scales: harptabber::get_scales(),
+
+            receiver: None,
         }
     }
 }
@@ -164,6 +171,10 @@ impl eframe::App for GUIApp {
 
         self.help_window(ctx);
         self.about_window(ctx);
+        if self.receiver.is_some() {
+            self.transpose();
+            ctx.request_repaint();
+        }
     }
 }
 
@@ -239,6 +250,7 @@ impl GUIApp {
 
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
         ui.heading("input");
+        self.autotabber(ui);
 
         let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
         let tedit_output = input_field.show(ui);
@@ -657,5 +669,35 @@ impl GUIApp {
                 }
             }
         });
+    }
+
+    fn autotabber(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            if ui.button("run").clicked() {
+                let (sender, receiver) = mpsc::channel();
+                self.receiver = Some(receiver);
+
+                let buffer_size = 512;
+                let count = 4;
+                let full = false;
+                let min_volume = 0.12;
+                let key = self.key.clone();
+
+                std::thread::spawn(move || {
+                    autotabber::run(buffer_size, count, full, min_volume, key, sender);
+                });
+            }
+            if ui.button("stop").clicked() {
+                self.receiver = None;
+            }
+        });
+        if let Some(receiver) = &self.receiver {
+            match receiver.try_recv() {
+                Ok(data) => {
+                    self.input_text.push_str(&data);
+                }
+                Err(_err) => (),
+            }
+        }
     }
 }
