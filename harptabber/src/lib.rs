@@ -218,6 +218,26 @@ fn tuning_to_notes(tuning: &str) -> &'static str {
     }
 }
 
+pub fn tab_to_scale_degree(
+    tab: &str,
+    position: u32,
+    notes_in_order: &[String],
+    duplicated_notes: &[String],
+) -> &'static str {
+    let tab = fix_enharmonics(tab, duplicated_notes);
+    let degrees = [
+        "1", "b2", "2", "b3", "3", "4", "#4", "5", "b6", "6", "b7", "7",
+    ];
+
+    if let Some(index) = notes_in_order.iter().position(|t| t == tab) {
+        let shift = ((position - 1) * 5).rem_euclid(12);
+        let index = (index + shift as usize).rem_euclid(12);
+        degrees[index]
+    } else {
+        "X"
+    }
+}
+
 pub fn tab_to_note(
     tab: &str,
     key: &str,

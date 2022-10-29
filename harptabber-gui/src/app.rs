@@ -18,7 +18,7 @@ pub struct GUIApp {
     output_tuning: String,
     keyboard_layout: Vec<Vec<String>>,
 
-    should_display_notes: bool,
+    display_as: DisplayOption,
     key: String,
     notes_in_order: Vec<String>,
     duplicated_notes: Vec<String>,
@@ -35,6 +35,13 @@ pub struct GUIApp {
     should_play_note: bool,
 
     scales: BTreeMap<String, Vec<&'static str>>,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+enum DisplayOption {
+    Tabs,
+    Degrees,
+    Notes,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -73,7 +80,7 @@ impl Default for GUIApp {
             output_tuning: "richter".to_owned(),
             keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
 
-            should_display_notes: false,
+            display_as: DisplayOption::Tabs,
             key: "C".to_owned(),
             notes_in_order: notes,
             duplicated_notes: duplicated,
@@ -456,16 +463,27 @@ impl GUIApp {
     fn tabkeyboard(&mut self, ui: &mut egui::Ui, tedit_id: egui::Id) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                ui.checkbox(&mut self.should_display_notes, "display as notes");
+                egui::ComboBox::from_id_source("no label")
+                    .selected_text(format!("{:?}", self.display_as))
+                    .width(80.0)
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(&mut self.display_as, DisplayOption::Tabs, "Tabs");
+                        ui.selectable_value(&mut self.display_as, DisplayOption::Notes, "Notes");
+                        ui.selectable_value(
+                            &mut self.display_as,
+                            DisplayOption::Degrees,
+                            "Degrees",
+                        );
+                    });
 
-                let mut _space = 155.0;
+                let mut _space = 176.0;
                 #[cfg(not(target_arch = "wasm32"))]
                 {
-                    _space = 70.0;
+                    _space -= 82.0;
                     ui.checkbox(&mut self.should_play_note, "play notes");
                 }
 
-                if self.should_display_notes || self.should_play_note {
+                if self.display_as == DisplayOption::Notes || self.should_play_note {
                     egui::ComboBox::from_label("key")
                         .selected_text(&self.key)
                         .width(60.0)
@@ -516,15 +534,23 @@ impl GUIApp {
                                 .fill(egui::color::Color32::TRANSPARENT),
                             );
                         } else {
-                            let display_note = if self.should_display_notes {
-                                harptabber::tab_to_note(
+                            let display_note = match self.display_as {
+                                DisplayOption::Notes => harptabber::tab_to_note(
                                     hole,
                                     &self.key,
                                     &self.notes_in_order,
                                     &self.duplicated_notes,
+                                ),
+                                DisplayOption::Degrees => harptabber::tab_to_scale_degree(
+                                    hole,
+                                    self.from_position,
+                                    &self.notes_in_order,
+                                    &self.duplicated_notes,
                                 )
-                            } else {
-                                harptabber::change_tab_style_single(hole, self.style)
+                                .to_owned(),
+                                DisplayOption::Tabs => {
+                                    harptabber::change_tab_style_single(hole, self.style)
+                                }
                             };
 
                             let hole = harptabber::change_tab_style_single(hole, self.style);
