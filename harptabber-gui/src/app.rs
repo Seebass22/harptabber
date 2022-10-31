@@ -35,6 +35,7 @@ pub struct GUIApp {
     should_play_note: bool,
 
     scales: BTreeMap<String, Vec<&'static str>>,
+    selected_scale: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -97,6 +98,7 @@ impl Default for GUIApp {
             should_play_note: false,
 
             scales: harptabber::get_scales(),
+            selected_scale: None,
         }
     }
 }
@@ -460,6 +462,28 @@ impl GUIApp {
         }
     }
 
+    fn get_tabkeyboard_button_color(&self, ui: &egui::Ui, hole: &str) -> egui::color::Color32 {
+        let degree = harptabber::tab_to_scale_degree(
+            hole,
+            self.from_position,
+            &self.notes_in_order,
+            &self.duplicated_notes,
+        );
+
+        if let Some(scale) = &self.selected_scale {
+            let scale = self.scales.get(scale).unwrap();
+            let is_scale_note = scale.contains(&degree);
+
+            match (is_scale_note, ui.ctx().style().visuals.dark_mode) {
+                (true, true) => egui::color::Color32::DARK_GREEN,
+                (true, false) => egui::color::Color32::LIGHT_GREEN,
+                (false, _) => ui.ctx().style().visuals.code_bg_color,
+            }
+        } else {
+            ui.ctx().style().visuals.code_bg_color
+        }
+    }
+
     fn tabkeyboard(&mut self, ui: &mut egui::Ui, tedit_id: egui::Id) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
@@ -520,6 +544,19 @@ impl GUIApp {
                 }
             });
 
+            egui::ComboBox::from_label("highlight scale")
+                .selected_text(
+                    self.selected_scale
+                        .clone()
+                        .unwrap_or_else(|| "none".to_owned()),
+                )
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut self.selected_scale, None, "none");
+                    for scale in self.scales.keys() {
+                        ui.selectable_value(&mut self.selected_scale, Some(scale.clone()), scale);
+                    }
+                });
+
             let rows = self.keyboard_layout.clone();
 
             for (i, row) in rows.iter().enumerate() {
@@ -553,13 +590,20 @@ impl GUIApp {
                                 }
                             };
 
+                            // determine color of button, depending on scale being highlighted
+                            let color = self.get_tabkeyboard_button_color(ui, hole);
+
                             let hole = harptabber::change_tab_style_single(hole, self.style);
 
                             let text = format!("{:width$}", &display_note, width = 5);
                             if ui
-                                .add(Button::new(
-                                    RichText::new(text.as_str()).text_style(TextStyle::Monospace),
-                                ))
+                                .add(
+                                    Button::new(
+                                        RichText::new(text.as_str())
+                                            .text_style(TextStyle::Monospace),
+                                    )
+                                    .fill(color),
+                                )
                                 .clicked()
                             {
                                 self.insert_text_at_pos(ui, hole.as_str(), tedit_id);
