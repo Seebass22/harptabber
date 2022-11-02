@@ -6,9 +6,13 @@
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
+    use eframe::epaint::Vec2;
     use harptabber_gui::GUIApp;
 
-    let native_options = eframe::NativeOptions::default();
+    let native_options = eframe::NativeOptions {
+        initial_window_size: Some(Vec2::new(1000.0, 800.0)),
+        ..eframe::NativeOptions::default()
+    };
     eframe::run_native(
         "harmonica tab transposer",
         native_options,

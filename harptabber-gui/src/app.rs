@@ -138,7 +138,7 @@ impl eframe::App for GUIApp {
         });
 
         egui::SidePanel::left("side_panel")
-            .default_width(330.0)
+            .default_width(550.0)
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     self.leftpanel(ui);
@@ -148,7 +148,7 @@ impl eframe::App for GUIApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("output");
-                ui.add(TextEdit::multiline(&mut self.output_text).desired_width(300.0));
+                ui.add(TextEdit::multiline(&mut self.output_text).desired_width(800.0));
                 egui::warn_if_debug_build(ui);
 
                 if ui.button("copy").clicked() {
