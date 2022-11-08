@@ -381,6 +381,8 @@ impl GUIApp {
                     "pentaharp",
                     "powerbender",
                     "powerdraw",
+                    "diminished",
+                    "lucky 13 diminished",
                     "lucky 13 powerchromatic",
                     "melody maker",
                     "easy 3rd",

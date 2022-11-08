@@ -9,7 +9,7 @@ edition = "2021"
 clap = "2.33.3"
 regex = "1.5"
 lazy_static = "1.4.0"
-harptool = { git = "https://github.com/Seebass22/harptool", rev = "83edf33", default-features = false }
+harptool = { git = "https://github.com/Seebass22/harptool", rev = "b4fd793", default-features = false }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rodio = "0.14"
