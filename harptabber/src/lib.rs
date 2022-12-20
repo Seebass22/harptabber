@@ -558,13 +558,6 @@ pub fn get_scales() -> BTreeMap<String, Vec<&'static str>> {
     harptool::scales::get_scales()
 }
 
-fn scale_degree_to_index(degree: &str) -> usize {
-    let degrees = [
-        "1", "b2", "2", "b3", "3", "4", "#4", "5", "b6", "6", "b7", "7",
-    ];
-    degrees.iter().position(|d| *d == degree).unwrap()
-}
-
 fn index_to_tab(notes: &[String], index: usize) -> String {
     match notes.get(index) {
         Some(note) => note.to_string(),
@@ -581,7 +574,7 @@ pub fn scale_to_tab(scale: &str, tuning: &str, position: i32, style: Style) -> S
 
     let mut res = scale_degrees
         .iter()
-        .map(|d| scale_degree_to_index(d))
+        .map(|d| harptool::scales::scale_degree_to_index(d))
         .map(|i| index_to_tab(&notes, i + semitone_shift as usize))
         .map(|mut s| {
             s.push(' ');
