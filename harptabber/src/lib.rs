@@ -18,7 +18,7 @@ pub enum Style {
     DrawDefault,
 }
 
-fn transpose<'a>(
+pub fn transpose<'a>(
     input_harp_notes: &'a [String],
     output_harp_notes: &'a [String],
     note: &str,
@@ -195,7 +195,7 @@ fn change_tab_style<T: AsRef<str>>(notes: &[T], style: Style) -> Vec<String> {
         .collect()
 }
 
-fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a [String]) -> &'a str {
+pub fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a [String]) -> &'a str {
     let mut i = 0;
     while i < duplicated_notes.len() {
         if note == duplicated_notes.get(i).unwrap() {
