@@ -18,6 +18,7 @@ pub enum Style {
     DrawDefault,
 }
 
+/// transpose a single harmonica note
 pub fn transpose<'a>(
     input_harp_notes: &'a [String],
     output_harp_notes: &'a [String],
@@ -40,6 +41,7 @@ pub fn transpose<'a>(
     }
 }
 
+/// given a position and a semitone offset, calculate the resulting position
 pub fn semitones_to_position(starting_pos: u32, semitones: i32) -> u32 {
     let position_diffs = [0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5];
     let index = semitones.rem_euclid(12);
@@ -47,6 +49,7 @@ pub fn semitones_to_position(starting_pos: u32, semitones: i32) -> u32 {
     (res + starting_pos - 1).rem_euclid(12) + 1
 }
 
+/// given an input position, an output position and number of octaves to shift, calculate the semitone difference
 pub fn positions_to_semitones(from_position: i32, to_position: i32, octave_shift: i32) -> i32 {
     let diff = to_position - from_position;
     (diff * 7).rem_euclid(12) + 12 * octave_shift
@@ -178,6 +181,7 @@ fn convert_to_harpsurgery_style(note: &str) -> String {
     }
 }
 
+/// change the tab style of a single note
 pub fn change_tab_style_single(note: &str, style: Style) -> String {
     match style {
         Style::BBends => note.replace('\'', "b"),
@@ -195,6 +199,7 @@ fn change_tab_style<T: AsRef<str>>(notes: &[T], style: Style) -> Vec<String> {
         .collect()
 }
 
+/// replace enharmonic notes in a tab, removing duplicated notes, e.g by replacing 3 blow with 3 draw on richter harps
 pub fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a [String]) -> &'a str {
     let mut i = 0;
     while i < duplicated_notes.len() {
@@ -206,6 +211,7 @@ pub fn fix_enharmonics<'a>(note: &'a str, duplicated_notes: &'a [String]) -> &'a
     note
 }
 
+/// return the notes of a harmonica in a certain tuning, falling back to richter tuning if tuning not found
 fn tuning_to_notes(tuning: &str) -> &'static str {
     let tunings = harptool::tunings::get_tunings();
 
@@ -218,6 +224,7 @@ fn tuning_to_notes(tuning: &str) -> &'static str {
     }
 }
 
+/// transform a single note (harmonica tab) to a scale degree
 pub fn tab_to_scale_degree(
     tab: &str,
     position: u32,
@@ -238,6 +245,7 @@ pub fn tab_to_scale_degree(
     }
 }
 
+/// transform a single note (harmonica tab) to letter notation
 pub fn tab_to_note(
     tab: &str,
     key: &str,
@@ -256,17 +264,20 @@ pub fn tab_to_note(
     }
 }
 
+/// given the name of a tuning, return 1. a vec of every note in that tuning and 2. a vec of duplicated notes and their alternatives
 pub fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
     let notes = tuning_to_notes(tuning);
     harptool::str_to_notes_in_order(notes)
 }
 
+/// play a tab as audio
 #[cfg(not(target_arch = "wasm32"))]
 pub fn play_tab(tab: String, tuning: &str, style: Style, sink: &rodio::Sink) {
     let indices = get_audio_indices(tab, tuning, style);
     play_indices_as_audio(&indices, sink);
 }
 
+/// play a tab as audio in a certain key
 #[cfg(not(target_arch = "wasm32"))]
 pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, sink: &rodio::Sink) {
     let mut indices = get_audio_indices(tab, tuning, style);
@@ -291,6 +302,7 @@ pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, sink:
     play_indices_as_audio(&indices, sink);
 }
 
+/// given indices (0 being A440), play them as audio
 #[cfg(not(target_arch = "wasm32"))]
 pub fn play_indices_as_audio(indices: &[i32], sink: &rodio::Sink) {
     for i in indices.iter() {
@@ -298,6 +310,7 @@ pub fn play_indices_as_audio(indices: &[i32], sink: &rodio::Sink) {
     }
 }
 
+/// return a vec of note indices for the tab (with 0 = A440)
 pub fn get_audio_indices(tab: String, tuning: &str, style: Style) -> Vec<i32> {
     let (notes, duplicated_notes) = tuning_to_notes_in_order(tuning);
     let notes = change_tab_style(&notes, style);
@@ -318,6 +331,7 @@ pub fn get_audio_indices(tab: String, tuning: &str, style: Style) -> Vec<i32> {
     res
 }
 
+/// transpose an entire tab
 pub fn transpose_tabs(
     tab: String,
     semitones: i32,
@@ -380,6 +394,7 @@ impl Tab for str {
     }
 }
 
+/// find all positions a tab is playable in without bends (or OBs and bends) and their semitone offsets
 pub fn get_playable_positions(
     tab: &str,
     input_position: u32,
@@ -415,6 +430,7 @@ pub fn get_playable_positions(
     results
 }
 
+/// convert 1-12 to ordinal numbers
 pub fn to_ordinal(num: u32) -> String {
     let end = match num {
         1 => "st",
@@ -554,6 +570,7 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
     ]
 }
 
+/// return a BTreeMap of scale names to scales (vec of scale degres)
 pub fn get_scales() -> BTreeMap<String, Vec<&'static str>> {
     harptool::scales::get_scales()
 }
@@ -572,6 +589,7 @@ fn index_to_tab(notes: &[String], index: usize) -> String {
     }
 }
 
+/// return a tab of a scale
 pub fn scale_to_tab(scale: &str, tuning: &str, position: i32, style: Style) -> String {
     let semitone_shift = positions_to_semitones(1, position, 0);
     let scales = get_scales();
