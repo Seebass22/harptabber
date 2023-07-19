@@ -679,9 +679,8 @@ impl GUIApp {
             use egui::TextBuffer as _;
             if let Some(ccursor) = state.ccursor_range() {
                 let mut deletion_start_point = ccursor.primary.index;
-                if deletion_start_point > 0 {
-                    deletion_start_point -= 1;
-                }
+                deletion_start_point = deletion_start_point.saturating_sub(1);
+
                 let chars: Vec<char> = self.input_text.chars().collect();
                 while deletion_start_point > 0 && chars[deletion_start_point - 1] != ' ' {
                     deletion_start_point -= 1;
