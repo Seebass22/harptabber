@@ -17,6 +17,7 @@ pub struct GUIApp {
     input_tuning: String,
     output_tuning: String,
     keyboard_layout: Vec<Vec<String>>,
+    keyboard_text: String,
 
     display_as: DisplayOption,
     key: String,
@@ -80,6 +81,7 @@ impl Default for GUIApp {
             input_tuning: "richter".to_owned(),
             output_tuning: "richter".to_owned(),
             keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
+            keyboard_text: "".to_owned(),
 
             display_as: DisplayOption::Tabs,
             key: "C".to_owned(),
@@ -105,7 +107,9 @@ impl Default for GUIApp {
 
 impl GUIApp {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        Self::default()
+        let mut default = Self::default();
+        default.generate_keyboard_text();
+        default
     }
 }
 
@@ -205,6 +209,7 @@ impl GUIApp {
             self.style,
             false,
         );
+        self.generate_keyboard_text();
     }
 
     fn playable_positions_panel(&mut self, ui: &mut egui::Ui) {
@@ -493,13 +498,18 @@ impl GUIApp {
                     .selected_text(format!("{:?}", self.display_as))
                     .width(80.0)
                     .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut self.display_as, DisplayOption::Tabs, "Tabs");
-                        ui.selectable_value(&mut self.display_as, DisplayOption::Notes, "Notes");
-                        ui.selectable_value(
-                            &mut self.display_as,
-                            DisplayOption::Degrees,
-                            "Degrees",
-                        );
+                        for (option_enum, option_str) in [
+                            (DisplayOption::Tabs, "Tabs"),
+                            (DisplayOption::Notes, "Notes"),
+                            (DisplayOption::Degrees, "Degrees"),
+                        ] {
+                            if ui
+                                .selectable_value(&mut self.display_as, option_enum, option_str)
+                                .changed()
+                            {
+                                self.generate_keyboard_text();
+                            };
+                        }
                     });
 
                 let mut _space = 176.0;
@@ -519,7 +529,12 @@ impl GUIApp {
                             ]
                             .iter()
                             {
-                                ui.selectable_value(&mut self.key, note.to_string(), *note);
+                                if ui
+                                    .selectable_value(&mut self.key, note.to_string(), *note)
+                                    .changed()
+                                {
+                                    self.generate_keyboard_text();
+                                }
                             }
                         });
                     ui.add_space(_space);
@@ -546,6 +561,7 @@ impl GUIApp {
                 }
             });
 
+            let mut should_generate_keyboard_text = false;
             egui::ComboBox::from_label("highlight scale")
                 .selected_text(
                     self.selected_scale
@@ -553,11 +569,26 @@ impl GUIApp {
                         .unwrap_or_else(|| "none".to_owned()),
                 )
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut self.selected_scale, None, "none");
+                    if ui
+                        .selectable_value(&mut self.selected_scale, None, "none")
+                        .changed()
+                    {
+                        should_generate_keyboard_text = true;
+                    };
                     for scale in self.scales.keys() {
-                        ui.selectable_value(&mut self.selected_scale, Some(scale.clone()), scale);
+                        if ui
+                            .selectable_value(&mut self.selected_scale, Some(scale.clone()), scale)
+                            .changed()
+                        {
+                            should_generate_keyboard_text = true;
+                        };
                     }
                 });
+            if should_generate_keyboard_text {
+                self.generate_keyboard_text();
+            }
+
+            ui.label(&self.keyboard_text);
 
             let rows = self.keyboard_layout.clone();
 
@@ -729,5 +760,43 @@ impl GUIApp {
                 }
             }
         });
+    }
+
+    fn generate_keyboard_text(&mut self) {
+        let mut text = String::new();
+        if self.display_as == DisplayOption::Notes {
+            text.push_str(&self.key);
+            text.push(' ');
+        }
+
+        text.push_str(&self.input_tuning);
+        text.push_str(" harp");
+
+        if let Some(scale) = &self.selected_scale {
+            text.push_str(", ");
+            if self.display_as == DisplayOption::Notes {
+                let shift = ((self.from_position - 1) * 7).rem_euclid(12) as usize;
+
+                let chromatic_notes = [
+                    "C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B",
+                ];
+                let mut index = chromatic_notes
+                    .iter()
+                    .position(|note| *note == self.key)
+                    .unwrap();
+                index = (index + shift).rem_euclid(12);
+
+                text.push_str(chromatic_notes[index]);
+                text.push(' ');
+            } else {
+                let pos_string = harptabber::to_ordinal(self.from_position);
+                text.push_str(&format!("{} position ", pos_string));
+            }
+
+            text.push_str(scale);
+            text.push_str(" scale highlighted");
+        }
+
+        self.keyboard_text = text;
     }
 }
