@@ -156,7 +156,7 @@ impl eframe::App for GUIApp {
                 egui::warn_if_debug_build(ui);
 
                 if ui.button("copy").clicked() {
-                    ui.output().copied_text = self.output_text.clone();
+                    ui.output_mut(|o| o.copied_text = self.output_text.clone());
                 }
 
                 if !self.error_text.is_empty() {
@@ -261,7 +261,7 @@ impl GUIApp {
         }
 
         if ui.button("copy").clicked() {
-            ui.output().copied_text = self.input_text.clone();
+            ui.output_mut(|o| o.copied_text = self.input_text.clone());
         }
 
         ui.spacing_mut().slider_width = 150.0;
@@ -464,7 +464,7 @@ impl GUIApp {
                     egui::text::CCursor::new(ccursor.primary.index + text.chars().count());
                 state.set_ccursor_range(Some(egui::text::CCursorRange::one(new_ccursor)));
                 state.store(ui.ctx(), tedit_id);
-                ui.ctx().memory().request_focus(tedit_id); // give focus back to the [`TextEdit`].
+                ui.ctx().memory_mut(|mem| mem.request_focus(tedit_id)); // give focus back to the [`TextEdit`].
             }
         }
     }
@@ -691,7 +691,7 @@ impl GUIApp {
                 let new_ccursor = egui::text::CCursor::new(deletion_start_point);
                 state.set_ccursor_range(Some(egui::text::CCursorRange::one(new_ccursor)));
                 state.store(ui.ctx(), tedit_id);
-                ui.ctx().memory().request_focus(tedit_id); // give focus back to the [`TextEdit`].
+                ui.ctx().memory_mut(|mem| mem.request_focus(tedit_id)); // give focus back to the [`TextEdit`].
             } else {
                 self.input_text.pop();
                 let mut last = self.input_text.chars().last();
