@@ -469,7 +469,7 @@ impl GUIApp {
         }
     }
 
-    fn get_tabkeyboard_button_color(&self, ui: &egui::Ui, hole: &str) -> egui::color::Color32 {
+    fn get_tabkeyboard_button_color(&self, ui: &egui::Ui, hole: &str) -> egui::ecolor::Color32 {
         let degree = harptabber::tab_to_scale_degree(
             hole,
             self.from_position,
@@ -482,8 +482,8 @@ impl GUIApp {
             let is_scale_note = scale.contains(&degree);
 
             match (is_scale_note, ui.ctx().style().visuals.dark_mode) {
-                (true, true) => egui::color::Color32::DARK_GREEN,
-                (true, false) => egui::color::Color32::LIGHT_GREEN,
+                (true, true) => egui::ecolor::Color32::DARK_GREEN,
+                (true, false) => egui::ecolor::Color32::LIGHT_GREEN,
                 (false, _) => ui.ctx().style().visuals.code_bg_color,
             }
         } else {
@@ -601,7 +601,7 @@ impl GUIApp {
                                 Button::new(
                                     RichText::new("     ").text_style(TextStyle::Monospace),
                                 )
-                                .fill(egui::color::Color32::TRANSPARENT),
+                                .fill(egui::ecolor::Color32::TRANSPARENT),
                             );
                         } else {
                             let display_note = match self.display_as {
