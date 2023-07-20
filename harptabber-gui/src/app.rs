@@ -124,6 +124,7 @@ impl eframe::App for GUIApp {
                 }
 
                 ui.menu_button("File", |ui| {
+                    #[cfg(not(target_arch = "wasm32"))]
                     if ui.button("Quit").clicked() {
                         frame.close();
                     }

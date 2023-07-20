@@ -18,7 +18,7 @@ pack:
 	rm -f *.zip
 	rm -rf $(OUTDIR)
 	mkdir -p $(OUTDIR)
-	zip -r $(OUTDIR)/web.zip docs
+	zip -r $(OUTDIR)/web.zip harptabber-gui/dist
 	cp target/release/harptabber-gui target/release/harptabber target/$(WINDOWS)/release/harptabber.exe target/$(WINDOWS)/release/harptabber-gui.exe $(OUTDIR)
 
 itch: pack
