@@ -513,7 +513,7 @@ impl GUIApp {
                         }
                     });
 
-                let mut _space = 176.0;
+                let mut _space = 192.0;
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     _space -= 82.0;
@@ -540,7 +540,7 @@ impl GUIApp {
                         });
                     ui.add_space(_space);
                 } else {
-                    ui.add_space(_space + 103.0);
+                    ui.add_space(_space + 95.0);
                 }
                 if ui
                     .add(Button::new(
