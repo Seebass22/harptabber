@@ -350,6 +350,9 @@ pub fn transpose_tabs(
     let mut result = String::from("");
     let mut errors: Vec<String> = Vec::new();
 
+    // replace double quotes in input with two single quotes
+    let tab = tab.replace('"', "''");
+
     for line in tab.lines() {
         let line: Vec<&str> = line.split_whitespace().collect();
 

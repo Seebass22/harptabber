@@ -713,8 +713,6 @@ impl GUIApp {
                 ui.label("- if a note is too high or low to be played, or would");
                 ui.label("  require bending an overblow, it will appear as X");
                 ui.add_space(10.0);
-                ui.label("- don't use double quotes (use single quotes for bends)");
-                ui.add_space(10.0);
                 ui.label("- don't forget spaces between notes");
                 ui.add_space(10.0);
                 ui.label("- set the tab style to the one you use, so the tab can");
