@@ -347,7 +347,8 @@ pub fn transpose_tabs(
     let (output_notes, _) = tuning_to_notes_in_order(output_tuning);
     let output_notes = change_tab_style(&output_notes, style);
 
-    let mut result = String::from("");
+    // allocate space for output tab
+    let mut result = String::with_capacity(tab.len() + 50);
     let mut errors: Vec<String> = Vec::new();
 
     // replace double quotes in input with two single quotes
