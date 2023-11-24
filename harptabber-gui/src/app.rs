@@ -1,5 +1,5 @@
 use eframe::egui;
-use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle};
+use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle, ViewportCommand};
 use harptabber::Style;
 use std::collections::BTreeMap;
 
@@ -114,7 +114,7 @@ impl GUIApp {
 }
 
 impl eframe::App for GUIApp {
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 let style: egui::Style = (*ui.ctx().style()).clone();
@@ -126,7 +126,7 @@ impl eframe::App for GUIApp {
                 ui.menu_button("File", |ui| {
                     #[cfg(not(target_arch = "wasm32"))]
                     if ui.button("Quit").clicked() {
-                        frame.close();
+                        ctx.send_viewport_cmd(ViewportCommand::Close);
                     }
                 });
 
