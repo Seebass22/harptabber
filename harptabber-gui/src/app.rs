@@ -26,6 +26,7 @@ pub struct GUIApp {
     playable_without_overblows: Vec<(u32, i32)>,
     playable_without_bends: Vec<(u32, i32)>,
     allow_bends: bool,
+    keep_errors: bool,
 
     error_text: String,
     about_open: bool,
@@ -90,6 +91,7 @@ impl Default for GUIApp {
             playable_without_overblows: Vec::new(),
             playable_without_bends: Vec::new(),
             allow_bends: true,
+            keep_errors: false,
 
             error_text: "".to_owned(),
             about_open: false,
@@ -153,12 +155,18 @@ impl eframe::App for GUIApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("output");
+
                 ui.add(TextEdit::multiline(&mut self.output_text).desired_width(800.0));
                 egui::warn_if_debug_build(ui);
 
-                if ui.button("copy").clicked() {
-                    ui.output_mut(|o| o.copied_text = self.output_text.clone());
-                }
+                ui.horizontal(|ui| {
+                    if ui.button("copy").clicked() {
+                        ui.output_mut(|o| o.copied_text = self.output_text.clone());
+                    }
+                    if ui.checkbox(&mut self.keep_errors, "keep errors").changed() {
+                        self.transpose();
+                    }
+                });
 
                 if !self.error_text.is_empty() {
                     ui.add_space(20.0);
@@ -186,7 +194,7 @@ impl GUIApp {
         let (tabs, errors) = harptabber::transpose_tabs(
             self.input_text.clone(),
             self.semitone_shift,
-            false,
+            self.keep_errors,
             self.style,
             &self.input_tuning,
             &self.output_tuning,
