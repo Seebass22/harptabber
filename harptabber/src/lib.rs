@@ -323,19 +323,14 @@ pub fn get_audio_indices(tab: String, tuning: &str, style: Style) -> Vec<i32> {
     let notes = change_tab_style(&notes, style);
     let duplicated_notes = change_tab_style(&duplicated_notes, style);
 
-    let mut res: Vec<i32> = Vec::new();
-    for line in tab.lines() {
-        let line: Vec<&str> = line.split_whitespace().collect();
-
-        for note in line {
-            let note = fix_enharmonics(note, &duplicated_notes);
-
-            if let Some(index) = get_index_a440(note, &notes) {
-                res.push(index);
-            }
-        }
-    }
-    res
+    tab.lines()
+        .flat_map(|line| {
+            line.split_whitespace().filter_map(|note| {
+                let note = fix_enharmonics(note, &duplicated_notes);
+                get_index_a440(note, &notes)
+            })
+        })
+        .collect()
 }
 
 /// transpose an entire tab
@@ -354,36 +349,35 @@ pub fn transpose_tabs(
     let (output_notes, _) = tuning_to_notes_in_order(output_tuning);
     let output_notes = change_tab_style(&output_notes, style);
 
-    // allocate space for output tab
-    let mut result = String::with_capacity(tab.len() + 50);
     let mut errors: Vec<String> = Vec::new();
 
     // replace double quotes in input with two single quotes
     let tab = tab.replace('"', "''");
 
-    for line in tab.lines() {
-        let line: Vec<&str> = line.split_whitespace().collect();
-
-        for note in line {
-            let note = fix_enharmonics(note, &duplicated_notes);
-            let new_note = transpose(&input_notes, &output_notes, note, semitones);
-
-            match new_note {
-                Ok(new_note) => {
-                    result.push_str(new_note);
-                    result.push(' ');
-                }
-                Err(s) => {
-                    errors.push(note.to_string());
-                    if !no_error {
-                        eprintln!("{}", s);
-                        std::process::exit(-1);
+    let result = tab
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|note| fix_enharmonics(note, &duplicated_notes))
+                .map(|note| transpose(&input_notes, &output_notes, note, semitones))
+                .flat_map(|transpose_result| match transpose_result {
+                    Ok(new_note) => [new_note, " "],
+                    Err(error) => {
+                        let TransposeError::InvalidNote(input_note) = error;
+                        errors.push(input_note.to_string());
+                        if !no_error {
+                            eprintln!("{}", error);
+                            std::process::exit(-1);
+                        }
+                        ["", ""]
                     }
-                }
-            }
-        }
-        result.push('\n');
-    }
+                })
+                .collect::<String>()
+        })
+        .chain(["".to_owned()])
+        .collect::<Vec<String>>()
+        .join("\n");
+
     (result, errors)
 }
 
