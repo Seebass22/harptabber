@@ -258,16 +258,16 @@ pub fn tab_to_note(
     key: &str,
     notes_in_order: &[String],
     duplicated_notes: &[String],
-) -> String {
+) -> &'static str {
     let scale = harptool::ChromaticScale::new(key, None);
     let tab = fix_enharmonics(tab, duplicated_notes);
 
     if let Some(index) = notes_in_order.iter().position(|t| t == tab) {
         let index = index.rem_euclid(12);
-        let res = scale.notes.get(index).unwrap();
-        String::from(res)
+        let res = scale.0.get(index).unwrap();
+        res
     } else {
-        String::from("X")
+        "X"
     }
 }
 
@@ -298,7 +298,7 @@ pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, sink:
     };
 
     let scale = harptool::ChromaticScale::new("C", sharp);
-    let mut offset = scale.notes.iter().position(|n| n == key).unwrap() as i32;
+    let mut offset = scale.0.iter().position(|&n| n == key).unwrap() as i32;
 
     if ["G", "A", "B", "Ab", "Bb"].contains(&key) {
         offset -= 12;
@@ -577,7 +577,7 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
 }
 
 /// return a BTreeMap of scale names to scales (vec of scale degres)
-pub fn get_scales() -> BTreeMap<String, Vec<&'static str>> {
+pub fn get_scales() -> &'static BTreeMap<String, Vec<&'static str>> {
     harptool::scales::get_scales()
 }
 

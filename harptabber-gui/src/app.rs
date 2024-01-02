@@ -36,7 +36,7 @@ pub struct GUIApp {
     audio_context: AudioContext,
     should_play_note: bool,
 
-    scales: BTreeMap<String, Vec<&'static str>>,
+    scales: &'static BTreeMap<String, Vec<&'static str>>,
     selected_scale: Option<String>,
 }
 
@@ -619,7 +619,8 @@ impl GUIApp {
                                     &self.key,
                                     &self.notes_in_order,
                                     &self.duplicated_notes,
-                                ),
+                                )
+                                .to_owned(),
                                 DisplayOption::Degrees => harptabber::tab_to_scale_degree(
                                     hole,
                                     self.from_position,
