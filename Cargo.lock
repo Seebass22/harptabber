@@ -1344,6 +1344,7 @@ dependencies = [
  "lazy_static",
  "regex",
  "rodio",
+ "thiserror",
 ]
 
 [[package]]

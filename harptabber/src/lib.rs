@@ -1,6 +1,8 @@
 use regex::Regex;
 use std::collections::BTreeMap;
 use std::fs;
+use thiserror::Error;
+
 #[macro_use]
 extern crate lazy_static;
 
@@ -18,18 +20,23 @@ pub enum Style {
     DrawDefault,
 }
 
+#[derive(Error, Debug, PartialEq)]
+pub enum TransposeError<'a> {
+    #[error("`{0}` is not a valid note")]
+    InvalidNote(&'a str),
+}
+
 /// transpose a single harmonica note
 pub fn transpose<'a>(
     input_harp_notes: &'a [String],
     output_harp_notes: &'a [String],
-    note: &str,
+    note: &'a str,
     semitones: i32,
-) -> Result<&'a str, String> {
+) -> Result<&'a str, TransposeError<'a>> {
     let mut pos = match input_harp_notes.iter().position(|x| x == note) {
         Some(p) => p as i32,
         None => {
-            let error = format!("\"{}\" is not a valid note", note);
-            return Err(error);
+            return Err(TransposeError::InvalidNote(note));
         }
     };
 
