@@ -186,7 +186,7 @@ impl GUIApp {
         let (tabs, errors) = harptabber::transpose_tabs(
             self.input_text.clone(),
             self.semitone_shift,
-            true,
+            false,
             self.style,
             &self.input_tuning,
             &self.output_tuning,

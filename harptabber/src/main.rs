@@ -49,10 +49,10 @@ fn main() {
                 .validator(is_int),
         )
         .arg(
-            Arg::with_name("no-error")
+            Arg::with_name("keep-errors")
                 .short("e")
-                .long("no-error")
-                .help("ignore invalid notes"),
+                .long("keep-errors")
+                .help("include invalid notes in output tab"),
         )
         .arg(
             Arg::with_name("style")
@@ -106,7 +106,7 @@ fn main() {
     let input_tuning = matches.value_of("input-tuning").unwrap();
     let output_tuning = matches.value_of("output-tuning").unwrap();
 
-    let no_error = matches.is_present("no-error");
+    let keep_errors = matches.is_present("keep-errors");
     let from_position = matches
         .value_of("from-position")
         .unwrap()
@@ -142,7 +142,7 @@ fn main() {
         from_position,
         to_position,
         octave_shift,
-        no_error,
+        keep_errors,
         style,
         input_tuning,
         output_tuning,

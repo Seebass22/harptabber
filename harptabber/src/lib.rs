@@ -68,7 +68,7 @@ pub struct RunOptions<'a> {
     pub from_position: i32,
     pub to_position: Option<i32>,
     pub octave_shift: i32,
-    pub no_error: bool,
+    pub keep_errors: bool,
     pub style: Style,
     pub input_tuning: &'a str,
     pub output_tuning: &'a str,
@@ -94,7 +94,7 @@ pub fn run(options: RunOptions) {
         from_position,
         to_position,
         octave_shift,
-        no_error,
+        keep_errors: no_error,
         style,
         input_tuning,
         output_tuning,
@@ -337,7 +337,7 @@ pub fn get_audio_indices(tab: String, tuning: &str, style: Style) -> Vec<i32> {
 pub fn transpose_tabs(
     tab: String,
     semitones: i32,
-    no_error: bool,
+    keep_errors: bool,
     style: Style,
     input_tuning: &str,
     output_tuning: &str,
@@ -365,11 +365,12 @@ pub fn transpose_tabs(
                     Err(error) => {
                         let TransposeError::InvalidNote(input_note) = error;
                         errors.push(input_note.to_string());
-                        if !no_error {
+                        if keep_errors {
+                            [input_note, " "]
+                        } else {
                             eprintln!("{}", error);
-                            std::process::exit(-1);
+                            ["", ""]
                         }
-                        ["", ""]
                     }
                 })
                 .collect::<String>()
@@ -416,7 +417,7 @@ pub fn get_playable_positions(
         let (notes, _errors) = transpose_tabs(
             tab.to_string(),
             semitones,
-            true,
+            false,
             style,
             input_tuning,
             output_tuning,
