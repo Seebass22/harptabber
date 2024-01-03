@@ -6,6 +6,8 @@ use std::collections::BTreeMap;
 #[cfg(not(target_arch = "wasm32"))]
 use rodio::{OutputStream, Sink};
 
+use crate::syntax_highlight;
+
 pub struct GUIApp {
     input_text: String,
     output_text: String,
@@ -27,6 +29,8 @@ pub struct GUIApp {
     playable_without_bends: Vec<(u32, i32)>,
     allow_bends: bool,
     keep_errors: bool,
+    highlighter: syntax_highlight::MemoizedHighlighter,
+    errors: Vec<String>,
 
     error_text: String,
     about_open: bool,
@@ -92,6 +96,8 @@ impl Default for GUIApp {
             playable_without_bends: Vec::new(),
             allow_bends: true,
             keep_errors: false,
+            highlighter: Default::default(),
+            errors: Vec::new(),
 
             error_text: "".to_owned(),
             about_open: false,
@@ -201,6 +207,7 @@ impl GUIApp {
         );
         self.output_text = tabs;
         self.error_text = errors.join(" ");
+        self.errors = errors;
 
         self.playable_without_overblows = harptabber::get_playable_positions(
             &self.input_text,
@@ -263,7 +270,15 @@ impl GUIApp {
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
         ui.heading("input");
 
-        let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
+        let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
+            let mut layout_job: egui::text::LayoutJob =
+                self.highlighter.highlight(ui.style(), string, &self.errors);
+            layout_job.wrap.max_width = wrap_width;
+            ui.fonts(|f| f.layout_job(layout_job))
+        };
+        let input_field = egui::TextEdit::multiline(&mut self.input_text)
+            .desired_width(600.0)
+            .layouter(&mut layouter);
         let tedit_output = input_field.show(ui);
         if tedit_output.response.changed() {
             self.transpose();
