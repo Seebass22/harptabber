@@ -34,7 +34,6 @@ fn highlight_tab(
     text: &str,
     invalid_notes: &[String],
 ) -> egui::text::LayoutJob {
-    dbg!(invalid_notes);
     let mut job = egui::text::LayoutJob::default();
 
     // TODO use regex instead to match word boundary
@@ -55,45 +54,25 @@ fn highlight_tab(
         })
     });
 
+    let default_text_format = egui::text::TextFormat {
+        color: egui_style.visuals.text_color(),
+        ..Default::default()
+    };
+    let error_text_format = egui::text::TextFormat {
+        color: egui_style.visuals.error_fg_color,
+        ..Default::default()
+    };
+
     let mut prev_pos = 0;
     if !indices.is_empty() {
         for &(start, stop) in indices.iter() {
-            job.append(
-                &text[prev_pos..start],
-                0.0,
-                egui::text::TextFormat {
-                    color: egui_style.visuals.text_color(),
-                    ..Default::default()
-                },
-            );
-
-            job.append(
-                &text[start..stop],
-                0.0,
-                egui::text::TextFormat {
-                    color: egui_style.visuals.error_fg_color,
-                    ..Default::default()
-                },
-            );
+            job.append(&text[prev_pos..start], 0.0, default_text_format.clone());
+            job.append(&text[start..stop], 0.0, error_text_format.clone());
             prev_pos = stop;
         }
-        job.append(
-            &text[prev_pos..],
-            0.0,
-            egui::text::TextFormat {
-                color: egui_style.visuals.text_color(),
-                ..Default::default()
-            },
-        );
+        job.append(&text[prev_pos..], 0.0, default_text_format);
     } else {
-        job.append(
-            text,
-            0.0,
-            egui::text::TextFormat {
-                color: egui_style.visuals.text_color(),
-                ..Default::default()
-            },
-        );
+        job.append(text, 0.0, default_text_format);
     }
 
     job
