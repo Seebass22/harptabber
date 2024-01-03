@@ -6,6 +6,8 @@ use std::collections::BTreeMap;
 #[cfg(not(target_arch = "wasm32"))]
 use rodio::{OutputStream, Sink};
 
+use crate::syntax_highlight::highlight_tab;
+
 pub struct GUIApp {
     input_text: String,
     output_text: String,
@@ -263,7 +265,14 @@ impl GUIApp {
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
         ui.heading("input");
 
-        let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
+        let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
+            let mut layout_job: egui::text::LayoutJob = highlight_tab(ui.style(), string);
+            layout_job.wrap.max_width = wrap_width;
+            ui.fonts(|f| f.layout_job(layout_job))
+        };
+        let input_field = egui::TextEdit::multiline(&mut self.input_text)
+            .desired_width(600.0)
+            .layouter(&mut layouter);
         let tedit_output = input_field.show(ui);
         if tedit_output.response.changed() {
             self.transpose();
