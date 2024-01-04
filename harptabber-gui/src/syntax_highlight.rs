@@ -50,9 +50,10 @@ fn highlight_tab(
         .flat_map(|invalid_note| {
             let escaped = regex::escape(invalid_note);
             // prevent highlighting parts of valid notes (e.g. ' in -4' or 2' in -2')
-            let regex_string = r"[^0-9'-]".to_owned() + &escaped;
+            let regex_string = r"(^|[^0-9'-])(?<target>".to_owned() + &escaped + ")";
             let re = Regex::new(&regex_string).unwrap();
-            re.find_iter(text)
+            re.captures_iter(text)
+                .map(|captures| captures.name("target").unwrap())
                 .map(|m| (m.start(), m.end()))
                 .collect::<Vec<(usize, usize)>>()
         })
