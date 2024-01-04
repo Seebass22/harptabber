@@ -1,6 +1,6 @@
-use std::collections::BTreeSet;
-
 use eframe::egui;
+use regex::Regex;
+use std::collections::BTreeSet;
 
 #[derive(Default)]
 pub struct MemoizedHighlighter {
@@ -45,15 +45,18 @@ fn highlight_tab(
         }
     }
 
-    // TODO use regex instead to match word boundary
     let mut indices: BTreeSet<(usize, usize)> = new_invalid_notes
         .iter()
         .flat_map(|invalid_note| {
-            text.match_indices(invalid_note)
-                .map(|(i, string)| (i, i + string.len()))
+            let escaped = regex::escape(invalid_note);
+            // prevent highlighting parts of valid notes (e.g. ' in -4' or 2' in -2')
+            let regex_string = r"[^0-9'-]".to_owned() + &escaped;
+            let re = Regex::new(&regex_string).unwrap();
+            re.find_iter(text)
+                .map(|m| (m.start(), m.end()))
+                .collect::<Vec<(usize, usize)>>()
         })
         .collect();
-    dbg!(&indices);
 
     let indices_copy = indices.clone();
     indices.retain(|(start, stop)| {
