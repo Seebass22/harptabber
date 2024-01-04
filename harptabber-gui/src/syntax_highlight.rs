@@ -36,8 +36,17 @@ fn highlight_tab(
 ) -> egui::text::LayoutJob {
     let mut job = egui::text::LayoutJob::default();
 
+    // workaround: double quotes may have been replaced by single quotes in input
+    let mut new_invalid_notes = Vec::new();
+    for string in invalid_notes.iter() {
+        new_invalid_notes.push(string.clone());
+        if string.contains("''") {
+            new_invalid_notes.push(string.replace("''", "\""));
+        }
+    }
+
     // TODO use regex instead to match word boundary
-    let mut indices: BTreeSet<(usize, usize)> = invalid_notes
+    let mut indices: BTreeSet<(usize, usize)> = new_invalid_notes
         .iter()
         .flat_map(|invalid_note| {
             text.match_indices(invalid_note)
