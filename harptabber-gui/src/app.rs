@@ -32,7 +32,6 @@ pub struct GUIApp {
     highlighter: syntax_highlight::MemoizedHighlighter,
     errors: Vec<String>,
 
-    error_text: String,
     about_open: bool,
     help_open: bool,
 
@@ -99,7 +98,6 @@ impl Default for GUIApp {
             highlighter: Default::default(),
             errors: Vec::new(),
 
-            error_text: "".to_owned(),
             about_open: false,
             help_open: false,
 
@@ -174,16 +172,6 @@ impl eframe::App for GUIApp {
                     }
                 });
 
-                if !self.error_text.is_empty() {
-                    ui.add_space(20.0);
-
-                    ui.label("invalid notes");
-                    ui.add_enabled(
-                        false,
-                        TextEdit::multiline(&mut self.error_text).desired_width(300.0),
-                    );
-                }
-
                 ui.collapsing("playable positions", |ui| {
                     self.playable_positions_panel(ui);
                 });
@@ -206,7 +194,6 @@ impl GUIApp {
             &self.output_tuning,
         );
         self.output_text = tabs;
-        self.error_text = errors.join(" ");
         self.errors = errors;
 
         self.playable_without_overblows = harptabber::get_playable_positions(
