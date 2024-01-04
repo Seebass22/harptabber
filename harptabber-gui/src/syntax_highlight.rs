@@ -75,6 +75,11 @@ fn highlight_tab(
     let mut prev_pos = 0;
     if !indices.is_empty() {
         for &(start, stop) in indices.iter() {
+            // fix invalid range indices sometimes occurring
+            if prev_pos > start {
+                job.append(&text[prev_pos..], 0.0, default_text_format.clone());
+                break;
+            }
             job.append(&text[prev_pos..start], 0.0, default_text_format.clone());
             job.append(&text[start..stop], 0.0, error_text_format.clone());
             prev_pos = stop;
