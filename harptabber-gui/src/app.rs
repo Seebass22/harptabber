@@ -16,8 +16,8 @@ pub struct GUIApp {
     to_position: u32,
     style: Style,
     style_example: String,
-    input_tuning: String,
-    output_tuning: String,
+    input_tuning: &'static str,
+    output_tuning: &'static str,
     keyboard_layout: Vec<Vec<String>>,
     keyboard_text: String,
 
@@ -82,8 +82,8 @@ impl Default for GUIApp {
             to_position: 1,
             style: Style::Default,
             style_example: "-2 -2'' -3 4 -4 5 5o 6".to_owned(),
-            input_tuning: "richter".to_owned(),
-            output_tuning: "richter".to_owned(),
+            input_tuning: "richter",
+            output_tuning: "richter",
             keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
             keyboard_text: "".to_owned(),
 
@@ -190,8 +190,8 @@ impl GUIApp {
             self.semitone_shift,
             self.keep_errors,
             self.style,
-            &self.input_tuning,
-            &self.output_tuning,
+            self.input_tuning,
+            self.output_tuning,
         );
         self.output_text = tabs;
         self.errors = errors;
@@ -199,16 +199,16 @@ impl GUIApp {
         self.playable_without_overblows = harptabber::get_playable_positions(
             &self.input_text,
             self.from_position,
-            &self.input_tuning,
-            &self.output_tuning,
+            self.input_tuning,
+            self.output_tuning,
             self.style,
             true,
         );
         self.playable_without_bends = harptabber::get_playable_positions(
             &self.input_text,
             self.from_position,
-            &self.input_tuning,
-            &self.output_tuning,
+            self.input_tuning,
+            self.output_tuning,
             self.style,
             false,
         );
@@ -334,7 +334,7 @@ impl GUIApp {
                 self.audio_context = AudioContext::new();
                 harptabber::play_tab_in_key(
                     self.input_text.clone(),
-                    &self.input_tuning,
+                    self.input_tuning,
                     self.style,
                     &self.key,
                     &self.audio_context.sink,
@@ -373,18 +373,14 @@ impl GUIApp {
     }
 
     fn tuning_selector(&mut self, ui: &mut egui::Ui, is_input: bool) {
-        let mut tuning;
-        let label_name;
-        if is_input {
-            label_name = "input tuning";
-            tuning = self.input_tuning.clone();
+        let (mut tuning, label_name) = if is_input {
+            (self.input_tuning, "input tuning")
         } else {
-            label_name = "output tuning";
-            tuning = self.output_tuning.clone();
-        }
+            (self.output_tuning, "output tuning")
+        };
 
         egui::ComboBox::from_label(label_name)
-            .selected_text(&tuning)
+            .selected_text(tuning)
             .width(150.0)
             .show_ui(ui, |ui| {
                 for tuning_text in [
@@ -409,19 +405,19 @@ impl GUIApp {
                 .iter()
                 {
                     if ui
-                        .selectable_value(&mut tuning, tuning_text.to_string(), *tuning_text)
+                        .selectable_value(&mut tuning, tuning_text, *tuning_text)
                         .changed()
                     {
                         if is_input {
-                            self.keyboard_layout = harptabber::get_tabkeyboard_layout(&tuning);
-                            self.input_tuning = tuning.clone();
+                            self.keyboard_layout = harptabber::get_tabkeyboard_layout(tuning);
+                            self.input_tuning = tuning;
 
                             let (notes, duplicated) =
-                                harptabber::tuning_to_notes_in_order(&self.input_tuning);
+                                harptabber::tuning_to_notes_in_order(self.input_tuning);
                             self.notes_in_order = notes;
                             self.duplicated_notes = duplicated;
                         } else {
-                            self.output_tuning = tuning.clone();
+                            self.output_tuning = tuning;
                         }
                         self.transpose();
                     }
@@ -660,7 +656,7 @@ impl GUIApp {
                                 if self.should_play_note {
                                     harptabber::play_tab_in_key(
                                         hole,
-                                        &self.input_tuning,
+                                        self.input_tuning,
                                         self.style,
                                         &self.key,
                                         &self.audio_context.sink,
@@ -762,7 +758,7 @@ impl GUIApp {
                 if ui.button(scale).clicked() {
                     self.input_text = harptabber::scale_to_tab(
                         scale,
-                        &self.input_tuning,
+                        self.input_tuning,
                         self.from_position as i32,
                         self.style,
                     );
@@ -779,7 +775,7 @@ impl GUIApp {
             text.push(' ');
         }
 
-        text.push_str(&self.input_tuning);
+        text.push_str(self.input_tuning);
         text.push_str(" harp");
 
         if let Some(scale) = &self.selected_scale {
