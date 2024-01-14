@@ -216,10 +216,10 @@ impl GUIApp {
     }
 
     fn playable_positions_panel(&mut self, ui: &mut egui::Ui) {
-        let pairs = if self.allow_bends {
-            self.playable_without_overblows.clone()
+        let pairs: &[(u32, i32)] = if self.allow_bends {
+            self.playable_without_overblows.as_ref()
         } else {
-            self.playable_without_bends.clone()
+            self.playable_without_bends.as_ref()
         };
 
         ui.horizontal(|ui| {
@@ -250,6 +250,7 @@ impl GUIApp {
                 self.semitone_shift = *semitones;
                 self.to_position = *position;
                 self.transpose();
+                break;
             }
         }
     }
@@ -757,7 +758,7 @@ impl GUIApp {
 
     fn scale_menu(&mut self, ui: &mut egui::Ui) {
         ui.menu_button("Scales", |ui| {
-            for scale in self.scales.clone().keys() {
+            for scale in self.scales.keys() {
                 if ui.button(scale).clicked() {
                     self.input_text = harptabber::scale_to_tab(
                         scale,
