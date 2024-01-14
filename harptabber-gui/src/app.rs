@@ -37,7 +37,7 @@ pub struct GUIApp {
     should_play_note: bool,
 
     scales: &'static BTreeMap<String, Vec<&'static str>>,
-    selected_scale: Option<String>,
+    selected_scale: Option<&'static str>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -483,7 +483,7 @@ impl GUIApp {
             &self.duplicated_notes,
         );
 
-        if let Some(scale) = &self.selected_scale {
+        if let Some(scale) = self.selected_scale {
             let scale = self.scales.get(scale).unwrap();
             let is_scale_note = scale.contains(&degree);
 
@@ -569,11 +569,7 @@ impl GUIApp {
 
             let mut should_generate_keyboard_text = false;
             egui::ComboBox::from_label("highlight scale")
-                .selected_text(
-                    self.selected_scale
-                        .clone()
-                        .unwrap_or_else(|| "none".to_owned()),
-                )
+                .selected_text(self.selected_scale.unwrap_or("none"))
                 .show_ui(ui, |ui| {
                     if ui
                         .selectable_value(&mut self.selected_scale, None, "none")
@@ -583,7 +579,7 @@ impl GUIApp {
                     };
                     for scale in self.scales.keys() {
                         if ui
-                            .selectable_value(&mut self.selected_scale, Some(scale.clone()), scale)
+                            .selectable_value(&mut self.selected_scale, Some(scale), scale)
                             .changed()
                         {
                             should_generate_keyboard_text = true;
