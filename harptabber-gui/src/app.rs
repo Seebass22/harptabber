@@ -22,7 +22,7 @@ pub struct GUIApp {
     keyboard_text: String,
 
     display_as: DisplayOption,
-    key: String,
+    key: &'static str,
     notes_in_order: Vec<String>,
     duplicated_notes: Vec<String>,
     playable_without_overblows: Vec<(u32, i32)>,
@@ -88,7 +88,7 @@ impl Default for GUIApp {
             keyboard_text: "".to_owned(),
 
             display_as: DisplayOption::Tabs,
-            key: "C".to_owned(),
+            key: "C",
             notes_in_order: notes,
             duplicated_notes: duplicated,
             playable_without_overblows: Vec::new(),
@@ -336,7 +336,7 @@ impl GUIApp {
                     self.input_text.clone(),
                     self.input_tuning,
                     self.style,
-                    &self.key,
+                    self.key,
                     &self.audio_context.sink,
                 );
                 self.audio_context.sink.play();
@@ -529,7 +529,7 @@ impl GUIApp {
 
                 if self.display_as == DisplayOption::Notes || self.should_play_note {
                     egui::ComboBox::from_label("key")
-                        .selected_text(&self.key)
+                        .selected_text(self.key)
                         .width(60.0)
                         .show_ui(ui, |ui| {
                             for note in [
@@ -537,10 +537,7 @@ impl GUIApp {
                             ]
                             .iter()
                             {
-                                if ui
-                                    .selectable_value(&mut self.key, note.to_string(), *note)
-                                    .changed()
-                                {
+                                if ui.selectable_value(&mut self.key, note, *note).changed() {
                                     self.generate_keyboard_text();
                                 }
                             }
@@ -611,7 +608,7 @@ impl GUIApp {
                             let display_note = match self.display_as {
                                 DisplayOption::Notes => harptabber::tab_to_note(
                                     hole,
-                                    &self.key,
+                                    self.key,
                                     &self.notes_in_order,
                                     &self.duplicated_notes,
                                 )
@@ -654,7 +651,7 @@ impl GUIApp {
                                         hole,
                                         self.input_tuning,
                                         self.style,
-                                        &self.key,
+                                        self.key,
                                         &self.audio_context.sink,
                                     );
                                 }
@@ -767,7 +764,7 @@ impl GUIApp {
     fn generate_keyboard_text(&mut self) {
         let mut text = String::new();
         if self.display_as == DisplayOption::Notes {
-            text.push_str(&self.key);
+            text.push_str(self.key);
             text.push(' ');
         }
 
