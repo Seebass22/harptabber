@@ -13,7 +13,7 @@ pub struct GUIApp {
     from_position: u32,
     to_position: u32,
     style: Style,
-    style_example: String,
+    style_example: &'static str,
     input_tuning: &'static str,
     output_tuning: &'static str,
     keyboard_layout: Vec<Vec<String>>,
@@ -78,7 +78,7 @@ impl Default for GUIApp {
             from_position: 1,
             to_position: 1,
             style: Style::Default,
-            style_example: "-2 -2'' -3 4 -4 5 5o 6".to_owned(),
+            style_example: "-2 -2'' -3 4 -4 5 5o 6",
             input_tuning: "richter",
             output_tuning: "richter",
             keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
@@ -428,35 +428,35 @@ impl GUIApp {
             .selectable_value(&mut self.style, Style::Default, "default")
             .clicked()
         {
-            self.style_example = String::from("-2 -2'' -3 4 -4 5 5o 6");
+            self.style_example = "-2 -2'' -3 4 -4 5 5o 6";
             self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::BBends, "b-bends")
             .clicked()
         {
-            self.style_example = String::from("-2 -2bb -3 4 -4 5 5o 6");
+            self.style_example = "-2 -2bb -3 4 -4 5 5o 6";
             self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::DrawDefault, "draw-default")
             .clicked()
         {
-            self.style_example = String::from("2 2'' 3 +4 4 +5 +5o +6");
+            self.style_example = "2 2'' 3 +4 4 +5 +5o +6";
             self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::Plus, "plus/minus")
             .clicked()
         {
-            self.style_example = String::from("-2 -2'' -3 +4 -4 +5 +5o +6");
+            self.style_example = "-2 -2'' -3 +4 -4 +5 +5o +6";
             self.transpose();
         }
         if ui
             .selectable_value(&mut self.style, Style::Harpsurgery, "harpsurgery")
             .clicked()
         {
-            self.style_example = String::from("2D 2D'' 3D 4B 4D 5B 5B# 6B");
+            self.style_example = "2D 2D'' 3D 4B 4D 5B 5B# 6B";
             self.transpose();
         }
     }
