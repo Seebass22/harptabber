@@ -9,7 +9,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-eframe = "0.26.0" # Gives us egui, web+native backends
+eframe = "0.27.2" # Gives us egui, web+native backends
 harptabber = { path = "../harptabber" }
 log = "0.4"
 regex = "1.10.2"
