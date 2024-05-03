@@ -38,6 +38,8 @@ pub struct GUIApp {
 
     scales: &'static BTreeMap<String, Vec<&'static str>>,
     selected_scale: Option<&'static str>,
+
+    theme: catppuccin_egui::Theme,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -103,6 +105,8 @@ impl Default for GUIApp {
 
             scales: harptabber::get_scales(),
             selected_scale: None,
+
+            theme: catppuccin_egui::FRAPPE,
         }
     }
 }
@@ -117,12 +121,19 @@ impl GUIApp {
 
 impl eframe::App for GUIApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        catppuccin_egui::set_theme(ctx, self.theme);
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 let style: egui::Style = (*ui.ctx().style()).clone();
                 let new_visuals = style.visuals.light_dark_small_toggle_button(ui);
                 if let Some(visuals) = new_visuals {
                     ui.ctx().set_visuals(visuals);
+                    use catppuccin_egui::{FRAPPE, LATTE};
+                    self.theme = match self.theme {
+                        FRAPPE => LATTE,
+                        LATTE => FRAPPE,
+                        _ => unreachable!(),
+                    }
                 }
 
                 ui.menu_button("File", |ui| {
@@ -489,10 +500,9 @@ impl GUIApp {
             let scale = self.scales.get(scale).unwrap();
             let is_scale_note = scale.contains(&degree);
 
-            match (is_scale_note, ui.ctx().style().visuals.dark_mode) {
-                (true, true) => egui::ecolor::Color32::DARK_GREEN,
-                (true, false) => egui::ecolor::Color32::LIGHT_GREEN,
-                (false, _) => ui.ctx().style().visuals.code_bg_color,
+            match is_scale_note {
+                true => ui.ctx().style().visuals.selection.bg_fill,
+                false => ui.ctx().style().visuals.code_bg_color,
             }
         } else {
             ui.ctx().style().visuals.code_bg_color

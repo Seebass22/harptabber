@@ -12,6 +12,8 @@ crate-type = ["cdylib", "rlib"]
 eframe = "0.27.2" # Gives us egui, web+native backends
 harptabber = { path = "../harptabber" }
 log = "0.4"
+regex = "1.10.2"
+catppuccin-egui = { version = "5.1", default-features = false, features = ["egui27"] }
 
 # native
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

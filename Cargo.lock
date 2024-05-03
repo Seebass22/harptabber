@@ -618,6 +618,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "catppuccin-egui"
+version = "5.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c521c1737df50564c5868f5d23e582fbcf8fc40366053cb02290421955e4c8f"
+dependencies = [
+ "egui",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1578,6 +1587,7 @@ dependencies = [
 name = "harptabber-gui"
 version = "0.1.0"
 dependencies = [
+ "catppuccin-egui",
  "eframe",
  "env_logger",
  "harptabber",
