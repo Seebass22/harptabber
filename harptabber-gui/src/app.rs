@@ -38,8 +38,6 @@ pub struct GUIApp {
 
     scales: &'static BTreeMap<String, Vec<&'static str>>,
     selected_scale: Option<&'static str>,
-
-    theme: catppuccin_egui::Theme,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -105,8 +103,6 @@ impl Default for GUIApp {
 
             scales: harptabber::get_scales(),
             selected_scale: None,
-
-            theme: catppuccin_egui::FRAPPE,
         }
     }
 }
@@ -121,21 +117,9 @@ impl GUIApp {
 
 impl eframe::App for GUIApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        catppuccin_egui::set_theme(ctx, self.theme);
+        catppuccin_egui::set_theme(ctx, catppuccin_egui::FRAPPE);
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                let style: egui::Style = (*ui.ctx().style()).clone();
-                let new_visuals = style.visuals.light_dark_small_toggle_button(ui);
-                if let Some(visuals) = new_visuals {
-                    ui.ctx().set_visuals(visuals);
-                    use catppuccin_egui::{FRAPPE, LATTE};
-                    self.theme = match self.theme {
-                        FRAPPE => LATTE,
-                        LATTE => FRAPPE,
-                        _ => unreachable!(),
-                    }
-                }
-
                 ui.menu_button("File", |ui| {
                     #[cfg(not(target_arch = "wasm32"))]
                     if ui.button("Quit").clicked() {
