@@ -165,7 +165,7 @@ impl eframe::App for GUIApp {
 
                 ui.horizontal(|ui| {
                     if ui.button("copy").clicked() {
-                        ui.output_mut(|o| o.copied_text = self.output_text.clone());
+                        ui.output_mut(|o| o.copied_text.clone_from(&self.output_text));
                     }
                     if ui.checkbox(&mut self.keep_errors, "keep errors").changed() {
                         self.transpose();
@@ -273,7 +273,7 @@ impl GUIApp {
         }
 
         if ui.button("copy").clicked() {
-            ui.output_mut(|o| o.copied_text = self.input_text.clone());
+            ui.output_mut(|o| o.copied_text.clone_from(&self.input_text));
         }
 
         ui.spacing_mut().slider_width = 150.0;

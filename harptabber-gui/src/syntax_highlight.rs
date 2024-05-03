@@ -21,7 +21,7 @@ impl MemoizedHighlighter {
             != (egui_style, text, invalid_notes)
         {
             self.style = egui_style.clone();
-            self.text = text.to_owned();
+            text.clone_into(&mut self.text);
             self.errors = invalid_notes.to_vec();
             self.output = highlight_tab(egui_style, text, invalid_notes);
         }
