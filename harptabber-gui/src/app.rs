@@ -466,11 +466,13 @@ impl GUIApp {
     fn insert_text_at_pos(&mut self, ui: &mut egui::Ui, text: &str, tedit_id: egui::Id) {
         if let Some(mut state) = egui::TextEdit::load_state(ui.ctx(), tedit_id) {
             use egui::TextBuffer as _;
-            if let Some(ccursor) = state.ccursor_range() {
+            if let Some(ccursor) = state.cursor.char_range() {
                 self.input_text.insert_text(text, ccursor.primary.index);
                 let new_ccursor =
                     egui::text::CCursor::new(ccursor.primary.index + text.chars().count());
-                state.set_ccursor_range(Some(egui::text::CCursorRange::one(new_ccursor)));
+                state
+                    .cursor
+                    .set_char_range(Some(egui::text::CCursorRange::one(new_ccursor)));
                 state.store(ui.ctx(), tedit_id);
                 ui.ctx().memory_mut(|mem| mem.request_focus(tedit_id)); // give focus back to the [`TextEdit`].
             }
@@ -679,7 +681,7 @@ impl GUIApp {
     fn backspace(&mut self, ui: &mut egui::Ui, tedit_id: egui::Id) {
         if let Some(mut state) = egui::TextEdit::load_state(ui.ctx(), tedit_id) {
             use egui::TextBuffer as _;
-            if let Some(ccursor) = state.ccursor_range() {
+            if let Some(ccursor) = state.cursor.char_range() {
                 let mut deletion_start_point = ccursor.primary.index;
                 deletion_start_point = deletion_start_point.saturating_sub(1);
 
@@ -691,7 +693,9 @@ impl GUIApp {
                     .delete_char_range(deletion_start_point..(ccursor.primary.index));
 
                 let new_ccursor = egui::text::CCursor::new(deletion_start_point);
-                state.set_ccursor_range(Some(egui::text::CCursorRange::one(new_ccursor)));
+                state
+                    .cursor
+                    .set_char_range(Some(egui::text::CCursorRange::one(new_ccursor)));
                 state.store(ui.ctx(), tedit_id);
                 ui.ctx().memory_mut(|mem| mem.request_focus(tedit_id)); // give focus back to the [`TextEdit`].
             } else {
