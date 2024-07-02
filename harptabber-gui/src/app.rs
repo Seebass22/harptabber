@@ -390,6 +390,7 @@ impl GUIApp {
                     "powerbender",
                     "powerdraw",
                     "diminished",
+                    "spiral",
                     "lucky 13 diminished",
                     "lucky 13 powerchromatic",
                     "melody maker",
