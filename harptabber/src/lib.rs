@@ -362,13 +362,11 @@ pub fn transpose_tabs(
                 .map(|note| transpose(&input_notes, &output_notes, note, semitones))
                 .flat_map(|transpose_result| match transpose_result {
                     Ok(new_note) => [new_note, " "],
-                    Err(error) => {
-                        let TransposeError::InvalidNote(input_note) = error;
+                    Err(TransposeError::InvalidNote(input_note)) => {
                         errors.push(input_note.to_string());
                         if keep_errors {
                             [input_note, " "]
                         } else {
-                            eprintln!("{}", error);
                             ["", ""]
                         }
                     }
