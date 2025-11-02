@@ -1,5 +1,5 @@
 use eframe::egui;
-use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle, ViewportCommand};
+use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle};
 use harptabber::Style;
 use std::collections::BTreeMap;
 
@@ -117,15 +117,18 @@ impl GUIApp {
 
 impl eframe::App for GUIApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        catppuccin_egui::set_theme(ctx, catppuccin_egui::FRAPPE);
+        // catppuccin_egui::set_theme(ctx, catppuccin_egui::FRAPPE);
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            egui::menu::bar(ui, |ui| {
-                ui.menu_button("File", |ui| {
-                    #[cfg(not(target_arch = "wasm32"))]
-                    if ui.button("Quit").clicked() {
-                        ctx.send_viewport_cmd(ViewportCommand::Close);
-                    }
-                });
+            egui::MenuBar::new().ui(ui, |ui| {
+                // NOTE: no File->Quit on web pages!
+                let is_web = cfg!(target_arch = "wasm32");
+                if !is_web {
+                    ui.menu_button("File", |ui| {
+                        if ui.button("Quit").clicked() {
+                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                        }
+                    });
+                }
 
                 if ui.button("Help").clicked() {
                     self.help_open = true;
@@ -136,6 +139,7 @@ impl eframe::App for GUIApp {
                 }
 
                 self.scale_menu(ui);
+                // egui::widgets::global_theme_preference_buttons(ui);
             });
         });
 
@@ -156,7 +160,7 @@ impl eframe::App for GUIApp {
 
                 ui.horizontal(|ui| {
                     if ui.button("copy").clicked() {
-                        ui.output_mut(|o| o.copied_text.clone_from(&self.output_text));
+                        ui.ctx().copy_text(self.output_text.clone());
                     }
                     if ui.checkbox(&mut self.keep_errors, "keep errors").changed() {
                         self.transpose();
@@ -266,7 +270,7 @@ impl GUIApp {
         }
 
         if ui.button("copy").clicked() {
-            ui.output_mut(|o| o.copied_text.clone_from(&self.input_text));
+            ui.ctx().copy_text(self.input_text.clone());
         }
 
         ui.spacing_mut().slider_width = 150.0;
@@ -497,7 +501,7 @@ impl GUIApp {
     fn tabkeyboard(&mut self, ui: &mut egui::Ui, tedit_id: egui::Id) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                egui::ComboBox::from_id_source("no label")
+                egui::ComboBox::from_id_salt("no label")
                     .selected_text(format!("{:?}", self.display_as))
                     .width(80.0)
                     .show_ui(ui, |ui| {

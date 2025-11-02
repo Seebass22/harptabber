@@ -16,7 +16,7 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "harmonica tab transposer",
         native_options,
-        Box::new(|cc| Box::new(GUIApp::new(cc))),
+        Box::new(|cc| Ok(Box::new(GUIApp::new(cc)))),
     )
 }
 
