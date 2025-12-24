@@ -263,7 +263,11 @@ impl GUIApp {
     fn semitone_offset_settings(&mut self, ui: &mut egui::Ui) {
         ui.spacing_mut().slider_width = 150.0;
         if ui
-            .add(Slider::new(&mut self.semitone_shift, -24..=24).text("semitone shift"))
+            .add(
+                Slider::new(&mut self.semitone_shift, -24..=24)
+                    .clamping(egui::SliderClamping::Edits)
+                    .text("semitone shift"),
+            )
             .changed()
         {
             self.to_position =
