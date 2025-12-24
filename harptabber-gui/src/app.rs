@@ -321,7 +321,8 @@ impl GUIApp {
             if ui.button("copy").clicked() {
                 ui.ctx().copy_text(self.input_text.clone());
             }
-            ui.add_space(80.0);
+            ui.add_space(ui.available_size_before_wrap().x - 97.0);
+
             #[cfg(not(target_arch = "wasm32"))]
             if ui.button("play tab").clicked() {
                 self.audio_context = AudioContext::new();
@@ -518,7 +519,7 @@ impl GUIApp {
                         }
                     });
 
-                let mut _space = 192.0;
+                let mut _space = 214.0;
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     _space -= 82.0;
