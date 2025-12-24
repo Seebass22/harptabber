@@ -292,21 +292,13 @@ impl GUIApp {
             }
         });
 
-        if ui
+        let from_position_changed = ui
             .add(Slider::new(&mut self.from_position, 1..=12).text("starting position"))
-            .changed()
-        {
-            self.semitone_shift = harptabber::positions_to_semitones(
-                self.from_position as i32,
-                self.to_position as i32,
-                0,
-            );
-            self.transpose();
-        }
-        if ui
+            .changed();
+        let to_position_changed = ui
             .add(Slider::new(&mut self.to_position, 1..=12).text("target position"))
-            .changed()
-        {
+            .changed();
+        if from_position_changed || to_position_changed {
             self.semitone_shift = harptabber::positions_to_semitones(
                 self.from_position as i32,
                 self.to_position as i32,
