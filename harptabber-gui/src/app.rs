@@ -260,19 +260,7 @@ impl GUIApp {
         }
     }
 
-    fn leftpanel(&mut self, ui: &mut egui::Ui) {
-        ui.heading("input");
-
-        let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
-        let tedit_output = input_field.show(ui);
-        if tedit_output.response.changed() {
-            self.transpose();
-        }
-
-        if ui.button("copy").clicked() {
-            ui.ctx().copy_text(self.input_text.clone());
-        }
-
+    fn semitone_offset_settings(&mut self, ui: &mut egui::Ui) {
         ui.spacing_mut().slider_width = 150.0;
         if ui
             .add(Slider::new(&mut self.semitone_shift, -24..=24).text("semitone shift"))
@@ -322,7 +310,22 @@ impl GUIApp {
             );
             self.transpose();
         }
+    }
 
+    fn leftpanel(&mut self, ui: &mut egui::Ui) {
+        ui.heading("input");
+
+        let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
+        let tedit_output = input_field.show(ui);
+        if tedit_output.response.changed() {
+            self.transpose();
+        }
+
+        if ui.button("copy").clicked() {
+            ui.ctx().copy_text(self.input_text.clone());
+        }
+
+        self.semitone_offset_settings(ui);
         ui.add_space(10.0);
 
         #[cfg(not(target_arch = "wasm32"))]
