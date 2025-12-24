@@ -306,6 +306,7 @@ impl GUIApp {
             );
             self.transpose();
         }
+        ui.add_space(10.0);
     }
 
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
@@ -316,16 +317,12 @@ impl GUIApp {
         if tedit_output.response.changed() {
             self.transpose();
         }
-
-        if ui.button("copy").clicked() {
-            ui.ctx().copy_text(self.input_text.clone());
-        }
-
-        self.semitone_offset_settings(ui);
-        ui.add_space(10.0);
-
-        #[cfg(not(target_arch = "wasm32"))]
         ui.horizontal(|ui| {
+            if ui.button("copy").clicked() {
+                ui.ctx().copy_text(self.input_text.clone());
+            }
+            ui.add_space(80.0);
+            #[cfg(not(target_arch = "wasm32"))]
             if ui.button("play tab").clicked() {
                 self.audio_context = AudioContext::new();
                 harptabber::play_tab_in_key(
@@ -337,18 +334,21 @@ impl GUIApp {
                 );
                 self.audio_context.sink.play();
             }
+            #[cfg(not(target_arch = "wasm32"))]
             if ui.button("stop").clicked() {
                 self.audio_context = AudioContext::new();
             }
         });
 
-        ui.add_space(10.0);
+        egui::CollapsingHeader::new("transpose settings")
+            .default_open(true)
+            .show(ui, |ui| {
+                self.semitone_offset_settings(ui);
+            });
 
         ui.collapsing("tab keyboard", |ui| {
             self.tabkeyboard(ui, tedit_output.response.id);
         });
-
-        ui.add_space(20.0);
 
         self.tuning_selector(ui, true);
         self.tuning_selector(ui, false);
@@ -671,6 +671,7 @@ impl GUIApp {
                     });
                 }
             }
+            ui.add_space(20.0);
         });
     }
 
