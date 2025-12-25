@@ -152,11 +152,11 @@ impl eframe::App for GUIApp {
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            ui.spacing_mut().slider_width = 150.0;
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("output");
 
                 ui.add(TextEdit::multiline(&mut self.output_text).desired_width(800.0));
-                egui::warn_if_debug_build(ui);
 
                 ui.horizontal(|ui| {
                     if ui.button("copy").clicked() {
@@ -166,6 +166,8 @@ impl eframe::App for GUIApp {
                         self.transpose();
                     }
                 });
+                self.position_slider(ui, true);
+                self.semitone_shift_slider_and_octave_buttons(ui);
 
                 if !self.error_text.is_empty() {
                     ui.add_space(20.0);
@@ -176,6 +178,7 @@ impl eframe::App for GUIApp {
                         TextEdit::multiline(&mut self.error_text).desired_width(300.0),
                     );
                 }
+                ui.add_space(10.0);
 
                 ui.collapsing("playable positions", |ui| {
                     self.playable_positions_panel(ui);
@@ -260,8 +263,7 @@ impl GUIApp {
         }
     }
 
-    fn semitone_offset_settings(&mut self, ui: &mut egui::Ui) {
-        ui.spacing_mut().slider_width = 150.0;
+    fn semitone_shift_slider_and_octave_buttons(&mut self, ui: &mut egui::Ui) {
         if ui
             .add(
                 Slider::new(&mut self.semitone_shift, -24..=24)
@@ -291,14 +293,18 @@ impl GUIApp {
                 self.transpose();
             }
         });
+    }
 
-        let from_position_changed = ui
-            .add(Slider::new(&mut self.from_position, 1..=12).text("starting position"))
-            .changed();
-        let to_position_changed = ui
-            .add(Slider::new(&mut self.to_position, 1..=12).text("target position"))
-            .changed();
-        if from_position_changed || to_position_changed {
+    fn position_slider(&mut self, ui: &mut egui::Ui, is_target: bool) {
+        let (position_var, slider_text) = if is_target {
+            (&mut self.to_position, "output position")
+        } else {
+            (&mut self.from_position, "input position")
+        };
+        if ui
+            .add(Slider::new(position_var, 1..=12).text(slider_text))
+            .changed()
+        {
             self.semitone_shift = harptabber::positions_to_semitones(
                 self.from_position as i32,
                 self.to_position as i32,
@@ -306,11 +312,11 @@ impl GUIApp {
             );
             self.transpose();
         }
-        ui.add_space(10.0);
     }
 
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
         ui.heading("input");
+        ui.spacing_mut().slider_width = 150.0;
 
         let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
         let tedit_output = input_field.show(ui);
@@ -341,11 +347,7 @@ impl GUIApp {
             }
         });
 
-        egui::CollapsingHeader::new("transpose settings")
-            .default_open(true)
-            .show(ui, |ui| {
-                self.semitone_offset_settings(ui);
-            });
+        self.position_slider(ui, false);
 
         ui.collapsing("tab keyboard", |ui| {
             self.tabkeyboard(ui, tedit_output.response.id);
