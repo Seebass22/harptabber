@@ -361,10 +361,7 @@ impl GUIApp {
             self.tabkeyboard(ui, tedit_output.response.id);
         });
 
-        ui.add_space(20.0);
-
-        ui.vertical(|ui| {
-            ui.label("tab style");
+        ui.collapsing("tab style", |ui| {
             ui.horizontal(|ui| {
                 self.tab_style_selector(ui);
             });
