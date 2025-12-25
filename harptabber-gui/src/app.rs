@@ -154,7 +154,11 @@ impl eframe::App for GUIApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.spacing_mut().slider_width = 150.0;
             egui::ScrollArea::vertical().show(ui, |ui| {
-                ui.heading("output");
+                ui.horizontal(|ui| {
+                    ui.heading("output");
+                    ui.add_space(20.0);
+                    self.tuning_selector(ui, false);
+                });
 
                 ui.add(TextEdit::multiline(&mut self.output_text).desired_width(800.0));
 
@@ -315,7 +319,11 @@ impl GUIApp {
     }
 
     fn leftpanel(&mut self, ui: &mut egui::Ui) {
-        ui.heading("input");
+        ui.horizontal(|ui| {
+            ui.heading("input");
+            ui.add_space(20.0);
+            self.tuning_selector(ui, true);
+        });
         ui.spacing_mut().slider_width = 150.0;
 
         let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
@@ -353,9 +361,6 @@ impl GUIApp {
             self.tabkeyboard(ui, tedit_output.response.id);
         });
 
-        self.tuning_selector(ui, true);
-        self.tuning_selector(ui, false);
-
         ui.add_space(20.0);
 
         ui.vertical(|ui| {
@@ -373,9 +378,9 @@ impl GUIApp {
 
     fn tuning_selector(&mut self, ui: &mut egui::Ui, is_input: bool) {
         let (mut tuning, label_name) = if is_input {
-            (self.input_tuning, "input tuning")
+            (self.input_tuning, "tuning")
         } else {
-            (self.output_tuning, "output tuning")
+            (self.output_tuning, "tuning ")
         };
 
         egui::ComboBox::from_label(label_name)
