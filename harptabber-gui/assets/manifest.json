@@ -1,14 +1,17 @@
 {
-    "name": "harptabber GUI PWA",
-    "short_name": "harptabber-gui-pwa",
-    "icons": [{
+  "name": "harptabber GUI PWA",
+  "short_name": "harptabber-gui-pwa",
+  "icons": [
+    {
       "src": "./icon-256.png",
-        "sizes": "256x256",
-        "type": "image/png"
-      }],
-    "lang": "en-US",
-    "start_url": "./index.html",
-    "display": "standalone",
-    "background_color": "white",
-    "theme_color": "white"
-  }
+      "sizes": "256x256",
+      "type": "image/png"
+    }
+  ],
+  "lang": "en-US",
+  "id": "/index.html",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "white",
+  "theme_color": "white"
+}
