@@ -59,7 +59,7 @@ impl AudioContext {
     fn new() -> Self {
         let (_output_stream, _stream_handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&_stream_handle).unwrap();
-        AudioContext {
+        Self {
             _output_stream,
             _stream_handle,
             sink,
@@ -72,8 +72,8 @@ impl Default for GUIApp {
         let (notes, duplicated) = harptabber::tuning_to_notes_in_order("richter");
 
         Self {
-            input_text: "".to_owned(),
-            output_text: "".to_owned(),
+            input_text: String::new(),
+            output_text: String::new(),
             semitone_shift: 0,
             from_position: 1,
             to_position: 1,
@@ -82,7 +82,7 @@ impl Default for GUIApp {
             input_tuning: "richter",
             output_tuning: "richter",
             keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
-            keyboard_text: "".to_owned(),
+            keyboard_text: String::new(),
 
             display_as: DisplayOption::Tabs,
             key: "C",
@@ -93,7 +93,7 @@ impl Default for GUIApp {
             allow_bends: true,
             keep_errors: false,
 
-            error_text: "".to_owned(),
+            error_text: String::new(),
             about_open: false,
             help_open: false,
 
@@ -238,7 +238,7 @@ impl GUIApp {
                 RichText::new("position, semitone change").text_style(TextStyle::Monospace),
             ),
         );
-        for (position, semitones) in pairs.iter() {
+        for (position, semitones) in pairs {
             let text = format!(
                 "{:width$} {:+width$}",
                 harptabber::to_ordinal(*position),
@@ -380,7 +380,7 @@ impl GUIApp {
             .selected_text(tuning)
             .width(150.0)
             .show_ui(ui, |ui| {
-                for tuning_text in [
+                for tuning_text in &[
                     "richter",
                     "paddy richter",
                     "country",
@@ -399,9 +399,7 @@ impl GUIApp {
                     "easy 3rd",
                     "4 hole richter",
                     "5 hole richter",
-                ]
-                .iter()
-                {
+                ] {
                     if ui
                         .selectable_value(&mut tuning, tuning_text, *tuning_text)
                         .changed()
@@ -489,9 +487,10 @@ impl GUIApp {
             let scale = self.scales.get(scale).unwrap();
             let is_scale_note = scale.contains(&degree);
 
-            match is_scale_note {
-                true => ui.ctx().style().visuals.selection.bg_fill,
-                false => ui.ctx().style().visuals.code_bg_color,
+            if is_scale_note {
+                ui.ctx().style().visuals.selection.bg_fill
+            } else {
+                ui.ctx().style().visuals.code_bg_color
             }
         } else {
             ui.ctx().style().visuals.code_bg_color
@@ -515,7 +514,7 @@ impl GUIApp {
                                 .changed()
                             {
                                 self.generate_keyboard_text();
-                            };
+                            }
                         }
                     });
 
@@ -531,11 +530,9 @@ impl GUIApp {
                         .selected_text(self.key)
                         .width(60.0)
                         .show_ui(ui, |ui| {
-                            for note in [
+                            for note in &[
                                 "C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B",
-                            ]
-                            .iter()
-                            {
+                            ] {
                                 if ui.selectable_value(&mut self.key, note, *note).changed() {
                                     self.generate_keyboard_text();
                                 }
@@ -574,14 +571,14 @@ impl GUIApp {
                         .changed()
                     {
                         should_generate_keyboard_text = true;
-                    };
+                    }
                     for scale in self.scales.keys() {
                         if ui
                             .selectable_value(&mut self.selected_scale, Some(scale), scale)
                             .changed()
                         {
                             should_generate_keyboard_text = true;
-                        };
+                        }
                     }
                 });
             if should_generate_keyboard_text {
@@ -791,7 +788,7 @@ impl GUIApp {
                 text.push(' ');
             } else {
                 let pos_string = harptabber::to_ordinal(self.from_position);
-                text.push_str(&format!("{} position ", pos_string));
+                text.push_str(&format!("{pos_string} position "));
             }
 
             text.push_str(scale);
