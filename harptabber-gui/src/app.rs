@@ -732,7 +732,7 @@ impl GUIApp {
             .resizable(false)
             .open(&mut self.about_open)
             .show(ctx, |ui| {
-                ui.label("harptabber-gui");
+                ui.label(format!("harptabber-gui {}", env!("CARGO_PKG_VERSION")));
                 ui.add_space(10.0);
                 ui.label("Copyright © 2021-2024");
                 ui.label("Sebastian James Thuemmel");
