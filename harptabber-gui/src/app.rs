@@ -147,46 +147,13 @@ impl eframe::App for GUIApp {
             .default_width(550.0)
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    self.leftpanel(ui);
+                    self.left_panel(ui);
                 });
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.spacing_mut().slider_width = 150.0;
             egui::ScrollArea::vertical().show(ui, |ui| {
-                ui.horizontal(|ui| {
-                    ui.heading("output");
-                    ui.add_space(20.0);
-                    self.tuning_selector(ui, false);
-                });
-
-                ui.add(TextEdit::multiline(&mut self.output_text).desired_width(800.0));
-
-                ui.horizontal(|ui| {
-                    if ui.button("copy").clicked() {
-                        ui.ctx().copy_text(self.output_text.clone());
-                    }
-                    if ui.checkbox(&mut self.keep_errors, "keep errors").changed() {
-                        self.transpose();
-                    }
-                });
-                self.position_slider(ui, true);
-                self.semitone_shift_slider_and_octave_buttons(ui);
-
-                if !self.error_text.is_empty() {
-                    ui.add_space(20.0);
-
-                    ui.label("invalid notes");
-                    ui.add_enabled(
-                        false,
-                        TextEdit::multiline(&mut self.error_text).desired_width(300.0),
-                    );
-                }
-                ui.add_space(10.0);
-
-                ui.collapsing("playable positions", |ui| {
-                    self.playable_positions_panel(ui);
-                });
+                self.right_panel(ui);
             });
         });
 
@@ -318,13 +285,13 @@ impl GUIApp {
         }
     }
 
-    fn leftpanel(&mut self, ui: &mut egui::Ui) {
+    fn left_panel(&mut self, ui: &mut egui::Ui) {
+        ui.spacing_mut().slider_width = 150.0;
         ui.horizontal(|ui| {
             ui.heading("input");
             ui.add_space(20.0);
             self.tuning_selector(ui, true);
         });
-        ui.spacing_mut().slider_width = 150.0;
 
         let input_field = egui::TextEdit::multiline(&mut self.input_text).desired_width(600.0);
         let tedit_output = input_field.show(ui);
@@ -370,6 +337,43 @@ impl GUIApp {
                     .desired_width(350.0)
                     .interactive(false),
             );
+        });
+    }
+
+    fn right_panel(&mut self, ui: &mut egui::Ui) {
+        ui.spacing_mut().slider_width = 150.0;
+        ui.horizontal(|ui| {
+            ui.heading("output");
+            ui.add_space(20.0);
+            self.tuning_selector(ui, false);
+        });
+
+        ui.add(TextEdit::multiline(&mut self.output_text).desired_width(800.0));
+
+        ui.horizontal(|ui| {
+            if ui.button("copy").clicked() {
+                ui.ctx().copy_text(self.output_text.clone());
+            }
+            if ui.checkbox(&mut self.keep_errors, "keep errors").changed() {
+                self.transpose();
+            }
+        });
+        self.position_slider(ui, true);
+        self.semitone_shift_slider_and_octave_buttons(ui);
+
+        if !self.error_text.is_empty() {
+            ui.add_space(20.0);
+
+            ui.label("invalid notes");
+            ui.add_enabled(
+                false,
+                TextEdit::multiline(&mut self.error_text).desired_width(300.0),
+            );
+        }
+        ui.add_space(10.0);
+
+        ui.collapsing("playable positions", |ui| {
+            self.playable_positions_panel(ui);
         });
     }
 
@@ -426,40 +430,22 @@ impl GUIApp {
     }
 
     fn tab_style_selector(&mut self, ui: &mut egui::Ui) {
-        if ui
-            .selectable_value(&mut self.style, Style::Default, "default")
-            .clicked()
-        {
-            self.style_example = "-2 -2'' -3 4 -4 5 5o 6";
-            self.transpose();
-        }
-        if ui
-            .selectable_value(&mut self.style, Style::BBends, "b-bends")
-            .clicked()
-        {
-            self.style_example = "-2 -2bb -3 4 -4 5 5o 6";
-            self.transpose();
-        }
-        if ui
-            .selectable_value(&mut self.style, Style::DrawDefault, "draw-default")
-            .clicked()
-        {
-            self.style_example = "2 2'' 3 +4 4 +5 +5o +6";
-            self.transpose();
-        }
-        if ui
-            .selectable_value(&mut self.style, Style::Plus, "plus/minus")
-            .clicked()
-        {
-            self.style_example = "-2 -2'' -3 +4 -4 +5 +5o +6";
-            self.transpose();
-        }
-        if ui
-            .selectable_value(&mut self.style, Style::Harpsurgery, "harpsurgery")
-            .clicked()
-        {
-            self.style_example = "2D 2D'' 3D 4B 4D 5B 5B# 6B";
-            self.transpose();
+        let tab_styles = [
+            (Style::Default, "default", "-2 -2'' -3 4 -4 5 5o 6"),
+            (Style::BBends, "b-bends", "-2 -2bb -3 4 -4 5 5o 6"),
+            (Style::DrawDefault, "draw-default", "2 2'' 3 +4 4 +5 +5o +6"),
+            (Style::Plus, "plus/minus", "-2 -2'' -3 +4 -4 +5 +5o +6"),
+            (
+                Style::Harpsurgery,
+                "harpsurgery",
+                "2D 2D'' 3D 4B 4D 5B 5B# 6B",
+            ),
+        ];
+        for (value, name, example) in tab_styles {
+            if ui.selectable_value(&mut self.style, value, name).clicked() {
+                self.style_example = example;
+                self.transpose();
+            }
         }
     }
 
