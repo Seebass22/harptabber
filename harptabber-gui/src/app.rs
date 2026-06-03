@@ -156,7 +156,7 @@ impl eframe::App for GUIApp {
                 }
                 ui.add_space(10.0);
 
-                self.tabkeyboard(ui, egui::Id::new(10000));
+                self.tabkeyboard(ui, None);
             });
         } else {
             egui::SidePanel::left("side_panel")
@@ -342,7 +342,7 @@ impl GUIApp {
         self.position_slider(ui, false);
 
         ui.collapsing("tab keyboard", |ui| {
-            self.tabkeyboard(ui, tedit_output.response.id);
+            self.tabkeyboard(ui, Some(tedit_output.response.id));
         });
 
         ui.collapsing("tab style", |ui| {
@@ -504,7 +504,7 @@ impl GUIApp {
         }
     }
 
-    fn tabkeyboard(&mut self, ui: &mut egui::Ui, tedit_id: egui::Id) {
+    fn tabkeyboard(&mut self, ui: &mut egui::Ui, tedit_id: Option<egui::Id>) {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
                 egui::ComboBox::from_id_salt("no label")
@@ -549,23 +549,25 @@ impl GUIApp {
                 } else {
                     ui.add_space(_space + 95.0);
                 }
-                if ui
-                    .add(Button::new(
-                        RichText::new("return").text_style(TextStyle::Monospace),
-                    ))
-                    .clicked()
-                {
-                    self.insert_text_at_pos(ui, "\n", tedit_id);
-                }
+                if let Some(id) = tedit_id {
+                    if ui
+                        .add(Button::new(
+                            RichText::new("return").text_style(TextStyle::Monospace),
+                        ))
+                        .clicked()
+                    {
+                        self.insert_text_at_pos(ui, "\n", id);
+                    }
 
-                if ui
-                    .add(Button::new(
-                        RichText::new("backspace").text_style(TextStyle::Monospace),
-                    ))
-                    .clicked()
-                {
-                    self.backspace(ui, tedit_id);
-                    self.transpose();
+                    if ui
+                        .add(Button::new(
+                            RichText::new("backspace").text_style(TextStyle::Monospace),
+                        ))
+                        .clicked()
+                    {
+                        self.backspace(ui, id);
+                        self.transpose();
+                    }
                 }
             });
 
@@ -644,8 +646,10 @@ impl GUIApp {
                                 )
                                 .clicked()
                             {
-                                self.insert_text_at_pos(ui, hole.as_str(), tedit_id);
-                                self.insert_text_at_pos(ui, " ", tedit_id);
+                                if let Some(id) = tedit_id {
+                                    self.insert_text_at_pos(ui, hole.as_str(), id);
+                                    self.insert_text_at_pos(ui, " ", id);
+                                }
                                 self.transpose();
 
                                 #[cfg(not(target_arch = "wasm32"))]
