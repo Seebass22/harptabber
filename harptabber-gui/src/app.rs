@@ -97,7 +97,7 @@ impl Default for GUIApp {
             error_text: String::new(),
             about_open: false,
             help_open: false,
-            layout_explorer_active: true,
+            layout_explorer_active: false,
 
             #[cfg(not(target_arch = "wasm32"))]
             audio_context: AudioContext::new(),
@@ -141,6 +141,15 @@ impl eframe::App for GUIApp {
                 }
 
                 self.scale_menu(ui);
+
+                let mode_text = if self.layout_explorer_active {
+                    "tab transposer"
+                } else {
+                    "layout explorer"
+                };
+                if ui.button(mode_text).clicked() {
+                    self.layout_explorer_active = !self.layout_explorer_active;
+                }
                 // egui::widgets::global_theme_preference_buttons(ui);
             });
         });
