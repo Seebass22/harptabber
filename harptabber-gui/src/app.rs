@@ -31,6 +31,7 @@ pub struct GUIApp {
     error_text: String,
     about_open: bool,
     help_open: bool,
+    layout_explorer_active: bool,
 
     #[cfg(not(target_arch = "wasm32"))]
     audio_context: AudioContext,
@@ -96,6 +97,7 @@ impl Default for GUIApp {
             error_text: String::new(),
             about_open: false,
             help_open: false,
+            layout_explorer_active: true,
 
             #[cfg(not(target_arch = "wasm32"))]
             audio_context: AudioContext::new(),
@@ -143,19 +145,25 @@ impl eframe::App for GUIApp {
             });
         });
 
-        egui::SidePanel::left("side_panel")
-            .default_width(550.0)
-            .show(ctx, |ui| {
+        if self.layout_explorer_active {
+            egui::CentralPanel::default().show(ctx, |ui| {
+                self.tabkeyboard(ui, egui::Id::new(10000));
+            });
+        } else {
+            egui::SidePanel::left("side_panel")
+                .default_width(550.0)
+                .show(ctx, |ui| {
+                    egui::ScrollArea::vertical().show(ui, |ui| {
+                        self.left_panel(ui);
+                    });
+                });
+
+            egui::CentralPanel::default().show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    self.left_panel(ui);
+                    self.right_panel(ui);
                 });
             });
-
-        egui::CentralPanel::default().show(ctx, |ui| {
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                self.right_panel(ui);
-            });
-        });
+        }
 
         self.help_window(ctx);
         self.about_window(ctx);
