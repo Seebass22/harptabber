@@ -147,6 +147,15 @@ impl eframe::App for GUIApp {
 
         if self.layout_explorer_active {
             egui::CentralPanel::default().show(ctx, |ui| {
+                self.tuning_selector(ui, true);
+                ui.add_space(10.0);
+                if self.selected_scale.is_some() || self.display_as == DisplayOption::Degrees {
+                    self.position_slider(ui, false);
+                } else {
+                    ui.add_space(21.0);
+                }
+                ui.add_space(10.0);
+
                 self.tabkeyboard(ui, egui::Id::new(10000));
             });
         } else {
