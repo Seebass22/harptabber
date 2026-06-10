@@ -787,6 +787,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "egui-scale"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7964ad2697e2b2df7157e5a0104c812c3773172c2a7b7dea95b57d9b5fd285f"
+dependencies = [
+ "egui",
+]
+
+[[package]]
 name = "egui-wgpu"
 version = "0.33.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1179,6 +1188,7 @@ version = "1.0.0"
 dependencies = [
  "eframe",
  "egui",
+ "egui-scale",
  "env_logger",
  "harptabber",
  "log",

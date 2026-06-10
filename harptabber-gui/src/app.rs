@@ -1,5 +1,6 @@
 use eframe::egui;
 use eframe::egui::{Button, RichText, Slider, TextEdit, TextStyle};
+use egui_scale::EguiScale;
 use harptabber::Style;
 use std::collections::BTreeMap;
 
@@ -156,6 +157,7 @@ impl eframe::App for GUIApp {
 
         if self.layout_explorer_active {
             egui::CentralPanel::default().show(ctx, |ui| {
+                ui.style_mut().scale(1.5);
                 self.tuning_selector(ui, true);
                 ui.add_space(10.0);
                 if self.selected_scale.is_some() || self.display_as == DisplayOption::Degrees {
