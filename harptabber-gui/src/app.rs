@@ -119,16 +119,16 @@ impl GUIApp {
 }
 
 impl eframe::App for GUIApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         // catppuccin_egui::set_theme(ctx, catppuccin_egui::FRAPPE);
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+        egui::Panel::top("top_panel").show_inside(ui, |ui| {
             egui::MenuBar::new().ui(ui, |ui| {
                 // NOTE: no File->Quit on web pages!
                 let is_web = cfg!(target_arch = "wasm32");
                 if !is_web {
                     ui.menu_button("File", |ui| {
                         if ui.button("Quit").clicked() {
-                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                            ui.send_viewport_cmd(egui::ViewportCommand::Close);
                         }
                     });
                 }
@@ -156,7 +156,7 @@ impl eframe::App for GUIApp {
         });
 
         if self.layout_explorer_active {
-            egui::CentralPanel::default().show(ctx, |ui| {
+            egui::CentralPanel::default().show_inside(ui, |ui| {
                 ui.style_mut().scale(1.5);
                 self.tuning_selector(ui, true);
                 ui.add_space(10.0);
@@ -170,23 +170,23 @@ impl eframe::App for GUIApp {
                 self.tabkeyboard(ui, None);
             });
         } else {
-            egui::SidePanel::left("side_panel")
-                .default_width(550.0)
-                .show(ctx, |ui| {
+            egui::Panel::left("side_panel")
+                .default_size(550.0)
+                .show_inside(ui, |ui| {
                     egui::ScrollArea::vertical().show(ui, |ui| {
                         self.left_panel(ui);
                     });
                 });
 
-            egui::CentralPanel::default().show(ctx, |ui| {
+            egui::CentralPanel::default().show_inside(ui, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     self.right_panel(ui);
                 });
             });
         }
 
-        self.help_window(ctx);
-        self.about_window(ctx);
+        self.help_window(ui);
+        self.about_window(ui);
     }
 }
 
@@ -506,12 +506,12 @@ impl GUIApp {
             let is_scale_note = scale.contains(&degree);
 
             if is_scale_note {
-                ui.ctx().style().visuals.selection.bg_fill
+                ui.ctx().global_style().visuals.selection.bg_fill
             } else {
-                ui.ctx().style().visuals.code_bg_color
+                ui.ctx().global_style().visuals.code_bg_color
             }
         } else {
-            ui.ctx().style().visuals.code_bg_color
+            ui.ctx().global_style().visuals.code_bg_color
         }
     }
 
@@ -726,12 +726,12 @@ impl GUIApp {
         }
     }
 
-    fn help_window(&mut self, ctx: &egui::Context) {
+    fn help_window(&mut self, ui: &egui::Ui) {
         egui::Window::new("Help")
             .collapsible(false)
             .resizable(false)
             .open(&mut self.help_open)
-            .show(ctx, |ui| {
+            .show(ui, |ui| {
                 ui.label("- if a note is too high or low to be played, or would");
                 ui.label("  require bending an overblow, it will appear as X");
                 ui.add_space(10.0);
@@ -744,12 +744,12 @@ impl GUIApp {
             });
     }
 
-    fn about_window(&mut self, ctx: &egui::Context) {
+    fn about_window(&mut self, ui: &egui::Ui) {
         egui::Window::new("About")
             .collapsible(false)
             .resizable(false)
             .open(&mut self.about_open)
-            .show(ctx, |ui| {
+            .show(ui, |ui| {
                 ui.label(format!("harptabber-gui {}", env!("CARGO_PKG_VERSION")));
                 ui.add_space(10.0);
                 ui.label("Copyright © 2021-2024");
