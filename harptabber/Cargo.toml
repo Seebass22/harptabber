@@ -13,4 +13,4 @@ harptool = { git = "https://github.com/Seebass22/harptool", rev = "602b725", def
 thiserror = "1.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rodio = "0.14"
+rodio = "0.22.2"

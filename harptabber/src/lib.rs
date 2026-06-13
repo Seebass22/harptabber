@@ -8,8 +8,6 @@ extern crate lazy_static;
 
 #[cfg(not(target_arch = "wasm32"))]
 mod audio;
-#[cfg(not(target_arch = "wasm32"))]
-use rodio::{OutputStream, Sink};
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Style {
@@ -135,10 +133,12 @@ pub fn run(options: RunOptions) {
 
     #[cfg(not(target_arch = "wasm32"))]
     if _play_audio {
-        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-        let sink = Sink::try_new(&stream_handle).unwrap();
-        play_tab(res, output_tuning, style, &sink);
-        sink.sleep_until_end();
+        let handle =
+            rodio::DeviceSinkBuilder::open_default_sink().expect("open default audio stream");
+        let player = rodio::Player::connect_new(handle.mixer());
+
+        play_tab(res, output_tuning, style, &player);
+        player.sleep_until_end();
     }
 }
 
@@ -279,14 +279,14 @@ pub fn tuning_to_notes_in_order(tuning: &str) -> (Vec<String>, Vec<String>) {
 
 /// play a tab as audio
 #[cfg(not(target_arch = "wasm32"))]
-pub fn play_tab(tab: String, tuning: &str, style: Style, sink: &rodio::Sink) {
+pub fn play_tab(tab: String, tuning: &str, style: Style, sink: &rodio::Player) {
     let indices = get_audio_indices(tab, tuning, style);
     play_indices_as_audio(&indices, sink);
 }
 
 /// play a tab as audio in a certain key
 #[cfg(not(target_arch = "wasm32"))]
-pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, sink: &rodio::Sink) {
+pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, player: &rodio::Player) {
     let mut indices = get_audio_indices(tab, tuning, style);
 
     let sharp = if key == "F#" {
@@ -306,12 +306,12 @@ pub fn play_tab_in_key(tab: String, tuning: &str, style: Style, key: &str, sink:
     for i in indices.iter_mut() {
         *i += offset;
     }
-    play_indices_as_audio(&indices, sink);
+    play_indices_as_audio(&indices, player);
 }
 
 /// given indices (0 being A440), play them as audio
 #[cfg(not(target_arch = "wasm32"))]
-pub fn play_indices_as_audio(indices: &[i32], sink: &rodio::Sink) {
+pub fn play_indices_as_audio(indices: &[i32], sink: &rodio::Player) {
     for i in indices.iter() {
         audio::play(*i, sink);
     }

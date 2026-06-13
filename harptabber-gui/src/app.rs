@@ -4,9 +4,6 @@ use egui_scale::EguiScale;
 use harptabber::Style;
 use std::collections::BTreeMap;
 
-#[cfg(not(target_arch = "wasm32"))]
-use rodio::{OutputStream, Sink};
-
 pub struct GUIApp {
     input_text: String,
     output_text: String,
@@ -51,20 +48,21 @@ enum DisplayOption {
 
 #[cfg(not(target_arch = "wasm32"))]
 struct AudioContext {
-    _output_stream: rodio::OutputStream,
-    _stream_handle: rodio::OutputStreamHandle,
-    sink: rodio::Sink,
+    _handle: rodio::MixerDeviceSink,
+    player: rodio::Player,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 impl AudioContext {
     fn new() -> Self {
-        let (_output_stream, _stream_handle) = OutputStream::try_default().unwrap();
-        let sink = Sink::try_new(&_stream_handle).unwrap();
+        // _stream must live as long as the sink
+        let handle =
+            rodio::DeviceSinkBuilder::open_default_sink().expect("open default audio stream");
+        let player = rodio::Player::connect_new(handle.mixer());
+
         Self {
-            _output_stream,
-            _stream_handle,
-            sink,
+            _handle: handle,
+            player,
         }
     }
 }
@@ -340,9 +338,9 @@ impl GUIApp {
                     self.input_tuning,
                     self.style,
                     self.key,
-                    &self.audio_context.sink,
+                    &self.audio_context.player,
                 );
-                self.audio_context.sink.play();
+                self.audio_context.player.play();
             }
             #[cfg(not(target_arch = "wasm32"))]
             if ui.button("stop").clicked() {
@@ -670,7 +668,7 @@ impl GUIApp {
                                         self.input_tuning,
                                         self.style,
                                         self.key,
-                                        &self.audio_context.sink,
+                                        &self.audio_context.player,
                                     );
                                 }
                             }
