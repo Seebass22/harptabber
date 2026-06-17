@@ -769,7 +769,7 @@ impl GUIApp {
             .show(ui, |ui| {
                 ui.label(format!("harptabber-gui {}", env!("CARGO_PKG_VERSION")));
                 ui.add_space(10.0);
-                ui.label("Copyright © 2021-2024");
+                ui.label("Copyright © 2021-2026");
                 ui.label("Sebastian James Thuemmel");
                 ui.add_space(10.0);
                 ui.add(egui::Hyperlink::from_label_and_url(
