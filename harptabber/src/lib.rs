@@ -516,50 +516,50 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
     }
     for i in 0..harplen {
         let mut note = (i + 1).to_string();
-        if tuning.blow_bends_half.get(i).unwrap().is_some() {
+        if tuning.blow_bends_half[i].is_some() {
             note.push('\'');
-            *blow_bends_1.get_mut(i).unwrap() = note;
-        } else if tuning.overblows.get(i).unwrap().is_some() {
+            blow_bends_1[i] = note;
+        } else if tuning.overblows[i].is_some() {
             note.push('o');
-            *blow_bends_1.get_mut(i).unwrap() = note;
+            blow_bends_1[i] = note;
         }
     }
 
     for i in 0..harplen {
         let mut note = (i + 1).to_string();
-        if tuning.blow_bends_full.get(i).unwrap().is_some() {
+        if tuning.blow_bends_full[i].is_some() {
             note.push_str("''");
-            *blow_bends_2.get_mut(i).unwrap() = note;
+            blow_bends_2[i] = note;
         }
     }
 
     for i in 0..harplen {
         let index = i as i32;
         let mut note = (-(index + 1)).to_string();
-        if tuning.bends_half.get(i).unwrap().is_some() {
+        if tuning.bends_half[i].is_some() {
             note.push('\'');
-            *draw_bends_1.get_mut(i).unwrap() = note;
-        } else if tuning.overdraws.get(i).unwrap().is_some() {
+            draw_bends_1[i] = note;
+        } else if tuning.overdraws[i].is_some() {
             note.push('o');
-            *draw_bends_1.get_mut(i).unwrap() = note;
+            draw_bends_1[i] = note;
         }
     }
 
     for i in 0..harplen {
         let index = i as i32;
         let mut note = (-(index + 1)).to_string();
-        if tuning.bends_full.get(i).unwrap().is_some() {
+        if tuning.bends_full[i].is_some() {
             note.push_str("''");
-            *draw_bends_2.get_mut(i).unwrap() = note;
+            draw_bends_2[i] = note;
         }
     }
 
     for i in 0..harplen {
         let index = i as i32;
         let mut note = (-(index + 1)).to_string();
-        if tuning.bends_one_and_half.get(i).unwrap().is_some() {
+        if tuning.bends_one_and_half[i].is_some() {
             note.push_str("'''");
-            *draw_bends_3.get_mut(i).unwrap() = note;
+            draw_bends_3[i] = note;
         }
     }
 
