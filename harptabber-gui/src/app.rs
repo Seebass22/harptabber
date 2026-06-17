@@ -15,6 +15,7 @@ pub struct GUIApp {
     input_tuning: &'static str,
     output_tuning: &'static str,
     keyboard_layout: Vec<Vec<String>>,
+    separate_overblows: bool,
     keyboard_text: String,
 
     display_as: DisplayOption,
@@ -71,6 +72,7 @@ impl Default for GUIApp {
     fn default() -> Self {
         let (notes, duplicated) = harptabber::tuning_to_notes_in_order("richter");
 
+        let separate_overblows = false;
         Self {
             input_text: String::new(),
             output_text: String::new(),
@@ -81,7 +83,8 @@ impl Default for GUIApp {
             style_example: "-2 -2'' -3 4 -4 5 5o 6",
             input_tuning: "richter",
             output_tuning: "richter",
-            keyboard_layout: harptabber::get_tabkeyboard_layout("richter"),
+            keyboard_layout: harptabber::get_tabkeyboard_layout("richter", separate_overblows),
+            separate_overblows,
             keyboard_text: String::new(),
 
             display_as: DisplayOption::Tabs,
@@ -439,7 +442,8 @@ impl GUIApp {
                         .changed()
                     {
                         if is_input {
-                            self.keyboard_layout = harptabber::get_tabkeyboard_layout(tuning);
+                            self.keyboard_layout =
+                                harptabber::get_tabkeyboard_layout(tuning, self.separate_overblows);
                             self.input_tuning = tuning;
 
                             let (notes, duplicated) =
@@ -581,24 +585,38 @@ impl GUIApp {
             });
 
             let mut should_generate_keyboard_text = false;
-            egui::ComboBox::from_label("highlight scale")
-                .selected_text(self.selected_scale.unwrap_or("none"))
-                .show_ui(ui, |ui| {
-                    if ui
-                        .selectable_value(&mut self.selected_scale, None, "none")
-                        .changed()
-                    {
-                        should_generate_keyboard_text = true;
-                    }
-                    for scale in self.scales.keys() {
+            ui.horizontal(|ui| {
+                egui::ComboBox::from_label("highlight scale")
+                    .selected_text(self.selected_scale.unwrap_or("none"))
+                    .show_ui(ui, |ui| {
                         if ui
-                            .selectable_value(&mut self.selected_scale, Some(scale), scale)
+                            .selectable_value(&mut self.selected_scale, None, "none")
                             .changed()
                         {
                             should_generate_keyboard_text = true;
                         }
-                    }
-                });
+                        for scale in self.scales.keys() {
+                            if ui
+                                .selectable_value(&mut self.selected_scale, Some(scale), scale)
+                                .changed()
+                            {
+                                should_generate_keyboard_text = true;
+                            }
+                        }
+                    });
+
+                ui.add_space(10.0);
+                if ui
+                    .checkbox(&mut self.separate_overblows, "separate overblows")
+                    .changed()
+                {
+                    self.keyboard_layout = harptabber::get_tabkeyboard_layout(
+                        self.input_tuning,
+                        self.separate_overblows,
+                    );
+                };
+            });
+
             if should_generate_keyboard_text {
                 self.generate_keyboard_text();
             }
@@ -606,6 +624,7 @@ impl GUIApp {
             ui.label(&self.keyboard_text);
 
             let rows = self.keyboard_layout.clone();
+            let number_row_index = if self.separate_overblows { 3 } else { 2 };
 
             for (i, row) in rows.iter().enumerate() {
                 ui.horizontal(|ui| {
@@ -675,7 +694,7 @@ impl GUIApp {
                         }
                     }
                 });
-                if i == 2 {
+                if i == number_row_index {
                     ui.horizontal(|ui| {
                         for hole in row {
                             let text = format!("{:width$}", hole, width = 5);

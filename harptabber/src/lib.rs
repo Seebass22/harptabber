@@ -489,7 +489,7 @@ fn transpose_playable_positions(
     res
 }
 
-pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
+pub fn get_tabkeyboard_layout(input_tuning: &str, separate_overbows: bool) -> Vec<Vec<String>> {
     let notes = tuning_to_notes(input_tuning);
     let tuning = harptool::Tuning::from(notes);
     let harplen = tuning.blow.len();
@@ -502,6 +502,9 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
     let mut draw_bends_2: Vec<String> = Vec::new();
     let mut draw_bends_3: Vec<String> = Vec::new();
 
+    let mut overblows: Vec<String> = Vec::new();
+    let mut overdraws: Vec<String> = Vec::new();
+
     for i in 0..harplen {
         blow.push((i + 1).to_string());
         blow_bends_1.push("".to_string());
@@ -509,6 +512,8 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
         draw_bends_1.push("".to_string());
         draw_bends_2.push("".to_string());
         draw_bends_3.push("".to_string());
+        overblows.push("".to_string());
+        overdraws.push("".to_string());
     }
     for i in 0..harplen {
         let i = -((i + 1) as i32);
@@ -521,7 +526,11 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
             blow_bends_1[i] = note;
         } else if tuning.overblows[i].is_some() {
             note.push('o');
-            blow_bends_1[i] = note;
+            if separate_overbows {
+                overblows[i] = note;
+            } else {
+                blow_bends_1[i] = note;
+            }
         }
     }
 
@@ -541,7 +550,11 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
             draw_bends_1[i] = note;
         } else if tuning.overdraws[i].is_some() {
             note.push('o');
-            draw_bends_1[i] = note;
+            if separate_overbows {
+                overdraws[i] = note;
+            } else {
+                draw_bends_1[i] = note;
+            }
         }
     }
 
@@ -563,15 +576,29 @@ pub fn get_tabkeyboard_layout(input_tuning: &str) -> Vec<Vec<String>> {
         }
     }
 
-    vec![
-        blow_bends_2,
-        blow_bends_1,
-        blow,
-        draw,
-        draw_bends_1,
-        draw_bends_2,
-        draw_bends_3,
-    ]
+    if separate_overbows {
+        vec![
+            overblows,
+            blow_bends_2,
+            blow_bends_1,
+            blow,
+            draw,
+            draw_bends_1,
+            draw_bends_2,
+            draw_bends_3,
+            overdraws,
+        ]
+    } else {
+        vec![
+            blow_bends_2,
+            blow_bends_1,
+            blow,
+            draw,
+            draw_bends_1,
+            draw_bends_2,
+            draw_bends_3,
+        ]
+    }
 }
 
 /// return a BTreeMap of scale names to scales (vec of scale degres)
